@@ -302,8 +302,8 @@ and you can write your tasting notes anytime later.</string>
     <string name="keulraesig_kagteil">Classic Cocktail</string>
     <string name="keuraepeuteu_kagteil">Craft Cocktail</string>
     <string name="koldeu_beuru">Cold Brew</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld items rated</string>
-    <string name="lldweol_teiseuting">%lld Month Tasting</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d items rated</string>
+    <string name="lldweol_teiseuting">%d Month Tasting</string>
     <string name="maegju_seutail">Beer Styles</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">Very low bitterness, often found in lagers, wheat beers, and light ales. These beers are generally smooth and refreshing.</string>
     <string name="maggeolri">Makgeolli</string>
@@ -341,7 +341,7 @@ You can check your tasted products in My Page even without writing a note.</stri
     <string name="mweol_dil_e_a_h_mm">MMM d (E) h:mm a</string>
     <string name="nae_jeongbo">My Info</string>
     <string name="nae_noteu">My Notes</string>
-    <string name="nae_noteu_lld">My Notes (%lld)</string>
+    <string name="nae_noteu_lld">My Notes (%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">Share my notes &amp; favorite products</string>
     <string name="nae_pideu">My Feed</string>
     <string name="naebonaegi">Export</string>
@@ -480,7 +480,7 @@ Your drafts are securely saved!</string>
     <string name="sieum_noteu">Tasting Note</string>
     <string name="sieum_noteu_alrim_yeyag">%s Tasting Notes Schedule Notifications</string>
     <string name="sieum_noteu_jagseong">Write Tasting Note</string>
-    <string name="sieum_noteu_lld">Tasting notes (%lld)</string>
+    <string name="sieum_noteu_lld">Tasting notes (%d)</string>
     <string name="sieum_noteuga_eobsseubnida">No tasting notes available.</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">It\'s time to write your tasting notes!</string>
     <string name="sieumnoteu_deiteo_naebonaegi">Export tasting note data</string>

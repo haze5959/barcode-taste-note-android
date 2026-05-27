@@ -302,8 +302,8 @@
     <string name="keulraesig_kagteil">Классический коктейль</string>
     <string name="keuraepeuteu_kagteil">Крафтовый коктейль</string>
     <string name="koldeu_beuru">Колд брю</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld товаров с рейтингом</string>
-    <string name="lldweol_teiseuting">Дегустация %lld месяца</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d товаров с рейтингом</string>
+    <string name="lldweol_teiseuting">Дегустация %d месяца</string>
     <string name="maegju_seutail">Стили пива</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">Очень низкая горечь. Часто встречается в лагерах, пшеничных и лёгких элях — мягкие и освежающие.</string>
     <string name="maggeolri">Макколли</string>
@@ -480,7 +480,7 @@
     <string name="sieum_noteu">Заметка о дегустации</string>
     <string name="sieum_noteu_alrim_yeyag">%s Дегустационные заметки Уведомления о расписании</string>
     <string name="sieum_noteu_jagseong">Написать заметку о дегустации</string>
-    <string name="sieum_noteu_lld">Дегустационные заметки (%lld)</string>
+    <string name="sieum_noteu_lld">Дегустационные заметки (%d)</string>
     <string name="sieum_noteuga_eobsseubnida">Дегустационных заметок нет.</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">Пора писать дегустационные заметки!</string>
     <string name="sieumnoteu_deiteo_naebonaegi">Экспорт данных дегустационных заметок</string>

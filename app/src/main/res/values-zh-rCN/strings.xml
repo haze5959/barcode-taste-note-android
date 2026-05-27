@@ -302,8 +302,8 @@ AI 将分析标签并提取信息。</string>
     <string name="keulraesig_kagteil">经典鸡尾酒</string>
     <string name="keuraepeuteu_kagteil">手工鸡尾酒</string>
     <string name="koldeu_beuru">冷萃咖啡</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">已评级 %lld 项</string>
-    <string name="lldweol_teiseuting">%lld月品酒会</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">已评级 %d 项</string>
+    <string name="lldweol_teiseuting">%d月品酒会</string>
     <string name="maegju_seutail">啤酒风格</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">苦味非常低。常见于拉格、小麦啤酒和淡色艾尔，整体顺滑清爽。</string>
     <string name="maggeolri">马格利酒</string>
@@ -341,7 +341,7 @@ AI 将分析标签并提取信息。</string>
     <string name="mweol_dil_e_a_h_mm">M月d日 (E) ah:mm</string>
     <string name="nae_jeongbo">我的信息</string>
     <string name="nae_noteu">我的笔记</string>
-    <string name="nae_noteu_lld">我的笔记 (%lld)</string>
+    <string name="nae_noteu_lld">我的笔记 (%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">分享我的笔记与收藏产品</string>
     <string name="nae_pideu">我的主页</string>
     <string name="naebonaegi">导出</string>
@@ -480,7 +480,7 @@ AI 将分析标签并提取信息。</string>
     <string name="sieum_noteu">品鉴笔记</string>
     <string name="sieum_noteu_alrim_yeyag">%s 品酒笔记日程通知</string>
     <string name="sieum_noteu_jagseong">撰写品鉴笔记</string>
-    <string name="sieum_noteu_lld">品酒笔记 (%lld)</string>
+    <string name="sieum_noteu_lld">品酒笔记 (%d)</string>
     <string name="sieum_noteuga_eobsseubnida">暂无品酒笔记。</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">是时候写品酒笔记了！</string>
     <string name="sieumnoteu_deiteo_naebonaegi">导出笔记数据</string>

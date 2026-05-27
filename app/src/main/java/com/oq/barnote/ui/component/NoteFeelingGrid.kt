@@ -1,0 +1,91 @@
+package com.oq.barnote.ui.component
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.designsystem.R
+import com.oq.barnote.core.domain.NoteDetail
+import com.oq.barnote.extension.desc
+
+/**
+ * 감정 선택 그리드. iOS `NoteFeelingGridView` 에 대응.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun NoteFeelingGrid(
+    selectedFeeling: NoteDetail.Feeling?,
+    onFeelingSelected: (NoteDetail.Feeling) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accent = colorResource(R.color.accent_color)
+    val secondary = colorResource(R.color.text_secondary)
+    val surfaceSecondary = colorResource(R.color.surface_secondary)
+    val textPrimary = colorResource(R.color.text_primary)
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+    ) {
+        Text(
+            text = "감정",
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            color = textPrimary,
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
+            verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+        ) {
+            NoteDetail.Feeling.values().forEach { feeling ->
+                val isSelected = feeling == selectedFeeling
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(Dimens.Radius))
+                        .background(
+                            if (isSelected) accent.copy(alpha = 0.1f) else surfaceSecondary,
+                        )
+                        .border(
+                            width = if (isSelected) 1.5.dp else 0.dp,
+                            color = if (isSelected) accent else Color.Transparent,
+                            shape = RoundedCornerShape(Dimens.Radius),
+                        )
+                        .clickable { onFeelingSelected(feeling) }
+                        .width(80.dp)
+                        .padding(vertical = Dimens.Spacing),
+                ) {
+                    Text(
+                        text = feeling.emoji,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        text = feeling.desc(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isSelected) accent else secondary,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}

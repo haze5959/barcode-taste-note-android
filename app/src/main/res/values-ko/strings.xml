@@ -158,6 +158,7 @@
     <string name="gurisbic_saegsangui_gyunhyeong_jabhin_kaereomel_molteu_eil">구릿빛 색상의 균형 잡힌 캐러멜 몰트 에일.</string>
     <string name="gwail">과일</string>
     <string name="gwail_soju">과일 소주</string>
+    <string name="gwanggo_eobsneun_kwaejeoghan_aeb_hwangyeong">광고 없는 쾌적한 앱 환경</string>
     <string name="gwanrija_dabbyeon">관리자 답변</string>
     <string name="gyeongwaryu">너티</string>
     <string name="gyesog_jagseong">계속 작성</string>
@@ -280,6 +281,7 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="jeulgyeocajneun_jepum">즐겨찾는 제품</string>
     <string name="jeulgyeocajneun_jepumi_eobsseubnida">즐겨찾는 제품이 없습니다</string>
     <string name="jigeum_baro_haedang_jepumui_sieum_noteureul_jagseonghasigess">지금 바로 해당 제품의 시음 노트를 작성하시겠어요?</string>
+    <string name="jigeumggaji_gae_jepumi_deungrogdoeeo_isseoyo">지금까지 %s개 제품이 등록되어 있어요!</string>
     <string name="jigeumeun_jarireul_jeulgiseyo_masyeobon_jepumeuro_deungrogha">지금은 자리를 즐기세요! 마셔본 제품으로
 등록하고 나중에 언제든지 시음노트 작성을 할 수 있습니다.</string>
     <string name="jigeumeun_jarireul_jeulgisigo_naeil_ijji_anhdorog_alryeodeur">지금은 자리를 즐기시고 내일 잊지 않도록 알려드릴게요</string>
@@ -300,8 +302,8 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="keulraesig_kagteil">클래식 칵테일</string>
     <string name="keuraepeuteu_kagteil">크래프트 칵테일</string>
     <string name="koldeu_beuru">콜드 브루</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld개의 항목 평가 완료</string>
-    <string name="lldweol_teiseuting">%lld월 테이스팅</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d개의 항목 평가 완료</string>
+    <string name="lldweol_teiseuting">%d월 테이스팅</string>
     <string name="maegju_seutail">맥주 스타일</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">매우 낮은 쓴맛. 라거, 밀맥주, 라이트 에일에서 흔하며, 일반적으로 부드럽고 청량합니다.</string>
     <string name="maggeolri">막걸리</string>
@@ -332,11 +334,14 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="moseukato">모스카토</string>
     <string name="munui_naeyeogi_eobsseubnida">문의 내역이 없습니다.</string>
     <string name="munuihagi">문의하기</string>
+    <string name="mujehan_ai_rabel_seukaen">무제한 AI 라벨 스캔</string>
+    <string name="mujehan_sns_web_gongyu">무제한 SNS, 웹 공유</string>
+    <string name="mujehan_teiseuting_noteu_jagseong">무제한 테이스팅 노트 작성</string>
     <string name="muryo_iyong_jung">무료 이용 중</string>
     <string name="mweol_dil_e_a_h_mm">M월 d일 (E) a h:mm</string>
     <string name="nae_jeongbo">내 정보</string>
     <string name="nae_noteu">내 노트</string>
-    <string name="nae_noteu_lld">내 노트(%lld)</string>
+    <string name="nae_noteu_lld">내 노트(%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">내 노트와 즐겨찾는 제품 공유</string>
     <string name="nae_pideu">내 피드</string>
     <string name="naebonaegi">내보내기</string>
@@ -471,11 +476,12 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="seutail">스타일</string>
     <string name="seutauteu">스타우트</string>
     <string name="seutauteuboda_gabyeobgo_budeureoun_heugmaegju_kaereomel_gyeo">스타우트보다 가볍고 부드러운 흑맥주. 캐러멜·견과 풍미.</string>
+    <string name="sieumnoteu_deiteo_naebonaegi">시음노트 데이터 내보내기</string>
     <string name="sieum_jepum">시음 제품</string>
     <string name="sieum_noteu">시음 노트</string>
     <string name="sieum_noteu_alrim_yeyag">%s 시음 노트 알림 예약</string>
     <string name="sieum_noteu_jagseong">시음 노트 작성</string>
-    <string name="sieum_noteu_lld">시음 노트(%lld)</string>
+    <string name="sieum_noteu_lld">시음 노트(%d)</string>
     <string name="sieum_noteuga_eobsseubnida">시음 노트가 없습니다.</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">시음 노트를 작성할 시간이에요!</string>
     <string name="sieumnoteu_jagseong_alrim">시음노트 작성 알림</string>

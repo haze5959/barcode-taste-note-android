@@ -302,8 +302,8 @@ AIがラベルを分析して情報を抽出します。</string>
     <string name="keulraesig_kagteil">クラシックカクテル</string>
     <string name="keuraepeuteu_kagteil">クラフトカクテル</string>
     <string name="koldeu_beuru">コールドブリュー</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld件の評価が完了しました</string>
-    <string name="lldweol_teiseuting">%lld月テイスティング</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d件の評価が完了しました</string>
+    <string name="lldweol_teiseuting">%d月テイスティング</string>
     <string name="maegju_seutail">ビアスタイル</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">非常に低い苦味。ラガー、ヴァイツェン、ライトエールに多く、全体的にまろやかで爽やか。</string>
     <string name="maggeolri">マッコリ</string>
@@ -341,7 +341,7 @@ AIがラベルを分析して情報を抽出します。</string>
     <string name="mweol_dil_e_a_h_mm">M月d日 (E) ah:mm</string>
     <string name="nae_jeongbo">マイインフォ</string>
     <string name="nae_noteu">マイノート</string>
-    <string name="nae_noteu_lld">マイノート（%lld）</string>
+    <string name="nae_noteu_lld">マイノート（%d）</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">ノートとお気に入り製品をシェア</string>
     <string name="nae_pideu">マイフィード</string>
     <string name="naebonaegi">エクスポート</string>
@@ -480,7 +480,7 @@ AIがラベルを分析して情報を抽出します。</string>
     <string name="sieum_noteu">テイスティングノート</string>
     <string name="sieum_noteu_alrim_yeyag">%s 試飲ノート通知の予約</string>
     <string name="sieum_noteu_jagseong">テイスティングノートを作成</string>
-    <string name="sieum_noteu_lld">試飲ノート（%lld）</string>
+    <string name="sieum_noteu_lld">試飲ノート（%d）</string>
     <string name="sieum_noteuga_eobsseubnida">試飲ノートがありません。</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">テイスティングノートを書く時間です！</string>
     <string name="sieumnoteu_deiteo_naebonaegi">テイスティングノートのデータエクスポート</string>

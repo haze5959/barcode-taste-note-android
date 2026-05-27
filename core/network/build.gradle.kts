@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt.android)
     id("kotlin-kapt")
 }
@@ -25,7 +26,16 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(project(":core:domain"))
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.kotlin.serialization)
+    implementation(libs.okhttp.logging)
+
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+
+    implementation(project(":core:domain"))
+    implementation(project(":core:oqcore"))
 }

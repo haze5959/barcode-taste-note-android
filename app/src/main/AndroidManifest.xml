@@ -4,10 +4,20 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- 시음 노트 예약 로컬 알림 (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- AlarmManager 정확 시간 알림 (Android 12+) -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- FCM -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!-- Google Play Billing (구독) -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
+        android:name=".BarNoteApp"
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -19,7 +29,45 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Auth0 Web Auth 콜백. manifestPlaceholders 의 auth0Domain/auth0Scheme 가 주입됨. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="${auth0Domain}"
+                    android:pathPrefix="/android/${applicationId}/callback"
+                    android:scheme="${auth0Scheme}" />
+            </intent-filter>
         </activity>
+
+        <!-- FCM 토큰 갱신 / 메시지 수신 -->
+        <service
+            android:name="com.oq.barnote.core.data.fcm.BarNoteMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- 시음 노트 예약 알림: AlarmManager trigger -->
+        <receiver
+            android:name="com.oq.barnote.core.data.notification.NotificationAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.oq.barnote.NOTE_RESERVATION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 알림 탭 처리 -->
+        <receiver
+            android:name="com.oq.barnote.core.data.notification.NotificationTapReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.oq.barnote.NOTE_RESERVATION_TAP" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

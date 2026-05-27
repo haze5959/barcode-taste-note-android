@@ -302,8 +302,8 @@ y podrás escribir tus notas de cata en cualquier momento después.</string>
     <string name="keulraesig_kagteil">Cóctel clásico</string>
     <string name="keuraepeuteu_kagteil">Cóctel artesanal</string>
     <string name="koldeu_beuru">Cold Brew</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld artículos clasificados</string>
-    <string name="lldweol_teiseuting">Cata %lld Mes</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d artículos clasificados</string>
+    <string name="lldweol_teiseuting">Cata %d Mes</string>
     <string name="maegju_seutail">Estilos de cerveza</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">Amargor muy bajo. Habitual en lagers, cervezas de trigo y light ales; generalmente suaves y refrescantes.</string>
     <string name="maggeolri">Makgeolli</string>
@@ -341,7 +341,7 @@ Puede consultar sus productos degustados en Mi Perfil aunque no haya escrito una
     <string name="mweol_dil_e_a_h_mm">d MMM (E) HH:mm</string>
     <string name="nae_jeongbo">Mi información</string>
     <string name="nae_noteu">Mis notas</string>
-    <string name="nae_noteu_lld">Mis notas (%lld)</string>
+    <string name="nae_noteu_lld">Mis notas (%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">Comparte tus notas y productos favoritos</string>
     <string name="nae_pideu">Mi perfil</string>
     <string name="naebonaegi">Exportar</string>
@@ -480,7 +480,7 @@ Hola 👋</string>
     <string name="sieum_noteu">Nota de cata</string>
     <string name="sieum_noteu_alrim_yeyag">%s Notas de Cata Horario Notificaciones</string>
     <string name="sieum_noteu_jagseong">Escribir nota de cata</string>
-    <string name="sieum_noteu_lld">Notas de cata (%lld)</string>
+    <string name="sieum_noteu_lld">Notas de cata (%d)</string>
     <string name="sieum_noteuga_eobsseubnida">No hay notas de cata disponibles.</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">¡Es hora de escribir tus notas de cata!</string>
     <string name="sieumnoteu_deiteo_naebonaegi">Exportar datos de notas de cata</string>

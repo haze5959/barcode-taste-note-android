@@ -60,5 +60,31 @@ enum class AppLanguage(val id: String) {
     Spanish("es"),
     Italian("it"),
     Portuguese("pt"),
-    Russian("ru")
+    Russian("ru");
+
+    companion object {
+        /** SharedPreferences / DataStore 에서 사용하는 표준 키. iOS `AppLanguage.userDefaultsKey` 와 동일. */
+        const val USER_DEFAULTS_KEY: String = "selected_language"
+
+        fun fromId(id: String): AppLanguage? = values().firstOrNull { it.id == id }
+    }
+
+    /**
+     * iOS `AppLanguage.locale` 에 대응.
+     * `System` 은 시스템 기본 Locale 을 사용하라는 의미이므로 `null` 을 반환합니다.
+     */
+    fun toLocale(): java.util.Locale? = when (this) {
+        System -> null
+        English -> java.util.Locale.ENGLISH
+        Korean -> java.util.Locale.KOREAN
+        Japanese -> java.util.Locale.JAPANESE
+        ChineseSimplified -> java.util.Locale.SIMPLIFIED_CHINESE
+        ChineseTraditional -> java.util.Locale.TRADITIONAL_CHINESE
+        French -> java.util.Locale.FRENCH
+        German -> java.util.Locale.GERMAN
+        Spanish -> java.util.Locale("es")
+        Italian -> java.util.Locale.ITALIAN
+        Portuguese -> java.util.Locale("pt")
+        Russian -> java.util.Locale("ru")
+    }
 }

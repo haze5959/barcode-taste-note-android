@@ -30,7 +30,7 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="error_module_error">Internal error</string>
     <string name="error_network_invalid_response">Invalid server response</string>
     <string name="error_network_invalid_url">Invalid access</string>
-    <string name="error_network_status_code_lld">Server error: %lld</string>
+    <string name="error_network_status_code_lld">Server error: %d</string>
     <string name="error_network_transport_failed">Network connection failed</string>
     <string name="error_network_unauthorized">Unauthorized</string>
     <string name="error_translation_failed">Translation is not supported for this language or an error occurred.</string>
@@ -39,7 +39,7 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="image_editor_reset">Reset</string>
     <string name="image_editor_rotate">Rotate</string>
     <string name="image_editor_title">Edit Photo</string>
-    <string name="image_viewer_page_count">Page %lld of %lld</string>
+    <string name="image_viewer_page_count">Page %1$d of %2$d</string>
     <string name="imiji_jeojang">Save Image</string>
     <string name="jepumui_jeongboreul_ggomggomhi_salpyeobogo_isseoyo">Carefully reviewing the product information.</string>
     <string name="keulribbodeue_bogsadoeeossseubnida">Copied to clipboard.</string>
@@ -58,13 +58,14 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="network_error_invalid_url">Invalid URL</string>
     <string name="network_error_transport">Transport error: %s</string>
     <string name="network_error_unacceptable_status_code">Status error: %d</string>
+    <string name="nyeon">Year</string>
     <string name="nyeon_weol_seontaeg">Select Year/Month</string>
     <string name="picker_no_content">No content</string>
     <string name="picker_year_month_title">Select Month</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Failed to save to photo library.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">Saved to photo library.</string>
     <string name="sns_share_title">Share</string>
-    <string name="tf_min_length_error">Min %lld chars</string>
+    <string name="tf_min_length_error">Min %d chars</string>
     <string name="tf_option">Optional</string>
     <string name="thumbnail_add_photo">Add Photo</string>
     <string name="url_bogsa">Copy URL</string>
@@ -76,5 +77,6 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="weekday_thu">Thu</string>
     <string name="weekday_tue">Tue</string>
     <string name="weekday_wed">Wed</string>
+    <string name="weol">Month</string>
     <string name="yeolgi">Open</string>
 </resources>

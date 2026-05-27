@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- iOS Assets.xcassets의 colorset을 변환한 라이트 모드 컬러 -->
+    <color name="accent_color">#F05A2C</color>
+    <color name="accent_secondary">#FFE0D2</color>
+    <color name="background_primary">#F7F5F2</color>
+    <color name="disabled_button">#DEDBD6</color>
+    <color name="disabled_text">#7D7A74</color>
+    <color name="divider">#E2E2E8</color>
+    <color name="surface_primary">#FFFFFF</color>
+    <color name="surface_secondary">#F0EEEA</color>
+    <color name="text_primary">#18181C</color>
+    <color name="text_secondary">#6F6F78</color>
+</resources>

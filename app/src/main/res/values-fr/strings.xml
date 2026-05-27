@@ -302,8 +302,8 @@ et vous pourrez rédiger vos notes de dégustation à tout moment plus tard.</st
     <string name="keulraesig_kagteil">Cocktail classique</string>
     <string name="keuraepeuteu_kagteil">Cocktail artisanal</string>
     <string name="koldeu_beuru">Cold Brew</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld articles notés</string>
-    <string name="lldweol_teiseuting">Dégustation %lld Mois</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d articles notés</string>
+    <string name="lldweol_teiseuting">Dégustation %d Mois</string>
     <string name="maegju_seutail">Styles de bière</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">Amertume très faible. Fréquente dans les lagers, bières de blé et light ales — généralement douces et rafraîchissantes.</string>
     <string name="maggeolri">Makgeolli</string>
@@ -341,7 +341,7 @@ Vous pouvez consulter vos produits dégustés dans Mon Profil même sans note.</
     <string name="mweol_dil_e_a_h_mm">d MMM (E) HH:mm</string>
     <string name="nae_jeongbo">Mes infos</string>
     <string name="nae_noteu">Mes notes</string>
-    <string name="nae_noteu_lld">Mes notes (%lld)</string>
+    <string name="nae_noteu_lld">Mes notes (%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">Partagez vos notes et produits favoris</string>
     <string name="nae_pideu">Mon profil</string>
     <string name="naebonaegi">Exporter</string>
@@ -480,7 +480,7 @@ Vos brouillons sont sauvegardés en toute sécurité !</string>
     <string name="sieum_noteu">Note de dégustation</string>
     <string name="sieum_noteu_alrim_yeyag">Notes de dégustation %s Notifications de calendrier</string>
     <string name="sieum_noteu_jagseong">Rédiger une note de dégustation</string>
-    <string name="sieum_noteu_lld">Notes de dégustation (%lld)</string>
+    <string name="sieum_noteu_lld">Notes de dégustation (%d)</string>
     <string name="sieum_noteuga_eobsseubnida">Aucune note de dégustation disponible.</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">Il est temps d\'écrire vos notes de dégustation !</string>
     <string name="sieumnoteu_deiteo_naebonaegi">Exporter les données des notes de dégustation</string>

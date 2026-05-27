@@ -302,8 +302,8 @@ können Sie Ihre Tasting-Notizen später jederzeit verfassen.</string>
     <string name="keulraesig_kagteil">Klassischer Cocktail</string>
     <string name="keuraepeuteu_kagteil">Craft Cocktail</string>
     <string name="koldeu_beuru">Cold Brew</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld Artikel bewertet</string>
-    <string name="lldweol_teiseuting">%lld-Monats-Verkostung</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d Artikel bewertet</string>
+    <string name="lldweol_teiseuting">%d-Monats-Verkostung</string>
     <string name="maegju_seutail">Bierstile</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">Sehr niedrige Bitterkeit. Häufig in Lagern, Weizenbieren und Light Ales – allgemein weich und erfrischend.</string>
     <string name="maggeolri">Makgeolli</string>
@@ -341,7 +341,7 @@ Sie können Ihre verkosteten Produkte auch in Mein Profil einsehen, ohne eine No
     <string name="mweol_dil_e_a_h_mm">d. MMM (E) HH:mm</string>
     <string name="nae_jeongbo">Meine Info</string>
     <string name="nae_noteu">Meine Notizen</string>
-    <string name="nae_noteu_lld">Meine Notizen (%lld)</string>
+    <string name="nae_noteu_lld">Meine Notizen (%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">Notizen &amp; Lieblingsprodukte teilen</string>
     <string name="nae_pideu">Mein Feed</string>
     <string name="naebonaegi">Exportieren</string>
@@ -480,7 +480,7 @@ Ihre Entwürfe werden sicher gespeichert!</string>
     <string name="sieum_noteu">Tasting-Notiz</string>
     <string name="sieum_noteu_alrim_yeyag">%s Verkostungsnotizen, Terminbenachrichtigungen</string>
     <string name="sieum_noteu_jagseong">Tasting-Notiz schreiben</string>
-    <string name="sieum_noteu_lld">Verkostungsnotizen (%lld)</string>
+    <string name="sieum_noteu_lld">Verkostungsnotizen (%d)</string>
     <string name="sieum_noteuga_eobsseubnida">Keine Verkostungsnotizen vorhanden.</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">Es ist Zeit, Ihre Verkostungsnotizen zu schreiben!</string>
     <string name="sieumnoteu_deiteo_naebonaegi">Export von Verkostungsnotiz-Daten</string>

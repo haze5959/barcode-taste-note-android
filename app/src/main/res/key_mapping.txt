@@ -299,8 +299,8 @@ kapucino ← 카푸치노
 keulraesig_kagteil ← 클래식 칵테일
 keuraepeuteu_kagteil ← 크래프트 칵테일
 koldeu_beuru ← 콜드 브루
-lldgaeui_hangmog_pyeongga_wanryo ← %lld개의 항목 평가 완료
-lldweol_teiseuting ← %lld월 테이스팅
+lldgaeui_hangmog_pyeongga_wanryo ← %d개의 항목 평가 완료
+lldweol_teiseuting ← %d월 테이스팅
 maegju_seutail ← 맥주 스타일
 maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy ← 매우 낮은 쓴맛. 라거, 밀맥주, 라이트 에일에서 흔하며, 일반적으로 부드럽고 청량합니다.
 maggeolri ← 막걸리
@@ -338,7 +338,7 @@ muryo_iyong_jung ← 무료 이용 중
 mweol_dil_e_a_h_mm ← M월 d일 (E) a h:mm
 nae_jeongbo ← 내 정보
 nae_noteu ← 내 노트
-nae_noteu_lld ← 내 노트(%lld)
+nae_noteu_lld ← 내 노트(%d)
 nae_noteuwa_jeulgyeocajneun_jepum_gongyu ← 내 노트와 즐겨찾는 제품 공유
 nae_pideu ← 내 피드
 naebonaegi ← 내보내기
@@ -474,7 +474,7 @@ sieum_jepum ← 시음 제품
 sieum_noteu ← 시음 노트
 sieum_noteu_alrim_yeyag ← %@ 시음 노트 알림 예약
 sieum_noteu_jagseong ← 시음 노트 작성
-sieum_noteu_lld ← 시음 노트(%lld)
+sieum_noteu_lld ← 시음 노트(%d)
 sieum_noteuga_eobsseubnida ← 시음 노트가 없습니다.
 sieum_noteureul_jagseonghal_siganieyo ← 시음 노트를 작성할 시간이에요!
 sieumnoteu_deiteo_naebonaegi ← 시음노트 데이터 내보내기

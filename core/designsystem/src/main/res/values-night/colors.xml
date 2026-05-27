@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- iOS Assets.xcassets의 colorset 다크 모드 컬러 -->
+    <color name="accent_color">#FF8654</color>
+    <color name="accent_secondary">#5A2C21</color>
+    <color name="background_primary">#050505</color>
+    <color name="disabled_button">#303033</color>
+    <color name="disabled_text">#B6B6BC</color>
+    <color name="divider">#39393F</color>
+    <color name="surface_primary">#151518</color>
+    <color name="surface_secondary">#1D1D21</color>
+    <color name="text_primary">#F7F7FA</color>
+    <color name="text_secondary">#A7A8B3</color>
+</resources>

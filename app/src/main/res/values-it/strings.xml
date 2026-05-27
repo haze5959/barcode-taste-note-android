@@ -302,8 +302,8 @@ e potrai scrivere le tue note di degustazione in qualsiasi momento dopo.</string
     <string name="keulraesig_kagteil">Cocktail classico</string>
     <string name="keuraepeuteu_kagteil">Cocktail artigianale</string>
     <string name="koldeu_beuru">Cold Brew</string>
-    <string name="lldgaeui_hangmog_pyeongga_wanryo">%lld articoli valutati</string>
-    <string name="lldweol_teiseuting">Degustazione del %lld Mese</string>
+    <string name="lldgaeui_hangmog_pyeongga_wanryo">%d articoli valutati</string>
+    <string name="lldweol_teiseuting">Degustazione del %d Mese</string>
     <string name="maegju_seutail">Stili di birra</string>
     <string name="maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy">Amaro molto basso. Tipico di lager, birre di frumento e light ale, generalmente morbide e rinfrescanti.</string>
     <string name="maggeolri">Makgeolli</string>
@@ -341,7 +341,7 @@ Puoi controllare i tuoi prodotti degustati in Il Mio Profilo anche senza nota.</
     <string name="mweol_dil_e_a_h_mm">d MMM (E) HH:mm</string>
     <string name="nae_jeongbo">Le mie info</string>
     <string name="nae_noteu">Le mie note</string>
-    <string name="nae_noteu_lld">I miei appunti (%lld)</string>
+    <string name="nae_noteu_lld">I miei appunti (%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">Condividi note e prodotti preferiti</string>
     <string name="nae_pideu">Il mio profilo</string>
     <string name="naebonaegi">Esporta</string>
@@ -480,7 +480,7 @@ Le tue bozze sono salvate al sicuro!</string>
     <string name="sieum_noteu">Nota di degustazione</string>
     <string name="sieum_noteu_alrim_yeyag">%s Note di degustazione Programma notifiche</string>
     <string name="sieum_noteu_jagseong">Scrivi nota di degustazione</string>
-    <string name="sieum_noteu_lld">Note di degustazione (%lld)</string>
+    <string name="sieum_noteu_lld">Note di degustazione (%d)</string>
     <string name="sieum_noteuga_eobsseubnida">Nessuna nota di degustazione disponibile.</string>
     <string name="sieum_noteureul_jagseonghal_siganieyo">È ora di scrivere le tue note di degustazione!</string>
     <string name="sieumnoteu_deiteo_naebonaegi">Esportare i dati delle note di degustazione</string>
