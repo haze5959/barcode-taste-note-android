@@ -1,0 +1,6 @@
+package com.oq.barnote.core.domain
+
+/**
+ * core:domain 모듈의 placeholder 파일입니다.
+ * 순수 Kotlin 모듈로, Android 프레임워크 종속성을 가지지 않습니다.
+ */

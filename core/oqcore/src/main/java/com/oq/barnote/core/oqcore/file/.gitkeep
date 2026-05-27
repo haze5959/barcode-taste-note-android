@@ -1,0 +1,4 @@
+package com.oq.barnote.core.oqcore.file
+
+// iOS: OQFileManager.swift 대응
+// 파일 관리 유틸리티

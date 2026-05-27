@@ -1,0 +1,544 @@
+absaengteu ← 압생트
+aeb_ribyuhagi ← 앱 리뷰하기
+aembeo_eil ← 앰버 에일
+ai_bunseog_jung ← AI 분석 중...
+ai_seukaen_enjin ← AI 스캔 엔진
+ai_seukaenhagi ← AI 스캔하기
+airisi_wiseuki ← 아이리시 위스키
+ajig_i_jepume_daehae_jagseonghan_noteuga_eobseoyo ← 아직 이 제품에 대해 작성한 노트가 없어요.
+albarinyo ← 알바리뇨
+alkool ← 알코올
+alrim ← 알림
+alrim_gweonhani_pilyohabnida ← 알림 권한이 필요합니다.
+amerikano ← 아메리카노
+amondeu_gyeongwaryu_gosoham ← 아몬드, 견과류, 고소함
+aniseu_hoehyang_deung_heobeureul_gahyanghan_godoju_teugyuui ← 아니스·회향 등 허브를 가향한 고도주. 특유의 초록빛과 강한 향.
+areumanyag ← 아르마냑
+badigam ← 바디감
+baelreonseu ← 밸런스
+bakodeu_geomsaeg ← 바코드 검색
+bakodeu_insig_mic_ai_rabel_seukaeneul_iyonghae_bbareugo_jeon ← 바코드 인식 및 AI 라벨 스캔을 이용해
+빠르고 정확하게 시음노트를 작성하세요.
+bakodeu_seukaenhagi ← 바코드 스캔하기
+bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar ← 바코드가 있는 제품이라면 바코드 스캔으로 더 빠르게 등록할 수 있습니다.
+bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar_44a131 ← 바코드가 있는 제품이라면 바코드 스캔으로 더 빠르게 찾을 수 있습니다.
+bakodeureul_cajeul_su_eobsnayo ← 바코드를 찾을 수 없나요?
+balhyo_jung_jeungryujureul_ceomgahae_dosureul_nopin_wain_pot ← 발효 중 증류주를 첨가해 도수를 높인 와인. 포트, 셰리가 대표적.
+banana_painaepeul_manggo_deung ← 바나나, 파인애플, 망고 등
+banhaebeorin ← 반해버린
+banilra ← 바닐라
+banilra_karamel_beoteo ← 바닐라, 카라멜, 버터
+barnote_timeseo_suncajeogeuro_bowandoel_yejeongira_jeongboe ← 💡 BarNote 팀에서 순차적으로 보완될 예정이라 정보에 오차가 있을 수 있습니다. 잘못된 부분은 상단의 %@ 버튼으로 문의해주세요.
+bbeuddi_bereudo ← 쁘띠 베르도
+beiseu_jeungryujue_gwail_heobeu_hyangsinryo_deungeul_gahyang ← 베이스 증류주에 과일·허브·향신료 등을 가향하고 가당한 술의 총칭.
+belgie_hyomo_teugyuui_hyangsinryowa_gwail_hyang_nopeun_dosug ← 벨기에 효모 특유의 향신료와 과일 향, 높은 도수가 인상적인 에일.
+beljian_eil ← 벨지안 에일
+beobeon ← 버번
+beojeon ← 버전
+beriryu ← 베리류
+beulrendideu_seukaci ← 블렌디드 스카치
+beuraendi ← 브랜디
+bigonggae ← 비공개
+bionie ← 비오니에
+boda_wanseongdo_nopeun_jepum_jeongboreul_jegonghagoja_barnot ← 보다 완성도 높은 제품 정보를 제공하고자, BarNote 팀에서 순차적으로 보완될 예정입니다.
+bodeuka ← 보드카
+bogi ← 보기
+bogjabhan_gaib_eobsi_3comane_rogeuinhago_gineungeul_iyonghae ← 복잡한 가입 없이, 3초만에 로그인하고 기능을 이용해보세요!
+bogsadoem ← %@ 복사됨
+bori_bbang_biseukis ← 보리, 빵, 비스킷
+byeoleul_teocihageona_deuraegeuhamyeon_0_5jeom_danwiro_seont ← 별을 터치하거나 드래그하면 0.5점 단위로 선택돼요.
+byeoljeom ← 별점
+byeoljeomman_kog_geuggangui_dansunham_nuguna_swibgo_gabyeobg ← 별점만 콕! 극강의 단순함 누구나 쉽고 가볍게
+byeong_ddoneun_taengkeueseo_2ca_balhyoro_tansaneul_gajin_wai ← 병 또는 탱크에서 2차 발효로 탄산을 가진 와인. 샴페인이 대표적.
+byeongyeonghal_nigneimeul_ibryeoghaseyo ← 변경할 닉네임을 입력하세요.
+cadandoen_sayongjaibnida ← 차단된 사용자입니다
+cadanhagi ← 차단하기
+cekoeseo_sijagdoen_hwanggeumbic_rageo_seonmyeonghan_hob_hyan ← 체코에서 시작된 황금빛 라거. 선명한 홉 향과 드라이한 마무리.
+ceombuhal_sajineul_5jangggaji_seontaeghal_su_isseoyo ← 첨부할 사진을 5장까지 선택할 수 있어요.
+ceongju ← 청주
+ceori_jung ← 처리 중...
+cingugonggae ← 친구공개
+coegeun_deungrog_jepum ← 최근 등록 제품
+coegeun_deungrog_noteu ← 최근 등록 노트
+coejong_hwagin ← 최종 확인
+coesin_jepum ← 최신 제품
+coesinsun ← 최신순
+coesohanui_gaeibeuro_mandeun_wain_jayeon_hyomoman_sayonghago ← 최소한의 개입으로 만든 와인. 자연 효모만 사용하고 첨가물을 거의 쓰지 않음.
+cokolris ← 초콜릿
+cokolris_keopi_kakao ← 초콜릿, 커피, 카카오
+cwiso ← 취소
+d_peiji ← %d 페이지
+dadgi ← 닫기
+daeum ← 다음
+daiginjo ← 다이긴조
+dakeu ← 다크 🌙
+dakeu_reom ← 다크 럼
+dangdo_dalkomhamui_jeongdo ← 당도, 달콤함의 정도
+danmas ← 단맛
+danpungnamu_suc_yeogwa_ringkeon_kaunti_peuroseseu_reul_geoci ← 단풍나무 숯 여과(링컨 카운티 프로세스)를 거친 미국 테네시주 위스키.
+dareun_geomsaegeona_pilteoreul_sidohaeboseyo ← 다른 검색어나 필터를 시도해보세요.
+dareun_sayongjadeului_coesin_teiseuting_noteu ← 다른 사용자들의 최신 테이스팅 노트
+dayanghan_agabero_mandeun_megsiko_jeontong_jeungryuju_hunyeo ← 다양한 아가베로 만든 멕시코 전통 증류주. 훈연 풍미가 두드러짐.
+dayanghan_gogmuleul_beulrendinghan_kaenada_wiseuki_budeureob ← 다양한 곡물을 블렌딩한 캐나다 위스키. 부드럽고 가볍게 마시기 편함.
+dayanghan_juryureul_pogneolbge_seontaeghal_su_isseoyo ← 다양한 주류를 폭넓게 선택할 수 있어요
+ddalgi_rajeuberi_beulruberi_deung ← 딸기, 라즈베리, 블루베리 등
+dduryeoshan_sseunmas_manheun_ipawa_ganghan_peil_eile_jeonhye ← 뚜렷한 쓴맛. 많은 IPA와 강한 페일 에일에 전형적이며, 분명한 홉 풍미를 느낄 수 있습니다.
+deiteo ← 데이터
+deiteo_bulreooneun_jung ← 데이터 불러오는 중...
+deiteo_naebonaegi ← 데이터 내보내기
+deobogi ← 더보기
+deoburughan ← 더부룩한
+deungrog_jeon_naeyongeul_hwaginhaseyo ← 등록 전 내용을 확인하세요
+deungrog_jung ← 등록 중
+deungrogdoen_sogaega_eobsseubnida ← 등록된 소개가 없습니다.
+deungrogeul_wanryohaejuseyo ← %@ 등록을 완료해주세요 📝
+deungrogil ← 등록일
+deurib_keopi ← 드립 커피
+dijeoteu_wain ← 디저트 와인
+dosu ← 도수
+dosueseo_oneun_ddeugeobgeona_ganghan_jageug ← 도수에서 오는 뜨겁거나 강한 자극
+e_masyeobon_jepumieyo ← %@에 마셔본 제품이에요!
+eoneo ← 언어
+eoneo_seoljeong ← 언어 설정
+eosi ← 어시
+eseupeureso ← 에스프레소
+gae ← %@개
+gae_1f31b2 ← 개
+gae_jepum_deungrog ← %@개 제품 등록
+gaeinjeongbo_ceoribangcim ← 개인정보 처리방침
+gaeui_hangmog_pyeongga_wanryo ← %@개의 항목 평가 완료
+gaeunhan ← 개운한
+gaibil ← 가입일
+gajang_manhi_neuggyeojin_hyangmi ← 가장 많이 느껴진 향미
+gajyeool_peiji_1peijidang_dgae ← 가져올 페이지 (1페이지당 %d개)
+game ← 가메
+gamjeong ← 감정
+ganghage_boggeun_molteuro_mandeun_geomeun_sangmyeonbalhyo_ma ← 강하게 볶은 몰트로 만든 검은 상면발효 맥주. 커피·초콜릿 풍미.
+ganghan_sseunmas_deobeul_ipa_imperieol_ipa_ilbu_balriwainese ← 강한 쓴맛. 더블 IPA, 임페리얼 IPA, 일부 발리와인에서 볼 수 있으며, 매우 강한 홉 향과 쓴맛이 특징입니다.
+gebwireuceuteuramineo ← 게뷔르츠트라미너
+geomsaeg ← 검색
+geomsaeg_gyeolgwaga_eobseoyo ← %@ 검색 결과가 없어요
+geomsaeghareo_gagi ← 검색하러 가기
+geomto_jung ← 검토 중
+geonneoddwigi ← 건너뛰기
+georeumceoneuroman_georeun_taghan_ceongju_ssalui_danmasgwa_b ← 거름천으로만 거른 탁한 청주. 쌀의 단맛과 부드러운 질감이 특징.
+geoui_da_wasseoyo ← 거의 다 왔어요!
+geureunasyu ← 그르나슈
+ggabereune_peurang ← 까베르네 프랑
+ggabereune_syobinyong ← 까베르네 쇼비뇽
+ggareuminereu ← 까르미네르
+ggeobjileul_jegeohago_gwajeubman_balhyohan_baegpodoju_gabyeo ← 껍질을 제거하고 과즙만 발효한 백포도주. 가볍고 산뜻한 산미가 특징.
+ggeobjilgwa_jjalbge_jeobcogsikyeo_bunhongbiceul_eodeun_wain ← 껍질과 짧게 접촉시켜 분홍빛을 얻은 와인. 가벼운 과실향이 인상적.
+ggochyanggi_jangmi_jaseumin ← 꽃향기, 장미, 자스민
+ggonyag ← 꼬냑
+ggul_sireob_dalkomhan_hyang ← 꿀, 시럽, 달콤한 향
+gibon_alrim_sigan ← 기본 알림 시간
+gibon_jeongbo ← 기본 정보
+gibun_joheun ← 기분 좋은
+gigi_seoljeong ← 기기 설정
+gineung_jean ← 기능 제안
+ginjo ← 긴조
+girogdoen_sangse_noteuga_eobsseubnida ← 기록된 상세 노트가 없습니다.
+gita ← 기타
+gita_pumjong ← 기타 품종
+gogaegsenteo ← 고객센터
+gogmul ← 곡물
+gogmul_gamja_deungeul_balhyohae_jeungryuhan_musaeg_muhyang_j ← 곡물·감자 등을 발효해 증류한 무색·무향 증류주. 칵테일 베이스로 자주 쓰임.
+gonggae_beomwi ← 공개 범위
+gongyuhagi ← 공유하기
+goryangju ← 고량주
+gudog_gwanri ← 구독 관리
+gudog_jeongbo ← 구독 정보
+gudoghagi ← 구독하기
+gudogja ← 구독자
+gurisbic_saegsange_hobgwa_molteuga_gyunhyeong_jabhin_sangmye ← 구릿빛 색상에 홉과 몰트가 균형 잡힌 상면발효 에일.
+gurisbic_saegsangui_gyunhyeong_jabhin_kaereomel_molteu_eil ← 구릿빛 색상의 균형 잡힌 캐러멜 몰트 에일.
+gwail ← 과일
+gwail_soju ← 과일 소주
+gwanggo_eobsneun_kwaejeoghan_aeb_hwangyeong ← 광고 없는 쾌적한 앱 환경
+gwanrija_dabbyeon ← 관리자 답변
+gyeongwaryu ← 견과류
+gyesog_jagseong ← 계속 작성
+gyesog_sujeong ← 계속 수정
+haedang_jepum_sangse_bogi ← 해당 제품 상세 보기
+haedang_noteureul_dareun_iyongjawa_gongyuhabnida ← 해당 노트를 다른 이용자와 공유합니다.
+haibol ← 하이볼
+hangugeo ← 한국어
+heiji_ipa ← 헤이지 IPA
+heobeu ← 허브
+heoni ← 허니
+heulgnaeeum ← 흙내음
+heulgnaeeum_beoseos_jeojeun_ip ← 흙내음, 버섯, 젖은 잎
+hobeul_deumbbug_sayonghae_sseunmasgwa_siteureoseu_peulroreol ← 홉을 듬뿍 사용해 쓴맛과 시트러스/플로럴 향이 강한 페일 에일.
+hoeweon_taltoe ← 회원 탈퇴
+hoeweon_taltoega_wanryodoeeossseubnida ← 회원 탈퇴가 완료되었습니다.
+hoeweon_taltoehagi ← 회원 탈퇴하기
+hom ← 홈
+homil_51_isangeuro_mandeun_wiseuki_maekomhago_deuraihan_pung ← 호밀 51% 이상으로 만든 위스키. 매콤하고 드라이한 풍미.
+honjojo ← 혼조조
+hucu_sinamon_hyangsinryo ← 후추, 시나몬, 향신료
+huhoedoeneun ← 후회되는
+hwaiteu_beulrendeu ← 화이트 블렌드
+hwaiteu_wain ← 화이트 와인
+hwalryeogcungjeon ← 활력충전
+hyang_mas_mamurireul_giroghae_boseyo ← 향, 맛, 마무리를 기록해 보세요.
+hyanggwa_masi_eolmana_gangryeolhanji ← 향과 맛이 얼마나 강렬한지
+hyangmi_sangse_seolmyeong ← 향미 상세 설명
+hyangmi_yeopui_susjaneun_sayongjaga_jagseonghan_noteueseo_se ← 향미 옆의 숫자는 사용자가 작성한 노트에서 선택한 향미들의 개수 입니다.
+i_jepume_daehan_gyeongheomeul_giroghae_boseyo ← 이 제품에 대한 경험을 기록해 보세요.
+i_jepume_daehan_sieum_noteureul_jagseonghabnida ← 이 제품에 대한 시음 노트를 작성합니다.
+i_jepume_deungrogdoen_noteuga_eobsgeona_bigonggae_sangtaeibn ← 이 제품에 등록된 노트가 없거나 비공개 상태입니다.
+i_jepume_deungrogdoen_sajini_ajig_eobseoyo ← 이 제품에 등록된 사진이 아직 없어요.
+i_jepumui_jalmosdoen_jeongboreul_singohasigessseubnigga ← 이 제품의 잘못된 정보를 신고하시겠습니까?
+i_naljjaeneun_jagseongdoen_teiseuting_noteuga_eobseoyo ← 이 날짜에는 작성된 테이스팅 노트가 없어요.
+i_sayongjareul_cadanhasigessseubnigga_cadanhamyeon_haedang_s ← 이 사용자를 차단하시겠습니까?
+차단하면 해당 사용자가 작성한 노트가 모두 숨겨집니다.
+i_yujeoga_jeulgyeocajgihan_jepumi_eobsseubnida ← 이 유저가 즐겨찾기한 제품이 없습니다.
+i_yujeoneun_ajig_teiseuting_noteureul_jagseonghaji_anhassseu ← 이 유저는 아직 테이스팅 노트를 작성하지 않았습니다.
+ib_aneseo_neuggyeojineun_masgwa_gamjeong_deungeul_cugaro_gir ← 입 안에서 느껴지는 맛과 감정 등을 추가로 기록해보세요.
+ibaneseo_neuggyeojineun_aegceui_mugegam ← 입안에서 느껴지는 액체의 무게감
+ibmas_danggineun ← 입맛 당기는
+ibryeoghan_naeyongi_jeojangdoeji_anheul_su_isseoyo ← 입력한 내용이 저장되지 않을 수 있어요.
+ibryeoghasin_ireumgwa_yusahan_jepumi_imi_jonjaehabnida_geoms ← 입력하신 이름과 유사한 제품이 이미 존재합니다.
+검색 결과에서 확인해주세요.
+ibu ← IBU
+idong ← 이동
+ijeon ← 이전
+ilban ← 일반
+imi_deungrogdoen_jepumieyo ← 이미 등록된 제품이에요!
+imiji ← 이미지
+imiji_ceombu ← 이미지 첨부
+ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida ← 이는 되돌릴 수 없으며, 모든 데이터를 삭제합니다.
+inseuta_web_kakaotogeuro_nae_sieumnoteu_mogroggwa_jeulgyeoca ← 인스타 웹 카카오톡으로 내 시음노트 목록과 즐겨찾는 제품들을 공유해보세요.
+inseuta_web_kakaotogeuro_sieumnoteureul_gongyuhal_su_issseub ← 인스타 웹 카카오톡으로 시음노트를 공유할 수 있습니다.
+ipa ← IPA
+jaepaenijeu_wiseuki ← 재패니즈 위스키
+jagisogae ← 자기소개
+jagseong_jungin_noteureul_dadeulggayo ← 작성 중인 노트를 닫을까요?
+jagseong_noteu ← 작성 노트
+jagseonghagi ← 작성하기
+jagseonghan_noteuga_eobsseubnida ← 작성한 노트가 없습니다
+jagseonghan_noteuga_yeogie_boyeoyo ← 작성한 노트가 여기에 보여요.
+jagseongil ← 작성일
+jagseongja ← 작성자
+jalmosdoen_jeongboreul_jasehi_jagseonghaejuseyo ← 잘못된 정보를 자세히 작성해주세요.
+jamsi_hu_dasi_sidohae_boseyo ← 잠시 후 다시 시도해 보세요.
+jandangi_nopa_danmasi_dudeureojineun_wain_dijeoteuwa_hamgge ← 잔당이 높아 단맛이 두드러지는 와인. 디저트와 함께 마시기 좋음.
+jasineul_sogaehaneun_geuleul_ibryeoghaseyo ← 자신을 소개하는 글을 입력하세요.
+jayuroun_gongyu ← 자유로운 공유
+jebo_naeyong ← 제보 내용
+jegeohagi ← 제거하기
+jehan_eobsneun_gineung_gwanggo_eobsneun_gyeongheom ← 제한 없는 기능, 광고 없는 경험
+jejosa ← 제조사
+jeogdanghan_sseunmas_peil_eil_ipa_aembeo_eileseo_heunhamyeo ← 적당한 쓴맛. 페일 에일, IPA, 앰버 에일에서 흔하며, 균형 잡힌 홉 풍미를 보여줍니다.
+jeojang ← 저장
+jeojsan_balhyoro_sinmasi_dodeurajineun_maegju_gwaileul_deoha ← 젖산 발효로 신맛이 도드라지는 맥주. 과일을 더한 버전이 많음.
+jeonce ← 전체
+jeonce_gonggae ← 전체 공개
+jeoncegonggae ← 전체공개
+jeongbo ← 정보
+jeongmalro_i_noteureul_jegeohasigessseubnigga_jegeodoen_note ← 정말로 이 노트를 제거하시겠습니까?
+제거된 노트는 복구할 수 없습니다.
+jeongmiyul_50_iha_yangjo_alkool_soryang_ceomga_gajang_hwarye ← 정미율 50% 이하 + 양조 알코올 소량 첨가. 가장 화려한 향과 섬세한 맛.
+jeongmiyul_50_iharo_ggaggeun_ssalro_mandeun_junmai_hwaryeoha ← 정미율 50% 이하로 깎은 쌀로 만든 준마이. 화려한 향과 섬세한 맛.
+jeongmiyul_60_iha_yangjo_alkool_soryang_ceomga_hyangi_dodeur ← 정미율 60% 이하 + 양조 알코올 소량 첨가. 향이 도드라짐.
+jeongmiyul_60_iharo_ggaggeun_ssalro_mandeun_junmai_ggalggeum ← 정미율 60% 이하로 깎은 쌀로 만든 준마이. 깔끔한 향과 부드러운 맛.
+jeongmiyul_70_iha_yangjo_alkool_soryang_ceomga_gabyeobgo_gga ← 정미율 70% 이하 + 양조 알코올 소량 첨가. 가볍고 깔끔한 맛.
+jeongseongggeos_sseun_sieumnoteu_naman_bogi_aggabdamyeon ← 정성껏 쓴 시음노트, 나만 보기 아깝다면?
+jeonsong ← 전송
+jeooneseo_hamyeonbalhyohan_maegjuui_congcing_malggo_ggalggeu ← 저온에서 하면발효한 맥주의 총칭. 맑고 깔끔한 마무리.
+jepum_bakodeu_seukaenhagi ← 제품 바코드 스캔하기
+jepum_bakodeureul_seukaenhayeo_bbareuge_jepum_sangsero_jinib ← 제품 바코드를 스캔하여 빠르게 제품 상세로 진입하세요!
+jepum_deungrog ← 제품 등록
+jepum_deungroghagi ← 제품 등록하기
+jepum_geomsaeghagi ← 제품 검색하기
+jepum_imiji ← 제품 이미지
+jepum_ireum ← 제품 이름
+jepum_jeongbo ← 제품 정보
+jepum_jeongbo_singo ← 제품 정보 신고
+jepum_jeongboga_jalmosdoeeo_issgeona_cugahal_naeyongi_issdam ← 💡 제품 정보가 잘못되어 있거나 추가할 내용이 있다면 상단의 %@ 버튼으로 문의해주세요.
+jepum_jigjeob_cuga ← 제품 직접 추가
+jepum_jigjeob_deungroghagi ← 제품 직접 등록하기
+jepum_sajineun_1jangggaji_ceombuhal_su_isseoyo ← 제품 사진은 1장까지 첨부할 수 있어요.
+jepum_seolmyeong ← 제품 설명
+jepum_seolmyeongeul_junbihago_issseubnida_bbareun_siil_naee ← 제품 설명을 준비하고 있습니다.
+빠른 시일 내에 추가하도록 할게요!
+jepum_seolmyeongina_imijireul_biweodusimyeon_aiga_jadongeuro ← 제품 설명이나 이미지를 비워두시면, AI가 자동으로 정보를 채워드립니다.
+jepum_singo ← 제품 신고
+jepumeul_cajeul_su_eobseoyo ← 제품을 찾을 수 없어요
+jepumeul_coecoro_deungroghaeboseyo ← 제품을 최초로 등록해보세요!
+jepumeul_seukaenhaeseo_teiseuting_noteureul_jagseonghaseyo ← 제품을 스캔해서 테이스팅 노트를 작성하세요
+jepummyeong_geomsaeg ← 제품명 검색
+jepummyeongman_ibryeoghasimyeon_doebnida_sangse_jeongboneun ← 제품명만 입력하시면 됩니다!
+상세 정보는 운영자가 추가해드립니다.
+jepumui_jeongboreul_ggomggomhi_salpyeobogo_isseoyo ← 제품의 정보를 꼼꼼히 살펴보고 있어요.
+jepumui_rabel_jeonmyeoni_jal_naodorog_jjigeojuseyo_aiga_rabe ← 제품의 라벨 전면이 잘 나오도록 찍어주세요.
+AI가 라벨을 분석하여 정보를 추출합니다.
+jepumui_teugjing_sugseongnyeondo_gagyeog_deung_jepumjeongbor ← 제품의 특징, 숙성년도, 가격 등 제품정보를 입력해주세요.
+jeulgyeocajneun_jepum ← 즐겨찾는 제품
+jeulgyeocajneun_jepumi_eobsseubnida ← 즐겨찾는 제품이 없습니다
+jigeum_baro_haedang_jepumui_sieum_noteureul_jagseonghasigess ← 지금 바로 해당 제품의 시음 노트를 작성하시겠어요?
+jigeumeun_jarireul_jeulgiseyo_masyeobon_jepumeuro_deungrogha ← 지금은 자리를 즐기세요! 마셔본 제품으로
+등록하고 나중에 언제든지 시음노트 작성을 할 수 있습니다.
+jigeumeun_jarireul_jeulgisigo_naeil_ijji_anhdorog_alryeodeur ← 지금은 자리를 즐기시고 내일 잊지 않도록 알려드릴게요
+jigeumggaji_gae_jepumi_deungrogdoeeo_isseoyo ← 지금까지 %@개 제품이 등록되어 있어요!
+jigjeob_cugahagi ← 직접 추가하기
+jin ← 진
+jinpandel ← 진판델
+jiweon ← 지원
+jjimhan_jepum ← 찜한 제품
+jujeongganghwa_wain ← 주정강화 와인
+junipeo_berireul_jungsimeuro_botaenikeoleul_gahyanghan_jeung ← 주니퍼 베리를 중심으로 보태니컬을 가향한 증류주. 또렷한 허브 향이 특징.
+junmai ← 준마이
+junmai_daiginjo ← 준마이 다이긴조
+junmai_ginjo ← 준마이 긴조
+juro_3hoe_jeungryuhae_budeureoun_ailraendeu_wiseuki_gabyeobg ← 주로 3회 증류해 부드러운 아일랜드 위스키. 가볍고 깔끔한 스타일.
+juryu_taib ← 주류 타입
+kaenadian_wiseuki ← 캐나디안 위스키
+kapucino ← 카푸치노
+keulraesig_kagteil ← 클래식 칵테일
+keuraepeuteu_kagteil ← 크래프트 칵테일
+koldeu_beuru ← 콜드 브루
+lldgaeui_hangmog_pyeongga_wanryo ← %lld개의 항목 평가 완료
+lldweol_teiseuting ← %lld월 테이스팅
+maegju_seutail ← 맥주 스타일
+maeu_najeun_sseunmas_rageo_milmaegju_raiteu_eileseo_heunhamy ← 매우 낮은 쓴맛. 라거, 밀맥주, 라이트 에일에서 흔하며, 일반적으로 부드럽고 청량합니다.
+maggeolri ← 막걸리
+maipeiji ← 마이페이지
+makiato ← 마키아토
+malbeg ← 말벡
+manjogseureon ← 만족스런
+masui_yosodeuli_eolmana_johwarounji ← 맛의 요소들이 얼마나 조화로운지
+masyeobon_jepum ← 마셔본 제품
+masyeobon_jepum_deungrog ← 마셔본 제품 등록
+masyeobon_jepume_deungrogdoeeossseubnida ← 마셔본 제품에 등록되었습니다.
+masyeobon_jepumeuro_deungroghago_sieumnoteureul_jagseonghaji ← 마셔본 제품으로 등록하고 시음노트를 작성하지 않은 제품이 있을 경우 표시됩니다.
+masyeobon_jepumeuro_deungroghago_teiseuting_noteureul_jagseo ← 마셔본 제품으로 등록하고 테이스팅 노트를 작성하세요
+노트를 작성하지 않아도 마이페이지에서 마셔본 제품들을 확인하실 수 있습니다.
+masyeobon_mogrogeseo_jegeohagi ← 마셔본 목록에서 제거하기
+megsikosan_beulru_agabero_mandeun_jeungryuju_ggalggeumhago_p ← 멕시코산 블루 아가베로 만든 증류주. 깔끔하고 풀잎 같은 향.
+mejeukal ← 메즈칼
+mereulro ← 메를로
+mileul_sayonghan_heurishan_saegui_maegju_banana_jeonghyang_g ← 밀을 사용한 흐릿한 색의 맥주. 바나나·정향 같은 효모 향이 특징.
+milmaegju ← 밀맥주
+modeun_gineungeul_jehan_eobsi_iyonghaseyo ← 모든 기능을 제한 없이 이용하세요
+modeun_sieum_noteu_deiteoreul_json_pailro_naebonaesigessseub ← 모든 시음 노트 데이터를 JSON 파일로 내보내시겠습니까?
+mogrogeul_ganryaghago_bbareuge_hwaginhaeboseyo ← 목록을 간략하고 빠르게 확인해보세요.
+mogrogeul_mileoseo_yeyageul_cwisohal_su_issseubnida ← 목록을 밀어서 예약을 취소할 수 있습니다.
+mogteil ← 목테일
+moka ← 모카
+montepulciano ← 몬테풀치아노
+moseukato ← 모스카토
+mujehan_ai_rabel_seukaen ← 무제한 AI 라벨 스캔
+mujehan_sns_web_gongyu ← 무제한 SNS, 웹 공유
+mujehan_teiseuting_noteu_jagseong ← 무제한 테이스팅 노트 작성
+munui_naeyeogi_eobsseubnida ← 문의 내역이 없습니다.
+munuihagi ← 문의하기
+muryo_iyong_jung ← 무료 이용 중
+mweol_dil_e_a_h_mm ← M월 d일 (E) a h:mm
+nae_jeongbo ← 내 정보
+nae_noteu ← 내 노트
+nae_noteu_lld ← 내 노트(%lld)
+nae_noteuwa_jeulgyeocajneun_jepum_gongyu ← 내 노트와 즐겨찾는 제품 공유
+nae_pideu ← 내 피드
+naebonaegi ← 내보내기
+naecureol_wain ← 내추럴 와인
+naeil_i_sigane_alrimeul_deurilgeyo ← 내일 이 시간에 알림을 드릴게요.
+naeil_sieumnoteu_jagseong_alrimeul_bonaedeurilggayo ← 내일 시음노트 작성 알림을 보내드릴까요?
+naeyong ← 내용
+nagagi ← 나가기
+najunge ← 나중에
+najunge_jagseonghagi ← 나중에 작성하기
+naljjareul_seontaeghamyeon_jagseongdoen_noteureul_bol_su_iss ← 날짜를 선택하면 작성된 노트를 볼 수 있습니다.
+namugwail ← 나무과일
+naui_barnote_webpeiji ← 나의 BarNote 웹페이지
+nebiolro ← 네비올로
+neuggyeojin_hyangmi ← 느껴진 향미
+neuggyeojineun_hyanggwa_masdeuleul_seontaeghaejuseyo ← 느껴지는 향과 맛들을 선택해주세요!
+nigneim ← 닉네임
+nigneimeuro_geomsaeg ← 닉네임으로 검색
+nigori ← 니고리
+nim_annyeonghaseyo ← %@님
+안녕하세요 👋
+nimui_teiseuting_noteu ← %@님의 테이스팅 노트
+noteu ← 노트
+noteu_deungrog ← 노트 등록
+noteu_jagseonghagi ← 노트 작성하기
+noteu_jagseongi_pilyohan_jepum ← 노트 작성이 필요한 제품
+noteu_jegeo ← 노트 제거
+noteu_sujeong ← 노트 수정
+noteu_sujeong_cwiso ← 노트 수정 취소
+noteuga_eobsseubnida ← 노트가 없습니다
+noteureul_cajeul_su_eobseoyo ← 노트를 찾을 수 없어요
+notification_new_follower ← notification_new_follower
+notification_new_note ← notification_new_note
+obsyeon ← 옵션
+ogsusu_51_isang_migugeseo_sae_okeutonge_sugseonghan_wiseuki ← 옥수수 51% 이상, 미국에서 새 오크통에 숙성한 위스키. 바닐라·캐러멜 풍미.
+okeu_namu_songjin ← 오크, 나무, 송진
+okeutongeseo_orae_sugseonghae_saegi_jitgo_pungmiga_mugjighan ← 오크통에서 오래 숙성해 색이 짙고 풍미가 묵직한 럼. 캐러멜·향신료 뉘앙스.
+oryu_jebo ← 오류 제보
+oryu_jebohagi ← 오류 제보하기
+oryu_naeyongeul_jasehi_jagseonghaejuseyo ← 오류 내용을 자세히 작성해주세요.
+palroing ← 팔로잉
+palroing_cwiso ← 팔로잉 취소
+palroinghaneun_yujeoga_eobsseubnida ← 팔로잉하는 유저가 없습니다.
+palroweo ← 팔로워
+palroweoga_eobsseubnida ← 팔로워가 없습니다.
+peiji_seontaeg ← 페이지 선택
+peil_eil ← 페일 에일
+peulraes_hwaiteu ← 플랫 화이트
+peulroreol ← 플로럴
+peurangseu_gaseukonyu_jiyeogeseo_dansig_jeungryuhan_beuraend ← 프랑스 가스코뉴 지역에서 단식 증류한 브랜디. 깊고 거친 풍미.
+peurangseu_konyag_jiyeogeseo_saengsandoeneun_podo_beuraendi ← 프랑스 코냑 지역에서 생산되는 포도 브랜디. 우아하고 복합적인 풍미.
+peurimieom_gudog_jung ← 프리미엄 구독 중
+peurimieom_membeosib ← 프리미엄 멤버십
+peurojeun_kagteil ← 프로즌 칵테일
+peuropil_sujeong ← 프로필 수정
+peuropili_sujeongdoeeossseubnida ← 프로필이 수정되었습니다.
+pilseuneo ← 필스너
+pilsu ← 필수
+pino_beulrang ← 피노 블랑
+pino_geurijio ← 피노 그리지오
+pino_nua ← 피노 누아
+podo_deung_gwaileul_jeungryuhan_sului_congcing_budeureoun_da ← 포도 등 과일을 증류한 술의 총칭. 부드러운 단맛과 과실 향.
+podo_ggeobjilgwa_hamgge_balhyohae_saeggwa_tanineul_cuculhan ← 포도 껍질과 함께 발효해 색과 타닌을 추출한 적포도주.
+poteo ← 포터
+premium_subscription_cta ← premium_subscription_cta
+premium_subscription_description ← premium_subscription_description
+premium_subscription_title ← premium_subscription_title
+pueo_obeo ← 푸어 오버
+pul_heobeu_minteu ← 풀, 허브, 민트
+pumjong ← 품종
+pungmi ← 풍미
+pungmi_sangse_seolmyeong ← 풍미 상세 설명
+pungmi_seontaeg ← 풍미 선택
+pungmiwa_sieum_noteureul_giroghaseyo ← 풍미와 시음 노트를 기록하세요
+pyeongjeomsun ← 평점순
+radde ← 라떼
+rageo ← 라거
+rai_wiseuki ← 라이 위스키
+raiteu ← 라이트 ☀️
+raiteu_reom ← 라이트 럼
+redeu_beulrendeu ← 레드 블렌드
+redeu_wain ← 레드 와인
+remon_raim_orenji ← 레몬, 라임, 오렌지
+reome_hyangsinryo_banilra_deungeul_gahyanghan_seutail_dalkom ← 럼에 향신료·바닐라 등을 가향한 스타일. 달콤하고 따뜻한 풍미.
+rikyueo ← 리큐어
+ringkeu ← 링크
+riseulring ← 리슬링
+rogeuaus ← 로그아웃
+rogeuin_pilyo ← 로그인 필요
+rogeuin_seonggong ← 로그인 성공 🎉
+rogeuinhagi ← 로그인하기
+rogeuinhago_coejong_dangyereul_wanryohaseyo_jagseonghan_naey ← 로그인하고 최종 단계를 완료하세요.
+작성한 내용은 그대로 안전하게 유지돼요!
+rogeuinhareo_gagi ← 로그인하러 가기
+roje_wain ← 로제 와인
+saerobge_deungrogdoen_jepumdeuleul_hwaginhaseyo ← 새롭게 등록된 제품들을 확인하세요
+saeroun_sieum_noteu_yeyageul_deungroghal_ddae_gibonjeogeuro ← 새로운 시음 노트 예약을 등록할 때 기본적으로 설정되는 시간입니다.
+sagwa_bae_bogsunga_deung ← 사과, 배, 복숭아 등
+sagwa_beri_podo_yeoldaegwail_banana ← 사과, 베리, 포도, 열대과일(바나나)
+sajin_byeongyeong ← 사진 변경
+sajini_eobsseubnida ← 사진이 없습니다
+sake_seutail ← 사케 스타일
+samkin_hu_ibane_namneun_masui_gili ← 삼킨 후 입안에 남는 맛의 길이
+sangpumui_byeoljeomeun_coegeun_jagseonghan_sieumnoteuui_byeo ← 상품의 별점은 최근 작성한 시음노트의 별점으로 표시됩니다.
+sangse_pyeongga ← 상세 평가
+sangse_pyeongga_hangmog_seolmyeong ← 상세 평가 항목 설명
+sanjiobeje ← 산지오베제
+sanmi_sangkeumhago_sikeumhan_jeongdo ← 산미, 상큼하고 시큼한 정도
+satangsusu_dangmilro_mandeun_ggalggeumhago_gabyeoun_reom_kag ← 사탕수수 당밀로 만든 깔끔하고 가벼운 럼. 칵테일 베이스로 자주 사용.
+saweo_bieo ← 사워 비어
+saweo_kagteil ← 사워 칵테일
+sayongja_cadan ← 사용자 차단
+semiyong ← 세미용
+seobiseu_iyongyaggwan ← 서비스 이용약관
+seoljeong ← 설정
+seoljeongeseo_alrimeul_heoyonghaejuseyo ← 설정에서 알림을 허용해주세요.
+seontaeghan_jepum ← 선택한 제품
+seontaeghan_jepum_jeongboreul_hwaginhaseyo ← 선택한 제품 정보를 확인하세요
+seukaen_hanaro_wanseongdoeneun_sieumnoteu ← 스캔 하나로 완성되는 시음노트
+seukoteulraendeu_bangsigeul_gibaneuro_ilboneseo_mandeun_wise ← 스코틀랜드 방식을 기반으로 일본에서 만든 위스키. 정교한 밸런스가 특징.
+seukoteulraendeu_danil_jeungryusoeseo_100_bori_maegaro_mande ← 스코틀랜드 단일 증류소에서 100% 보리 맥아로 만든 위스키.
+seukoteulraendeu_danil_jeungryusoeseo_bori_oe_gogmuleul_sayo ← 스코틀랜드 단일 증류소에서 보리 외 곡물을 사용해 만든 위스키. 가볍고 부드러움.
+seumoki ← 스모키
+seumoki_hunje_piteu ← 스모키, 훈제, 피트
+seupaiseudeu_reom ← 스파이스드 럼
+seupaisi ← 스파이시
+seupakeulring_wain ← 스파클링 와인
+seupiris_seutail ← 스피릿 스타일
+seutail ← 스타일
+seutauteu ← 스타우트
+seutauteuboda_gabyeobgo_budeureoun_heugmaegju_kaereomel_gyeo ← 스타우트보다 가볍고 부드러운 흑맥주. 캐러멜·견과 풍미.
+sieum_jepum ← 시음 제품
+sieum_noteu ← 시음 노트
+sieum_noteu_alrim_yeyag ← %@ 시음 노트 알림 예약
+sieum_noteu_jagseong ← 시음 노트 작성
+sieum_noteu_lld ← 시음 노트(%lld)
+sieum_noteuga_eobsseubnida ← 시음 노트가 없습니다.
+sieum_noteureul_jagseonghal_siganieyo ← 시음 노트를 작성할 시간이에요!
+sieumnoteu_deiteo_naebonaegi ← 시음노트 데이터 내보내기
+sieumnoteu_jagseong_alrim ← 시음노트 작성 알림
+sijaghagi ← 시작하기
+silmangseureon ← 실망스런
+singgeul_geurein_seukaci ← 싱글 그레인 스카치
+singgeul_molteu_seukaci ← 싱글 몰트 스카치
+singgeul_orijin ← 싱글 오리진
+singo_daesang_jepum ← 신고 대상 제품
+singo_naeyong ← 신고 내용
+singoga_jeobsudoeeossseubnida ← 신고가 접수되었습니다
+singoga_wanryodoeeossseubnida ← 신고가 완료되었습니다.
+sinmas ← 신맛
+sira_swirajeu ← 시라/쉬라즈
+siseutem ← 시스템 ⚙️
+siteureoseu ← 시트러스
+snswa_webeuro_ganpyeonhage_gongyuhago_palrou_gineungeuro_cwi ← SNS와 웹으로 간편하게 공유하고, 팔로우 기능으로 취향이 맞는 술친구를 찾아보세요.
+sogi_ulreonggeorineun ← 속이 울렁거리는
+soju ← 소주
+ssabssalham_sseunmasui_jeongdo ← 쌉쌀함, 쓴맛의 정도
+ssal_nurug_mul_hyomomaneuro_mandeun_ceongju_yangjo_alkooleul ← 쌀, 누룩, 물, 효모만으로 만든 청주. 양조 알코올을 첨가하지 않음.
+sseunmas ← 쓴맛
+str_100gaessig_sieum_noteu_deiteoreul_tegseuteu_pailro_naebo ← 100개씩 시음 노트 데이터를 텍스트 파일로 내보냅니다.
+진행하시겠습니까?
+str_3co_mane_rogeuinhago_namanui_sieum_noteureul_jagseonghae ← 3초 만에 로그인하고
+나만의 시음 노트를 작성해보세요
+sujeong_jungideon_naeyongi_sarajibnida_jeongmal_dadeulggayo ← 수정 중이던 내용이 사라집니다.
+정말 닫을까요?
+susu_deung_gogmulro_mandeun_junggug_jeontong_jeungryuju_gang ← 수수 등 곡물로 만든 중국 전통 증류주. 강한 향과 높은 도수.
+syareudone ← 샤르도네
+syobinyong_beulrang ← 쇼비뇽 블랑
+syunaeng_beulrang ← 슈냉 블랑
+taghan_oehyeonggwa_pungbuhan_yeoldaegwail_hyang_budeureobgo ← 탁한 외형과 풍부한 열대과일 향, 부드럽고 둥근 쓴맛이 특징인 IPA.
+taib ← 타입
+taiping_geumanhago_han_mogeum_masiseyo ← 타이핑 그만하고, 한 모금 마시세요.
+taltoehagi ← 탈퇴하기
+tannin ← 탄닌
+teiseuting ← 테이스팅
+teiseuting_noteu ← 테이스팅 노트
+teiseuting_noteu_mijagseong ← 📝 테이스팅 노트 미작성
+teiseuting_noteureul_jagseonghaji_anheun_jepumibnida ← 테이스팅 노트를 작성하지 않은 제품입니다
+tekilra ← 테킬라
+tema ← 테마
+tempeuraniyo ← 템프라니요
+tenesi_wiseuki ← 테네시 위스키
+tiki_kagteil ← 티키 칵테일
+udi ← 우디
+vivinoeseo_geomsaeghagi ← Vivino에서 검색하기
+wain_deungeseo_neuggyeojineun_ddeolbeun_neuggim ← 와인 등에서 느껴지는 떫은 느낌
+wain_seutail ← 와인 스타일
+webpeiji_jusoga_bogsadoeeossseubnida ← 웹페이지 주소가 복사되었습니다.
+weoldeu_wiseuki ← 월드 위스키
+weonsanji ← 원산지
+wiseuki_seutail ← 위스키 스타일
+yagju ← 약주
+ye_balbeni_12nyeon_deobeuludeu ← 예) 발베니 12년 더블우드
+yeoldaegwail ← 열대과일
+yeoreo_jeungryusoui_molteu_wiseukiwa_geurein_wiseukireul_hon ← 여러 증류소의 몰트 위스키와 그레인 위스키를 혼합한 스카치.
+yeoun ← 여운
+yeyag ← 예약
+yeyag_mogrog ← 예약 목록
+yeyagdoen_sieum_noteuga_eobsseubnida ← 예약된 시음 노트가 없습니다.
+yoyag ← 요약
+yujeo_geomsaeg ← 유저 검색
+yujeo_noteu ← 유저 노트
+yujeoreul_cajeul_su_eobsseubnida ← '%@' 유저를 찾을 수 없습니다.

@@ -1,0 +1,6 @@
+package com.oq.barnote.core.oqcore.extension
+
+// iOS 대응: OQ+Array.swift, OQ+String.swift, OQ+Date.swift,
+//           OQ+Codable.swift, OQ+Dictionary.swift, OQ+Bundle.swift,
+//           Combine+Etc.swift (→ Flow 확장)
+// Kotlin 확장 함수 모음

@@ -1,0 +1,5 @@
+package com.oq.barnote.core.oqcore.ui.modifier
+
+// iOS: ViewModifier/ 디렉토리 대응
+// OQButtonStyle, OQPopupModifier, OQTFStyle, HideModifier 등
+// 공용 Compose Modifier

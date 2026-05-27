@@ -1,0 +1,4 @@
+package com.oq.barnote.core.oqcore.model
+
+// iOS: Models/ 디렉토리 대응 (CacheItem.swift, Palette.swift, Report.swift)
+// 공용 모델 클래스

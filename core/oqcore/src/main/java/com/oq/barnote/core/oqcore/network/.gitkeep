@@ -1,0 +1,4 @@
+package com.oq.barnote.core.oqcore.network
+
+// iOS: Network/NetworkClient.swift 대응
+// 공용 네트워크 클라이언트 유틸리티

@@ -1,0 +1,4 @@
+package com.oq.barnote.core.oqcore.cache
+
+// iOS: CacheManager.swift 대응
+// 메모리/디스크 캐시 관리 유틸리티
