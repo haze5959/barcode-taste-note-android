@@ -111,6 +111,7 @@ to write tasting notes quickly and accurately.</string>
     <string name="gaeinjeongbo_ceoribangcim">Privacy Policy</string>
     <string name="gaeui_hangmog_pyeongga_wanryo">Evaluated %s items</string>
     <string name="gaeunhan">Refreshing</string>
+    <string name="gaelreori">Gallery</string>
     <string name="gaibil">Join Date</string>
     <string name="gajang_manhi_neuggyeojin_hyangmi">Most Felt Flavors</string>
     <string name="gajyeool_peiji_1peijidang_dgae">Page to fetch (%d per page)</string>
@@ -298,6 +299,7 @@ and you can write your tasting notes anytime later.</string>
     <string name="juro_3hoe_jeungryuhae_budeureoun_ailraendeu_wiseuki_gabyeobg">Irish whisky usually triple-distilled; smooth, light, and clean.</string>
     <string name="juryu_taib">Liquor Type</string>
     <string name="kaenadian_wiseuki">Canadian Whisky</string>
+    <string name="kamera">Camera</string>
     <string name="kapucino">Cappuccino</string>
     <string name="keulraesig_kagteil">Classic Cocktail</string>
     <string name="keuraepeuteu_kagteil">Craft Cocktail</string>
@@ -379,9 +381,11 @@ Hello 👋</string>
     <string name="ogsusu_51_isang_migugeseo_sae_okeutonge_sugseonghan_wiseuki">American whisky with at least 51% corn, aged in new oak barrels; vanilla and caramel notes.</string>
     <string name="okeu_namu_songjin">Oak, Wood, Resin</string>
     <string name="okeutongeseo_orae_sugseonghae_saegi_jitgo_pungmiga_mugjighan">Dark, full-bodied rum aged extensively in oak; caramel and spice notes.</string>
+    <string name="oryu">Error</string>
     <string name="oryu_jebo">Report Error</string>
     <string name="oryu_jebohagi">Submit Error Report</string>
     <string name="oryu_naeyongeul_jasehi_jagseonghaejuseyo">Please describe the error in detail.</string>
+    <string name="hwagin">OK</string>
     <string name="palroing">Following</string>
     <string name="palroing_cwiso">Unfollow</string>
     <string name="palroinghaneun_yujeoga_eobsseubnida">No users followed.</string>
@@ -461,6 +465,9 @@ Your drafts are securely saved!</string>
     <string name="seobiseu_iyongyaggwan">Terms of Service</string>
     <string name="seoljeong">Settings</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">Please allow notifications in settings.</string>
+    <string name="alrim_gwonhani_pilyohabnida">Notification permission required.</string>
+    <string name="kamera_gwonhani_pilyohabnida">Camera permission required.</string>
+    <string name="seoljeongeseo_kamerareul_heoyonghaejuseyo">Please allow camera access in settings.</string>
     <string name="seontaeghan_jepum">Selected Product</string>
     <string name="seontaeghan_jepum_jeongboreul_hwaginhaseyo">Check the selected product\'s information</string>
     <string name="seukaen_hanaro_wanseongdoeneun_sieumnoteu">Tasting Notes Completed with One Scan</string>
@@ -548,4 +555,26 @@ Are you sure you want to close?</string>
     <string name="yujeo_geomsaeg">User Search</string>
     <string name="yujeo_noteu">User Notes</string>
     <string name="yujeoreul_cajeul_su_eobsseubnida">Could not find user \'%s\'.</string>
+    <string name="beonyeog">Translate</string>
+    <string name="cadan_haeje">Unblock</string>
+    <string name="beonyeog_gyeolgwa">Translation</string>
+    <string name="seontaeghan_yeyageul_sagjehasigessseubnigga">Block this user? All notes by this user will be hidden.</string>
+    <string name="sieum_noteu_yeyag_alrim_caeneol">Tasting Note Reservation</string>
+    <string name="url_bogsa">Copy URL</string>
+    <string name="i_jepumui_jalmosdoen_jeongbo_singo_hwagin">Report incorrect information about this product?</string>
+    <string name="masyeobon_mogrogeseo_jegeohagi_btn">Remove from tasted list</string>
+    <string name="giroghdoen_sangse_noteuga_eobseubnida">No detailed note recorded.</string>
+    <string name="jagseong_il">Written on</string>
+    <string name="weonbon_bogi">Show original</string>
+    <string name="palrowo">Followers</string>
+    <string name="jagseong_jung_noteureul_dadeulggayo">Close the note in progress?</string>
+    <string name="jagseong_jung_naeyongi_modu_sarajibnida">All current input will be discarded.</string>
+    <string name="geoeui_da_wasseoyo">Almost there!</string>
+    <string name="rogeuinhago_coejong_dangyereul_wanryohaseyo">Log in to complete the final step. Your input is preserved.</string>
+    <string name="gateun_ireumui_jepumi_imi_isseoyo_geomsaeghagireo_gaboseyo">A product with the same name already exists. Try searching.</string>
+    <string name="jepum_seolmyeongina_imijireul_biwoduasimyeon_aiga_jadong">If you leave the description or image blank, AI will auto-fill the information.</string>
+    <string name="dayanghan_juryureul_pog_seontaeghal_su_isseoyo">Select from a wide variety of alcohol types</string>
+    <string name="ibu_annae">IBU Guide</string>
+    <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Tap the delete button to cancel a reservation.</string>
+    <string name="gumae_bogwon">Restore Purchases</string>
 </resources>

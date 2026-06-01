@@ -1,6 +1,11 @@
 package com.oq.barnote.core.oqcore.views
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,29 +19,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * iOS `SkeletonView` 의 안드로이드 Compose 포팅 — 5-stop 그라데이션 + 약간의 tilt + 부드러운 진폭으로
+ * 단순 2-stop linearGradient 대비 시각 품질 향상.
+ *
+ * - 5 stops: base → mid → highlight (peak) → mid → base. 매끄럽게 빛이 휘 지나가는 듯한 효과.
+ * - tilt: gradient 시작/끝의 x/y offset 비를 살짝 다르게 줘 비스듬한 sweep.
+ * - period: 1400ms (iOS 의 자연스러운 반복 속도).
+ */
 fun Modifier.skeleton(
     isActive: Boolean = true,
     cornerRadius: Dp = 12.dp,
-    baseColor: Color = Color.Gray.copy(alpha = 0.2f),
-    highlightColor: Color = Color.Gray.copy(alpha = 0.45f)
+    baseColor: Color = Color.Gray.copy(alpha = 0.18f),
+    midColor: Color = Color.Gray.copy(alpha = 0.30f),
+    highlightColor: Color = Color.White.copy(alpha = 0.55f),
 ): Modifier = composed {
     if (!isActive) return@composed this
 
     val transition = rememberInfiniteTransition(label = "skeleton")
     val translateAnim by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
+        initialValue = -1000f,
+        targetValue = 1500f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
+            animation = tween(durationMillis = 1400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Restart,
         ),
-        label = "skeleton_anim"
+        label = "skeleton_anim",
     )
 
+    // 5-stop gradient. base → mid → highlight (peak) → mid → base.
     val brush = Brush.linearGradient(
-        colors = listOf(baseColor, highlightColor, baseColor),
-        start = Offset(translateAnim - 200f, translateAnim - 200f),
-        end = Offset(translateAnim, translateAnim)
+        colorStops = arrayOf(
+            0.0f to baseColor,
+            0.25f to midColor,
+            0.5f to highlightColor,
+            0.75f to midColor,
+            1.0f to baseColor,
+        ),
+        start = Offset(translateAnim, translateAnim * 0.4f),
+        end = Offset(translateAnim + 600f, translateAnim * 0.4f + 240f),
     )
 
     this.background(brush = brush, shape = RoundedCornerShape(cornerRadius))
@@ -46,15 +67,17 @@ fun Modifier.skeleton(
 fun SkeletonView(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 12.dp,
-    baseColor: Color = Color.Gray.copy(alpha = 0.2f),
-    highlightColor: Color = Color.Gray.copy(alpha = 0.45f)
+    baseColor: Color = Color.Gray.copy(alpha = 0.18f),
+    midColor: Color = Color.Gray.copy(alpha = 0.30f),
+    highlightColor: Color = Color.White.copy(alpha = 0.55f),
 ) {
     Box(
         modifier = modifier.skeleton(
             isActive = true,
             cornerRadius = cornerRadius,
             baseColor = baseColor,
-            highlightColor = highlightColor
-        )
+            midColor = midColor,
+            highlightColor = highlightColor,
+        ),
     )
 }

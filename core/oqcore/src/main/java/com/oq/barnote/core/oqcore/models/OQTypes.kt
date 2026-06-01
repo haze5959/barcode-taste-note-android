@@ -48,6 +48,28 @@ enum class MediaType {
     Photo, Video
 }
 
+/**
+ * 다크 모드 설정. iOS `AppTheme` 에 대응.
+ * 안드로이드는 `AppCompatDelegate.setDefaultNightMode(...)` 로 적용합니다.
+ */
+enum class AppTheme(val id: String) {
+    System("system"),
+    Light("light"),
+    Dark("dark");
+
+    companion object {
+        const val USER_DEFAULTS_KEY: String = "selected_theme"
+        fun fromId(id: String): AppTheme? = values().firstOrNull { it.id == id }
+    }
+
+    /** `AppCompatDelegate.MODE_NIGHT_*` 에 대응하는 정수 상수. */
+    fun toNightMode(): Int = when (this) {
+        System -> -1 // AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        Light -> 1   // AppCompatDelegate.MODE_NIGHT_NO
+        Dark -> 2    // AppCompatDelegate.MODE_NIGHT_YES
+    }
+}
+
 enum class AppLanguage(val id: String) {
     System("system"),
     English("en"),

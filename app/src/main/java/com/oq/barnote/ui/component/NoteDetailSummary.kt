@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
@@ -87,7 +88,7 @@ fun NoteDetailSummary(
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "감정",
+                    text = stringResource(com.oq.barnote.R.string.gamjeong),
                     style = MaterialTheme.typography.bodyMedium,
                     color = secondary,
                 )

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.R
@@ -37,11 +38,12 @@ fun NotePublicToggleSection(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "전체 공개",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                text = stringResource(com.oq.barnote.R.string.jeonce_gonggae),
+                // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
             Text(
-                text = "해당 노트를 다른 이용자와 공유합니다.",
+                text = stringResource(com.oq.barnote.R.string.haedang_noteureul_dareun_iyongjawa_gongyuhabnida),
                 style = MaterialTheme.typography.bodySmall,
                 color = secondary,
             )

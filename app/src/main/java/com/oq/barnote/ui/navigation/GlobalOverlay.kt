@@ -1,0 +1,161 @@
+package com.oq.barnote.ui.navigation
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.oq.barnote.R
+import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.oqcore.models.Palette
+import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.views.OQToastConfig
+import com.oq.barnote.core.oqcore.views.OQToastHost
+
+/**
+ * 글로벌 로딩 오버레이. iOS `OQLoadingOverlay(isLoading = appController.globalLoading)` 에 대응.
+ *
+ * [AppController.globalLoading] 이 true 인 동안 반투명 black + 가운데 spinner.
+ * 사용자 인터랙션은 캡처하지 않음 (clickable 없음) — 단순 visual indicator.
+ */
+@Composable
+fun GlobalLoadingOverlay(appController: AppController) {
+    val isLoading by appController.globalLoading.collectAsState()
+    if (!isLoading) return
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.35f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(color = Color.White)
+    }
+}
+
+/**
+ * AI 라벨 스캔 전용 로딩 오버레이. iOS `OQLoadingOverlay(isLoading: appController.isAiScanLoadingBinding(),
+ * systemImage: "wand.and.stars", title: "AI 분석 중...", desc: "제품의 정보를 꼼꼼히 살펴보고 있어요.")` 대응.
+ *
+ * 일반 [GlobalLoadingOverlay] 와 분리한 이유: AI 스캔은 5~15초의 장기 작업이라 사용자에게
+ * "무슨 일이 일어나는지" 명시적인 메시지를 보여줄 필요가 있음. iOS 가 별도 overlay 를 쓰는 것도 같은 이유.
+ */
+@Composable
+fun GlobalAiScanLoadingOverlay(appController: AppController) {
+    val isLoading by appController.aiScanLoading.collectAsState()
+    if (!isLoading) return
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.55f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+            modifier = Modifier.padding(horizontal = Dimens.BtnPadding),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AutoAwesome,
+                contentDescription = null,
+                tint = accent,
+                modifier = Modifier.size(48.dp),
+            )
+            CircularProgressIndicator(color = accent)
+            Text(
+                text = stringResource(R.string.ai_bunseog_jung),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                ),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = stringResource(R.string.jepumui_jeongboreul_ggomggomhi_salpyeobogo_isseoyo),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color.White.copy(alpha = 0.8f),
+                ),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+/**
+ * 글로벌 토스트 호스트. iOS `OQToast.show(...)` 대응.
+ *
+ * [AppController.toastEvent] SharedFlow 를 collect 해 [OQToastHost] (자체 Composable) 로 표시.
+ * 풍부한 토스트 (icon/info/subTitle/button/position 등) 모두 지원.
+ */
+@Composable
+fun GlobalToastHost(
+    appController: AppController,
+    palette: Palette = com.oq.barnote.core.designsystem.barNotePalette(),
+) {
+    var currentToast by remember { mutableStateOf<OQToastConfig?>(null) }
+    LaunchedEffect(Unit) {
+        appController.toastEvent.collect { config ->
+            // 새 토스트가 오면 이전 것을 즉시 덮어쓴다 (single-toast slot).
+            currentToast = config
+        }
+    }
+    OQToastHost(
+        current = currentToast,
+        onDismiss = { currentToast = null },
+        palette = palette,
+    )
+}
+
+/**
+ * 글로벌 에러 다이얼로그. iOS `.errorAlert(error: appController.errorBinding())` 대응.
+ *
+ * [AppController.errorEvent] SharedFlow 를 collect 해 AlertDialog 로 표시.
+ * 사용자가 확인 버튼을 누를 때까지 modal 유지 — 단순 토스트보다 강한 인지 요구가 필요한 에러에 사용.
+ */
+@Composable
+fun GlobalErrorDialogHost(appController: AppController) {
+    var currentError by remember { mutableStateOf<Throwable?>(null) }
+    LaunchedEffect(Unit) {
+        appController.errorEvent.collect { throwable ->
+            currentError = throwable
+        }
+    }
+    currentError?.let { throwable ->
+        val message = throwable.message ?: throwable::class.simpleName ?: ""
+        AlertDialog(
+            onDismissRequest = { currentError = null },
+            title = { Text(text = stringResource(R.string.oryu)) },
+            text = { Text(text = message) },
+            confirmButton = {
+                TextButton(onClick = { currentError = null }) {
+                    Text(text = stringResource(R.string.hwagin))
+                }
+            },
+        )
+    }
+}

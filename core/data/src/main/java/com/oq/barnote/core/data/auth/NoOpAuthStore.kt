@@ -27,6 +27,8 @@ class NoOpAuthStore @Inject constructor() : AuthStore {
 
     override suspend fun currentCredentials(): Credentials? = cached
 
+    override suspend fun forceRefreshCredentials(): Credentials? = cached
+
     override suspend fun save(credentials: Credentials) {
         cached = credentials
         _isLoggedIn.value = true

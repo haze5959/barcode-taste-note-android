@@ -1,297 +1,283 @@
 # Android BarNote Project Context & Rules
 
 ## 1. Project Overview
-- **Goal**: 바코드 스캔 및 AI 이미지 인식을 통해 사용자가 빠르고 쉽게 테이스팅 노트를 작성하고 관리할 수 있는 안드로이드 애플리케이션입니다. (iOS BarNote 앱의 안드로이드 버전)
-- **Role**: 당신은 **Senior Android Tech Lead**입니다. **Clean Architecture**와 **UDF(Unidirectional Data Flow)** 원칙을 엄격하게 준수해야 합니다. 코드는 가독성이 높고, 모듈화되어 있어야 하며, 유지보수하기 쉽고, 커뮤니티의 최신 컨벤션에 맞아야 합니다.
+- **Goal**: 바코드 스캔 및 AI 이미지 인식 기반 테이스팅 노트 안드로이드 앱 (iOS BarNote 마이그레이션).
+- **Role**: 당신은 **Senior Android Tech Lead**. **Clean Architecture** + **UDF**를 엄격히 준수하고, 코드는 가독성·모듈화·유지보수·최신 컨벤션을 만족해야 합니다.
 
 ## 2. Tech Stack & Environment
-- **Platform**: Android 10 (API 29) 이상
-- **Language**: Kotlin 2.2+ (최신 안정화 버전)
-- **Architecture**: MVI / UDF (ViewModel + StateFlow) 기반 Clean Architecture
-- **UI Framework**: Jetpack Compose (Material Design 3)
-- **Build Tool**: Gradle (Kotlin DSL), Version Catalogs (`libs.versions.toml`)
-- **Dependency Injection**: Hilt
-- **Asynchronous**: Coroutines & Flow
+- **Platform**: minSdk 29 / compileSdk · targetSdk 35 (Android 15)
+- **Language**: Kotlin 2.1.10 · AGP 8.7.3 · Gradle Version Catalogs (`libs.versions.toml`)
+- **UI**: Jetpack Compose Material3 (Compose BOM 2024.12.01 → material3 1.3.1)
+- **Architecture**: MVI/UDF (`@HiltViewModel` + `StateFlow` + `Channel<NavEffect>`)
+- **DI**: Hilt 2.53.1
+- **Async**: kotlinx.coroutines 1.9.0 · Flow
+- **Serialization**: kotlinx.serialization 1.7.3
 
 ## 3. Project Structure & Architecture (CRITICAL)
-최신 안드로이드 모듈화 트렌드(Now in Android 권장 구조)를 따릅니다.
-- **`app`**: 앱 엔트리 포인트, Hilt 컴포넌트 루트, 최상위 네비게이션(`NavHost`, `AppState`).
-- **`feature:*` (UI & Feature Layer)**:
-  - 하위 도메인별 모듈: `feature:home`, `feature:mypage`, `feature:search`, `feature:settings` 등.
-  - **MVI/UDF 컨벤션**: 각 화면은 `@HiltViewModel`로 주입받는 `ViewModel`을 가집니다. `UiState`와 `UiEvent(Action)`을 통해 단방향으로 상태를 관리하며 `StateFlow`를 통해 Compose에 노출합니다.
-  - **네비게이션**: Jetpack Navigation Compose (또는 Type-Safe Navigation)를 사용하며, 각 피쳐는 자체 네비게이션 그래프를 정의하고 루트로 이벤트를 전달합니다.
-- **`core:domain` (Business Logic Layer)**:
-  - 핵심 엔티티(`Models`)와 Repository 프로토콜(Interface) 및 `UseCase` 정의. Android 프레임워크 종속성(`android.*`)을 가지지 않는 순수 Kotlin 모듈입니다.
-- **`core:data` (Data Layer)**:
-  - **Repositories**: API 구현, DTO를 Domain 모델로 매핑. Offline-first를 위한 로컬 캐싱 등을 처리합니다.
-- **`core:network` / `core:database` / `core:datastore`**:
-  - API 통신(Retrofit/OkHttp 또는 Ktor), 로컬 DB(Room), 설정(DataStore) 관련 세부 구현체.
-- **`core:designsystem`**:
-  - 프로젝트 전반에 사용되는 공통 컴포넌트, 컬러, 타이포그래피(`MaterialTheme`), 커스텀 UI(Skeleton 등)를 정의합니다.
-
-## 4. Global State & UI Guidelines
-- **Global App State (`AppState`)**:
-  - 앱 전체에 영향을 미치는 상태(네트워크 상태, 글로벌 로딩, 에러 스낵바 처리 등)는 최상위 네비게이션 레벨의 `AppState` 객체나 전역 `ViewModel`을 통해 관리합니다.
-- **Design System**:
-  - 하드코딩된 크기, 여백(padding), 색상, 문자열을 절대 사용하지 마세요. `core:designsystem`에서 정의한 테마 변수(`MaterialTheme.colorScheme`, `MaterialTheme.typography`) 및 리소스(`R.dimen`, `R.string`)를 사용합니다.
-- **Localization**:
-  - 모든 문자열은 `res/values/strings.xml`을 통해 관리 및 다국어 처리되어야 합니다. Compose UI 내에서는 반드시 `stringResource(id = R.string.XXX)`를 사용합니다.
-
-## 5. Logic & Feature Implementation Rules
-- **Authentication**:
-  - 사용자 인증은 **Auth0 모듈(Auth0 Android SDK)**을 사용하여 구현합니다.
-  - 사용자 인증 상태 및 토큰 갱신 로직은 Auth0 연동을 기반으로 구성하며, 필요한 정보는 DataStore와 Network Interceptor를 활용해 관리합니다.
-  - 로그인 필요 시 이벤트를 발생시켜 최상위 네비게이션에서 Auth0의 Web Auth 기반 로그인 화면으로 라우팅되도록 합니다.
-- **Concurrency & Streams**:
-  - 비동기 처리와 데이터 스트림은 **Kotlin Coroutines** 및 **Flow**를 독점적으로 사용합니다.
-  - Compose UI 레이어에서는 상태를 수집할 때 반드시 `collectAsStateWithLifecycle()`을 사용하여 생명주기를 고려한 Flow 수집을 해야 합니다.
-- **Subscriptions**:
-  - 무료/유료 구독 모델에 따른 기능 제한 등은 Domain 로직 내(`UseCase`)에서 처리하여 일관성을 유지합니다.
-
-## 6. Constraints & Code Preferences
-- **Third-Party Dependencies**: 
-  - 새로운 라이브러리 추가는 반드시 루트의 `gradle/libs.versions.toml` (Version Catalog)에 먼저 정의한 뒤, 각 모듈의 `build.gradle.kts`에 추가해야 합니다. 승인 없이 임의로 구방식의 의존성을 추가하지 마세요.
-- **Language Requirements**: 
-  - 모든 코드 주석, 사고 과정, 계획 설명 등 커뮤니케이션은 **한국어(Korean)**로 작성합니다.
-  - 반면, 모든 코드 심볼(변수, 메서드, 클래스, 인터페이스, 모듈명 등)은 표준 **English**로 작성합니다.
-
-## 7. AI Session Guidelines (AI 세션 지침)
-새로운 AI 세션이 시작될 때 다음 지침을 숙지하고 작업을 시작하세요:
-- **iOS 마이그레이션 컨텍스트**: iOS의 `Localizable.xcstrings` 등을 안드로이드 `strings.xml`로 변환할 때, 한글 키 등에서 충돌이 발생하지 않도록 로마자 변환(Romanization) 및 해시 기반의 고유 식별자를 사용하여 매핑했습니다 (`key_mapping.txt` 참조).
-- **네트워크 구조 (iOS vs Android)**: iOS의 커스텀 `NetworkClient` 패턴은 안드로이드 표준인 **Retrofit2 + OkHttp3** 조합으로 대체되었습니다. Hilt를 통해 `NetworkModule`에서 전역적으로 주입되며 `AuthInterceptor`를 통해 토큰 헤더를 관리합니다.
-- **데이터 모델링**: iOS의 `Codable` 및 `SwiftData` 모델들은 안드로이드에서 `data class`와 `kotlinx.serialization`(`@Serializable`)을 활용하여 매핑합니다.
-- **모듈 추가 규칙**: 새로운 모듈 생성 시 반드시 `kotlin-kapt` 플러그인과 `hilt.android` 의존성을 `build.gradle.kts`에 선언하여 Hilt 의존성 주입이 누락되지 않도록 주의해야 합니다.
-- **리소스 마이그레이션 결과** (2026-05-27):
-  - **컬러**: iOS `Assets.xcassets`의 `*.colorset`(srgb 0~1 float)을 `core:designsystem`의 `res/values/colors.xml` + `res/values-night/colors.xml`로 변환했습니다. 다크모드 대응 포함 (10개 토큰: `accent_color`, `accent_secondary`, `background_primary`, `disabled_button`, `disabled_text`, `divider`, `surface_primary`, `surface_secondary`, `text_primary`, `text_secondary`).
-  - **이미지**: iOS `imageset`은 `app/src/main/res/drawable-xxhdpi/`로(iOS @3x 매핑), JPEG 형식이었던 `onboarding_02/03`은 `.jpg`로 확장자 정정. AppIcon master(1024)는 `drawable-nodpi/app_icon.png`에 보관(런처 아이콘은 추후 Android Studio Image Asset Studio로 생성).
-  - **포맷 placeholder**: iOS의 `%@`는 `%s`, `%lld`는 `%d`로 변환됨. 같은 string에 정수 placeholder가 2개 이상 있을 때는 positional(`%1$d`, `%2$d`)을 사용합니다 (예: `image_viewer_page_count`).
-  - **다국어**: iOS `zh-Hans` → Android `values-zh-rCN`, `zh-Hant` → `values-zh-rTW`로 매핑. 모든 locale에서 키 셋 일관성을 유지(누락 시 영어 폴백 방지 차원에서 default 또는 빈 값으로라도 채워둘 것).
-- **Firebase 설정**: iOS의 `GoogleService-Info.plist`는 Android에서 직접 변환 불가. Firebase Console에서 Android 앱(`com.oq.barnote`)을 별도 등록해 받은 `google-services.json`을 `app/` 디렉토리에 배치해야 합니다. `.gitignore`에 이미 등록되어 있습니다.
-- **Auth0 설정** (✅ 완료): `local.properties` (`auth0.domain` / `auth0.clientId` / `auth0.scheme`) → `app/build.gradle.kts` 의 `buildConfigField` + `manifestPlaceholders` 로 주입. `BuildConfig.AUTH0_*` 상수를 통해 Hilt `@Named` qualifier 로 [Auth0AuthStore] 에 전달. 기존 `app/res/values/auth0.xml` 은 제거됨. 콜백 intent-filter (`<data android:host="${auth0Domain}" .../>`) 는 `AndroidManifest.xml` 의 MainActivity 에 등록되어 있음.
-- **Constants 마이그레이션 결과** (iOS `Constants.swift` 대응):
-  - **`app/Constants.kt`**: URL(`BASE_URL`, `WEB_BASE_URL` 등), SharedPreferences/DataStore 키, 페이징 수치 등 단순 상수 (`Constants.S`, `Constants.N`).
-  - **`core:designsystem/Dimens.kt`**: spacing/padding/icon size 등 dp 상수 (iOS `C.V` 대응).
-  - **`core:designsystem/Palettes.kt`**: `barNotePalette()` Composable 함수 (iOS `Palette.btnPalette` 대응). `colors.xml` 의 컬러를 `core:oqcore` 의 `Palette` data class 로 묶음.
-  - **`core:domain`** (순수 Kotlin): 모든 도메인 enum 을 `kotlinx-serialization` 기반으로 정의 (`ProductType`, `ProductStyle`, `GrapeVariety`, `ProductDetailInfo`, `PublicScope`, `Flavor`, `NoteDetail` + `Feeling`, `ProductOrderByKey`, `NoteOrderByKey`). 각 enum 은 `rawValue: Int`/`String` 과 `fromRaw()` 폴백 메서드, 이모지 등 정적 데이터만 포함합니다. **UI 표시용 텍스트는 도메인에 두지 않습니다.**
-  - **`app/extension/DomainStrings.kt`**: 위 enum 들에 대한 `@StringRes Int` 매핑 (`titleRes()`, `detailRes()` 등) + `@Composable` 헬퍼(`title()`, `detail()`). 향후 feature 모듈이 enum 표시 텍스트를 공유해야 한다면 string resource 와 함께 `core:designsystem` 으로 이전을 고려하세요. 현재는 strings.xml 이 app 모듈에 있어 cross-module 참조 제약 때문에 app 에 둔 상태입니다.
-  - **`core:oqcore/util/Country.kt`**: ISO alpha-2 코드 → 국기 이모지 + 지역명 변환 유틸 (iOS `Country` 대응). `Locale` 을 인자로 받는 형태로 변경. AppLanguage → Locale 변환은 `AppLanguage.toLocale()` 사용.
-  - **`core:oqcore/models/OQTypes.kt`** 의 `AppLanguage` 에 `USER_DEFAULTS_KEY` 상수와 `toLocale()` 변환 함수를 추가했습니다.
-- **enum → @StringRes 매핑 위치 컨벤션**: 도메인 enum 의 `title`/`detail` 같은 표시용 텍스트는 **순수 Kotlin 모듈인 `core:domain` 에 두지 않습니다.** 표시 텍스트는 안드로이드 리소스 의존이므로 app 또는 designsystem 의 extension 으로 분리합니다.
-- **도메인 모델 & Repository 마이그레이션 결과** (iOS `App/Sources/Domain` + `App/Sources/Data` 대응):
-  - **모델 (`core:domain`)**: `User`, `UserInfo`, `Product` (+ `ProductDetailsMap`), `ProductInfo` (+ `TastedProductInfo`), `Note`, `NoteInfo` (+ `UnratedNoteAlert`), `HomeInfo`, `MyPageInfo`, `NoteDraft`, `ProductDraft`, `NoteReservation`, `Report`. 모두 `data class` + `@Serializable`, snake_case 필드는 `@SerialName` 으로 매핑.
-  - **iOS `UUID` → Android `String`**: 서버에서 UUID 문자열로 받기 때문에 그대로 String 으로 보관. 필요 시 `java.util.UUID.fromString()` 으로 변환.
-  - **iOS `Date` → Android `String` (ISO8601)**: 도메인은 raw 문자열을 유지하고, 화면 표시 시점에 `Instant.parse` 등으로 변환.
-  - **`ProductDetailsMap`**: iOS 의 mixed-type (String/Int/Double/null) 값을 모두 String 으로 정규화하던 custom `Codable` 을 `KSerializer` + `JsonObject` 기반으로 동일하게 구현.
-  - **Repository 인터페이스 (`core:domain.BarNoteRepository`)**: iOS `BTNRepository` 프로토콜의 모든 메서드를 `suspend fun ...: Result<T>` 시그니처로 정의. 에러는 Kotlin 표준 `Result<T>` 의 `Throwable` 로 표현하며, 실제 인스턴스는 OQCore 의 `CommonError` (Network / ApiError / Decoding 등).
-  - **Repository 구현체 (`core:data.BarNoteRepositoryImpl`)**: iOS `BTNRepositoryLive` 와 동일한 로직. 인증 여부에 따른 `/api/` prefix 분기는 `AuthStore.hasCredentials()` 로 결정, Retrofit 의 `@Url` 동적 URL 로 전달합니다. `APIResponse<T>` 언래핑, `safeCall { }` 헬퍼로 throw 패턴을 `Result<T>` 로 wrap.
-  - **API 서비스 (`core:network.BarNoteApi`)**: Retrofit + kotlinx-serialization. snake_case body 는 `Map<String, Any?>` 로 전달. multipart 업로드는 `MultipartBody.Part` 사용.
-  - **`AuthStore` (`core:domain`)**: 인증 토큰 헤더 추상화. 현재는 `NoOpAuthStore` stub 으로 바인딩되어 있고, Auth0 SDK 통합 시점에 실제 구현체로 교체 필요. `AuthStoreHeadersProvider` 가 OQCore 의 `AuthInterceptor.HeadersProvider` 로 어댑팅.
-  - **NetworkModule 수정**: 잘못된 `https://api.barnote.com/` → `https://api.barnote.net/` 로 정정. JakeWharton 컨버터 import 를 retrofit 2.11+ 공식 `retrofit2.converter.kotlinx.serialization.asConverterFactory` 로 교체.
-  - **`Report` 위치 정정**: iOS 는 `App/Domain/Models/Report.swift` 인데 Android 에서는 `core:oqcore` 에 있었음. `core:domain` 으로 이전했고 OQCore 에서는 삭제.
-  - **`BarNoteApp`**: Hilt 진입점 Application 클래스 (`@HiltAndroidApp`) 추가, `AndroidManifest.xml` 에 등록.
-- **Repository 에러 처리 패턴**: 도메인 Repository 메서드는 `suspend fun ...: Result<T>` 형태. 실패의 cause 는 `Result.exceptionOrNull() as? CommonError` 로 캐스팅해 분류합니다 (`CommonError.Network`, `CommonError.ApiError`, `CommonError.Decoding` 등).
-- **AuthStore 구현 완료** (✅): `Auth0AuthStore` 가 Auth0 Android SDK 의 `SecureCredentialsManager` + `WebAuthProvider` 기반으로 동작합니다. `NoOpAuthStore` 는 더 이상 바인딩되지 않지만 (테스트/preview 용으로) 클래스 자체는 보존. 로그인 플로우 (`WebAuthProvider.login(...).start(...)`) 를 위해서는 별도 ViewModel 에서 SDK 호출 후 `Auth0AuthStore.saveAuth0Credentials(creds)` 호출.
-- **Dependencies 마이그레이션 결과** (iOS `App/Sources/Dependencies/*` 대응):
-  - **`AppController`** (`core:oqcore.util`): iOS `AppController.shared` 싱글톤 → Hilt `@Singleton` + Kotlin `StateFlow`/`SharedFlow` 로 변경. `globalLoading`, `toastEvent` 채널 제공.
-  - **`BlockedUsersStore`** (`core:domain` 인터페이스 + `core:data.blocked.BlockedUsersStoreImpl`): iOS `UserDefaults` JSON 저장 → Android `DataStore Preferences` `stringSetPreferencesKey` 로 단순화. 차단 추가/해제/조회/Flow 제공.
-  - **`FcmTokenProvider`** (`core:domain` 인터페이스 + `core:data.fcm.FcmTokenProviderImpl`): iOS `Messaging.delegate` → Android `FirebaseMessaging.getInstance().token` + `FirebaseMessagingService.onNewToken` 콜백. `BarNoteMessagingService` 가 Hilt 주입으로 토큰을 `FcmTokenProvider.onTokenRefresh()` 에 전달.
-  - **`MediaAttachmentPicker`** (`core:domain` 인터페이스만): 구현체는 Activity 컨텍스트 의존이라 feature 레이어에서 `ActivityResultContracts.PickVisualMedia` 기반으로 작성 예정. Options/Type 모델만 도메인에 정의.
-  - **`NotificationScheduler`** (`core:domain` 인터페이스 + `core:data.notification.NotificationSchedulerImpl`): iOS `UNUserNotificationCenter` + `UNCalendarNotificationTrigger` → Android `NotificationManager` + `AlarmManager.setExactAndAllowWhileIdle`. 알림 탭 이벤트는 `NotificationAlarmReceiver` + `NotificationTapReceiver` (BroadcastReceiver, `@AndroidEntryPoint`) 가 처리해 `SharedFlow<NotificationEvent>` 로 broadcast. 이벤트 타입은 `TappedReservation`/`TappedRemotePush(NewFollower/NewNote)` 로 iOS 와 1:1.
-  - **`RepositoryDependency`/`AuthStoreDependency`**: 이전 작업에서 이미 Hilt `@Binds` 로 처리됨.
-- **추가된 라이브러리**:
-  - `androidx.datastore:datastore-preferences` — BlockedUsersStore
-  - `com.google.firebase:firebase-bom` + `firebase-messaging-ktx` — FCM
-  - `com.google.gms.google-services` plugin (카탈로그만 등록, 실 적용은 `google-services.json` 추가 후)
-- **AndroidManifest 추가 항목**:
-  - 권한: `POST_NOTIFICATIONS` (13+), `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM` (12+), `c2dm.permission.RECEIVE`
-  - 서비스: `BarNoteMessagingService` (`com.google.firebase.MESSAGING_EVENT` filter)
-  - 리시버: `NotificationAlarmReceiver`, `NotificationTapReceiver`
-- **Dependencies 마이그레이션 TODO 진행 상황**:
-  1. ⏳ `google-services.json` 추가 후 `app/build.gradle.kts` 에 `id("com.google.gms.google-services")` plugin 활성화 (사용자 직접 작업 필요).
-  2. ✅ `MediaAttachmentPicker` 구현: `app/ui/picker/PhotoPicker.kt` (`rememberPhotoPicker`) + `ComposeMediaAttachmentPicker.kt` (`rememberComposeMediaAttachmentPicker` 가 도메인 인터페이스를 충족).
-  3. ✅ FCM data payload 파싱: `BarNoteMessagingService.onMessageReceived` 에서 `new_follower`/`new_note` 처리 후 `NotificationSchedulerImpl.emitEvent` 호출.
-  4. ✅ `NotificationScheduler.requestAuthorization` 권한 요청: `app/ui/permission/NotificationPermission.kt` (`rememberNotificationPermission`) 가 Accompanist Permissions 로 13+ 권한 요청 헬퍼 제공.
-  5. ✅ Auth0 SDK 통합: `Auth0AuthStore` 구현 완료.
-- **Data/Stores 마이그레이션 결과** (iOS `App/Sources/Data/Stores/*` 대응):
-  - **`AuthStore` 인터페이스 확장**: 기존 `hasCredentials`/`authorizationHeaders` 만 있던 인터페이스를 iOS 와 동일하게 `currentCredentials`/`save`/`clear(clearWebSession)` + `isLoggedIn: StateFlow<Boolean>` 까지 확장. iOS `appController.isLogin` 은 `AuthStore.isLoggedIn` StateFlow 로 대체.
-  - **`Credentials` 모델** (`core:domain`): Auth0 SDK 의 `Credentials` 와 동등. `accessToken`/`refreshToken`/`idToken`/`expiresAt`(epoch millis)/`scope`/`tokenType`.
-  - **`NoOpAuthStore` 갱신**: 메모리 보관 + isLoggedIn StateFlow 발행. 영속화/만료 검증 없음. Auth0 SDK 통합 후 교체 필요.
-  - **`ReservationStore`** (`core:domain` 인터페이스 + `core:data.reservation.ReservationStoreImpl`):
-    - iOS `UserDefaults` + JSON → DataStore Preferences 의 `stringPreferencesKey` 에 JSON-encoded `List<NoteReservation>` 저장.
-    - 기본 시간은 `LocalTime` ("HH:mm" 문자열) 로 저장, 기본값 10:00.
-    - `scheduleReservation(product)` 가 기존 중복 취소 → 다음날 기본 시간 산출 → 알림 등록 → 저장까지 한 번에 처리 (iOS 와 동일 흐름).
-    - `saveDefaultTime` 시 기존 예약들도 새 시간으로 재스케줄링 (날짜는 유지, 시/분만 교체).
-  - **`UserStore`** (`core:domain` 인터페이스 + `core:data.user.UserStoreImpl`):
-    - iOS `actor` → Kotlin `@Singleton` + `Mutex.withLock` 으로 동시성 보호.
-    - 사용자 / 노트 카운트 / 즐겨찾기 ID Set / 팔로워 카운트 / 리뷰 필요 상품 캐시.
-    - `noteCount`, `neededReviewProduct`, `followerCount` 는 `StateFlow` 로 UI 가 즉시 반영 가능.
-    - 구독 상태 (iOS StoreKit `Transaction.updates`) 는 현재 stub. Google Play Billing Library 통합 후 교체.
-    - `renewUser` 는 `repository.getMyPage()` 를 호출해 사용자/카운트/즐겨찾기 ID 를 한 번에 갱신.
-- **Stores 마이그레이션 TODO 완료**:
-  1. ✅ AuthStore/UserStore 자동 연동: `core:data.di.CoroutineScopeModule` 에서 `@ApplicationScope CoroutineScope` 를 제공하고, `core:data.auth.AuthSessionObserver` 가 `AuthStore.isLoggedIn` 을 구독해 false 전환 시 `UserStore.clear()` 호출. `BarNoteApp.onCreate()` 에서 `start()` 호출.
-  2. ✅ Google Play Billing: `core:data.billing.BillingManager` 가 `BillingClient` + `PurchasesUpdatedListener` 를 wrap. `UserStoreImpl` 의 구독 stub 들은 BillingManager 호출로 교체됨. 결제 화면에서 `BillingManager.purchasesUpdates` Flow 를 collect 해 결과 처리.
-  3. ✅ `Auth0AuthStore` 구현 완료 (위 항목 참조).
-- **Presentation/Shared UI 컴포넌트 마이그레이션 결과** (iOS `App/Sources/Presentation/Shared/*` 대응):
-  - **`core:oqcore/ui/component`** (OQ prefix 의존 컴포넌트):
-    - `OQImageView`: Coil `SubcomposeAsyncImage` 기반. 로딩 중 `SkeletonView`, 실패 시 fallback ImageVector.
-    - `OQGridImagesView`: 1/2/3/4+ 장 분기 그리드. 4+ 의 경우 `+N` 오버레이.
-    - `InfoTagView`: 작은 정보 태그. `Normal`/`Material`/`Accent` 3가지 스타일.
-  - **`core:oqcore/util/RelativeTime`**: iOS `Date.formattedByNow` 와 동일한 "방금 전 / 5분 전" 등 상대 시간 포맷터. `Instant.parse(ISO8601)` 사용. OQCore `strings.xml` 의 `date_*` 키 사용.
-  - **`core:designsystem/component`** (도메인 의존 없는 atomic):
-    - `RatingView` / `RatingInputView`: 5개 별 + 드래그 입력 (1~10 raw, 0.5 단위). HapticFeedback 통합.
-    - `PlaceholderPage`: 빈 화면용 (icon + title + message).
-    - `ViewAllButton`: "View All" + 우측 chevron 원형 배경.
-    - `InfoPopOver`: iOS popover → Android `AlertDialog` 로 단순화. title + (title, detail) 리스트.
-  - **`app/ui/component`** (BTN 도메인 의존):
-    - `BTNImage` / `BTNGridImages`: `Constants.S.IMAGE_BASE_URL` prefix 자동 부착 wrapper.
-    - `FlavorSummaryChips` / `FlavorCountChips`: 향미 칩 묶음 (FlowRow 기반).
-    - `NoteProductInfoSection`, `NotePublicToggleSection`, `NoteRatingSelectorSection`, `NoteAttachmentSection`, `NoteFeelingGrid`, `NoteDetailSlider`, `NoteDetailExpandable`, `NoteFlavorSelector`: 노트 작성 화면용 8종 입력 컴포넌트.
-    - `NoteDetailSummary`: 노트 디테일 평가 요약 (막대 그래프).
-    - `UserRow` (+ `UserRowSkeleton`), `ProductRow`, `ProductListRow`, `NoteRow`, `NoteListRow`, `NoteDetailRow`: 6종 row 컴포넌트.
-    - `ProductTypeFilter`: 가로 스크롤 칩 필터 ("전체" + 모든 `ProductType`).
-- **UI 컴포넌트 매핑 패턴**:
-  - **iOS `task(id:)` + `@Dependency` 호출**: ViewModel 레이어에서 미리 계산한 값을 파라미터로 전달 (예: `NoteRow(info, isBlocked = ...)`).
-  - **iOS `popover`**: Compose 에 등가물이 없어 `AlertDialog` 또는 `ModalBottomSheet` 로 대체.
-  - **iOS `OQHapticService.selection.run()`**: Compose `LocalHapticFeedback.current.performHapticFeedback(HapticFeedbackType.TextHandleMove)`.
-  - **iOS `Image(systemName:)`**: SF Symbol → Material Icons (`Icons.Filled.*`). `core:designsystem/DomainIcons.kt` 에 매핑 모음.
-  - **iOS `FlowLayout`**: `androidx.compose.foundation.layout.FlowRow` (실험 → 안정화).
-  - **iOS `@MainActor @Observable AppController.shared`**: Hilt `@Singleton AppController` + `StateFlow`/`SharedFlow`.
-- **UI 컴포넌트 TODO 진행 상황**:
-  1. ✅ `OQThumbnailsView` 다중 이미지 + add/remove: `core:oqcore/ui/component/OQThumbnailsView.kt` 작성. `LazyRow` + Coil `AsyncImage` 기반. `NoteAttachmentSection` 이 이를 직접 사용.
-  2. ⏳ `TipContainer` (iOS `TipKit`) — 안드로이드 등가물 없어 보류. 필요 시 자체 `TipPopup` 구현 또는 외부 라이브러리(예: `compose-tooltip`) 도입.
-  3. `ThumbnailsView.swift` 는 iOS 에서도 빈 파일이라 마이그레이션 안 함.
-  4. ⏳ BTN 컴포넌트 위치 (`app/ui/component`) → `core:designsystem` 이전: strings.xml 키 cross-module 정리 필요해 별도 작업.
-  5. ⏳ 한글 라벨 하드코딩 → `stringResource()`: 다국어 일관성을 위해 별도 작업.
-- **추가 라이브러리** (이번 작업에서 도입):
-  - `com.auth0.android:auth0` (이미 카탈로그) — Auth0 인증 SDK
-  - `androidx.security:security-crypto` (이미 카탈로그) — EncryptedSharedPreferences (Auth0 토큰 저장)
-  - `com.android.billingclient:billing-ktx:7.1.1` — Google Play Billing
-  - `com.google.accompanist:accompanist-permissions:0.34.0` — Compose 권한 헬퍼
-- **AndroidManifest 추가 권한**: `com.android.vending.BILLING` (구독), Auth0 콜백 intent-filter (`<data android:host="${auth0Domain}" .../>` 형식, MainActivity 에 등록).
-- **남은 TODO** (사용자 작업 필요 또는 별도 작업):
-  - `google-services.json` 추가 + `google-services` plugin 활성화 (사용자가 Firebase Console 에서 다운로드).
-  - 로그인 화면 ViewModel: `WebAuthProvider.login(auth0).start(...)` 호출 후 받은 `Credentials` 를 `Auth0AuthStore.saveAuth0Credentials(creds)` 로 저장.
-  - 결제 화면 ViewModel: `BillingManager.purchasesUpdates` Flow 를 collect 해 구매 완료/실패 처리.
-  - 다국어 + designsystem 이전 (strings.xml 재배치 + 컴포넌트 위치 정리).
-- **SF Symbol → Material Icon 매핑**: `core:designsystem/DomainIcons.kt` 에서 도메인 enum 의 `icon()` extension 으로 제공합니다. `material-icons-extended` 라이브러리 의존성을 `core:designsystem` 에 추가했습니다. 매핑 요약:
-  - `ProductType`: `wineglass.fill` → `Icons.Filled.WineBar` / `mug.fill` → `Icons.Filled.SportsBar`
-  - `PublicScope`: `lock.fill` → `Lock` / `person.2.badge.key.fill` → `Group` / `person.3.fill` → `Groups`
-  - `ProductDetailInfo`: `tag.fill` → `Sell` / `leaf` → `Eco` / `building.2.fill` → `Business` / `globe` → `Public` / `drop.fill` → `WaterDrop` / `gauge.medium` → `Speed`
-  - 1:1 대응되지 않는 아이콘(예: `person.2.badge.key.fill` 의 사람+키 조합)은 의미상 가장 가까운 Material Icon 으로 치환했습니다.
-- **규칙의 자발적 업데이트 허용**: AI는 세션을 진행하면서 미래의 AI 세션이나 프로젝트 협업에 도움이 될 만한 유용한 지침(아키텍처 패턴, 트러블슈팅 결과, 새로운 컨벤션 등)을 발견한다면, **사용자의 명시적 요청이 없더라도 언제든지 자발적으로 이 `RULES.md` 파일에 해당 지침을 추가 및 업데이트**할 권한과 의무가 있습니다.
-
----
-
-## 8. Quick Reference for New AI Sessions
-
-새 세션이 시작될 때 빠르게 프로젝트 구조를 파악하기 위한 cheatsheet.
-
-### 8.1 모듈 의존성 트리
-
 ```
 app
  ├─ core:domain      (pure Kotlin, no Android deps)
- ├─ core:oqcore      (Android library, Compose, Retrofit/OkHttp/Json)
- ├─ core:network     ← core:domain, core:oqcore
- ├─ core:data        ← core:domain, core:network, core:oqcore
- ├─ core:designsystem ← core:domain, core:oqcore
- └─ feature:*        (아직 미작성. core:* 만 의존, feature 간 직접 의존 X)
+ ├─ core:oqcore      (Android lib · Compose · Retrofit/OkHttp · `OQ` prefix UI)
+ ├─ core:network     ← core:domain, core:oqcore (Retrofit `BarNoteApi`)
+ ├─ core:data        ← core:domain, core:network, core:oqcore (Repository/Store 구현)
+ ├─ core:designsystem ← core:domain, core:oqcore (Material3 atomic, `Dimens`, `Palettes`, `DomainIcons`)
+ └─ feature:*        (core:* 만 의존, feature 간 직접 의존 X)
 ```
+- 각 화면은 `@HiltViewModel` + `UiState` + `UiEvent` + `Channel<NavEffect>` (UDF).
+- Compose 는 `collectAsStateWithLifecycle()` 로 상태 수집.
+- Navigation Compose 로 NavHost 구성, 각 feature 가 자체 graph 와 delegate 이벤트 정의.
 
-- **`core:domain`**: 의존성 없음 (kotlinx-coroutines + kotlinx-serialization-json 만). `androidx.*` import 금지.
-- **`core:oqcore`**: `OQ` prefix 클래스 + 네트워크 베이스(`NetworkModule`/`AuthInterceptor`) + 공용 UI 컴포넌트.
-- **`core:designsystem`**: Material 3 + Compose. 도메인 enum → `@StringRes` extension, `Dimens.kt`, `Palettes.kt`, `DomainIcons.kt`.
-- **`core:network`**: Retrofit `BarNoteApi` 인터페이스 + Hilt `ApiModule`.
-- **`core:data`**: Repository / Store 구현체 + Hilt 바인딩 모듈.
+## 4. Global State & UI Guidelines
+- **글로벌 상태**: `AppController` (Hilt `@Singleton`) — `globalLoading: StateFlow<Boolean>`, `toastEvent: SharedFlow<ToastEvent>`, `neededToRefresh: Volatile Boolean`, `showError(Throwable)`.
+- **디자인 시스템**: 하드코딩된 dp/색상/문자열 금지. `MaterialTheme.*`, `Dimens.*`, `R.dimen/string/color` 사용.
+- **다국어**: 모든 문자열은 `res/values*/strings.xml` (총 11 locale: ko/en/zh-rCN/zh-rTW/ja/fr/de/es/pt/it/ru). Compose 내 `stringResource(R.string.xxx)`. 신규 키 추가 시 11 locale 모두 보완 필요. 모듈별 strings.xml: `app/` (앱 UI), `core/oqcore/` (공용 / 시스템 알림 등). `core/data/` 같은 res-less 모듈에서 string 필요 시 `com.oq.barnote.core.oqcore.R.string.xxx` 참조.
 
-### 8.2 새 코드를 어디에 둘지 결정하는 가이드
+## 5. Logic & Feature Implementation Rules
+- **Auth**: Auth0 Android SDK (`Auth0AuthStore` + `SecureCredentialsManager`). 로그인 필요 시 `AppNavigationViewModel.ShowNeededLogin` → 글로벌 alert.
+- **Concurrency**: Kotlin Coroutines + Flow 전용. UI 수집은 `collectAsStateWithLifecycle()`.
+- **Subscriptions**: Google Play Billing (`BillingManager`). 기능 제한 검사는 UseCase / `UserStore.checkSubscriptionStatus()`.
 
+## 6. Constraints & Code Preferences
+- **Third-Party 의존성**: `libs.versions.toml` 에 먼저 등록 → 모듈 `build.gradle.kts` 에서 `libs.x.y` 참조. 직접 `implementation("group:name:version")` 금지.
+- **언어**: 주석/사고 과정/계획은 한국어, 코드 심볼은 영어.
+
+## 7. AI Session Guidelines
+
+### 7.0 RULES.md 작성 규칙 (가장 중요)
+이 문서는 **미래 AI 세션을 위한 영구 지침서**입니다. 새 내용을 추가하기 전 3가지를 자문:
+1. **6개월 뒤에도 유효한가?** "X 라이브러리 추가됨", "Y 화면 작성 완료" 등 시점 의존 정보는 잡음.
+2. **코드/카탈로그/manifest 만 보면 알 수 있는가?** 컴포넌트 목록, 추가 권한, destination 이름 등은 해당 파일이 권위. RULES 에는 **언제/어떻게 추가할지의 컨벤션**만.
+3. **다음 세션이 비슷한 작업 시 도움이 되는가?** 일반화 가능한 패턴/함정/외부 설정만 남기기.
+
+**RULES 에 두는 것** ✅: 영구 컨벤션 / iOS↔Android 매핑 / 잠재적 함정 / 미해결 TODO / 외부 세팅 가이드.
+**RULES 에 두지 않는 것** ❌: 작업 결과 이력, 추가한 라이브러리·권한·destination 목록, 버전 변경 이력, "✅ 완료" TODO, 특정 화면의 구성/strings 키 목록.
+
+### 7.1 iOS → Android 매핑 컨벤션
+
+**리소스 / 다국어** (지원 11 locale: ko/en/zh-rCN/zh-rTW/ja/fr/de/es/pt/it/ru)
+- iOS 한글 키 → 로마자+해시 기반 식별자 (매핑: `app/src/main/res/key_mapping.txt`). 새 string 은 동일 규칙으로 11개 locale 모두 채우기 (영어 폴백 회피).
+- 포맷 placeholder: `%@` → `%s`, `%lld` → `%d`. 정수 2개 이상 시 positional (`%1$d`, `%2$d`).
+- iOS `zh-Hans/zh-Hant` → Android `values-zh-rCN/zh-rTW`.
+
+**도메인 모델 / 네트워크**
+- iOS `Codable` → `data class` + `@Serializable` (snake_case 는 `@SerialName`).
+- iOS `UUID` → `String` (서버 응답 그대로). iOS `Date` → `String` (ISO8601, 표시 시점 `Instant.parse`).
+- iOS mixed-type JSON → 안드로이드 custom `KSerializer` + `JsonObject`.
+- iOS `Result<T, CommonError>` → Kotlin `Result<T>`. Repository 메서드는 `suspend fun ...: Result<T>` + `safeCall { }` 헬퍼 (`BarNoteRepositoryImpl` 참조). 실패는 `Result.exceptionOrNull() as? CommonError`.
+- iOS `NetworkClient` → Retrofit2 + OkHttp3, Hilt `NetworkModule`. 토큰은 `AuthInterceptor`.
+
+**상태 / 동시성**
+- iOS `@MainActor @Observable AppController.shared` → Hilt `@Singleton` + `StateFlow`/`SharedFlow`.
+- iOS `actor` → Kotlin `@Singleton` + `Mutex.withLock`.
+- iOS `@Dependency` (TCA) → Hilt `@Inject` 생성자. iOS `@Published`/`AsyncStream` → `Flow`/`StateFlow`.
+- iOS `UserDefaults` → DataStore Preferences. iOS `Keychain` → `EncryptedSharedPreferences`.
+- iOS TCA `.debounce(id:for:)` → ViewModel 안에서 `MutableSharedFlow + debounce(ms).filter{...}.collect{ fetch() }`. 즉시 `isLoading = true` 로 디바운스 중 Skeleton 표시.
+
+**UI 매핑 (Compose)**
+- iOS `task(id:)` + `@Dependency` 내부 호출 → ViewModel 에서 미리 계산해 Composable 에 파라미터로 전달.
+- iOS `popover` → `AlertDialog` / `ModalBottomSheet`. iOS `sheet(detents:)` → `ModalBottomSheet(skipPartiallyExpanded=...)`. 풀스크린 sheet → `Dialog(usePlatformDefaultWidth = false)`.
+- iOS `oqAlert` 3-button → 커스텀 `Dialog` + 세로 버튼 스택 (`ThreeButtonDialog` 패턴).
+- iOS `Image(systemName:)` → Material Icons (`Icons.Filled.*`). 도메인 enum 매핑은 `core:designsystem/DomainIcons.kt`.
+- iOS `OQHapticService.selection.run()` → `LocalHapticFeedback.current.performHapticFeedback(TextHandleMove)`.
+- iOS `FlowLayout` → `FlowRow`. iOS `TabView(.page)` → `HorizontalPager` (foundation.pager). iOS `Picker/Tabs` → `TabRow` + `Tab`.
+- iOS `.refreshable { }` → Material3 `PullToRefreshBox` + `rememberPullToRefreshState()`.
+- iOS `UIPasteboard.string =` → `ClipboardManager.setPrimaryClip(...)`. iOS `UIApplication.open(url)` → `Intent(ACTION_VIEW, url.toUri())`.
+- iOS `Date.formatted(date: .long)` → `Instant.parse → ZoneId.systemDefault().toLocalDate()` + `DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)`.
+- iOS `Menu + checkmark` → Material3 `DropdownMenu` + `DropdownMenuItem(leadingIcon = Icons.Filled.Check)`.
+- iOS `LazyVGrid(.adaptive(min:))` → `LazyVerticalGrid(GridCells.Adaptive(minSize=X.dp))`. List↔Grid 토글은 `GridCells.Fixed(1)`.
+- iOS 무한 스크롤 → `Lazy*State.layoutInfo.visibleItemsInfo.lastOrNull()?.index` 를 `snapshotFlow + distinctUntilChanged` 로 감지.
+- iOS `AttributedString` 부분 강조 → `buildAnnotatedString { withStyle(SpanStyle(...)) { append(match) } }`.
+- iOS `TextField.submitLabel(.search).onSubmit{}` → `BasicTextField` + `KeyboardOptions(imeAction=Search)` + `KeyboardActions(onSearch={})`.
+- iOS overlay 패널 (검색 자동완성 등) → `Box` + `Modifier.zIndex(...)` + `Alignment.BottomCenter`.
+- iOS `.swipeActions` → `SwipeToDismissBox` (Material3 1.3+) 또는 휴지통 아이콘 + `clickable`.
+- iOS `BindableAction.binding(\.field)` → ViewModel `onEvent(FieldChanged(...))` (UDF 단방향).
+- iOS `List + Section header/footer` → `Column` + 커스텀 `SettingsSection` + `SettingsRow`.
+- iOS `Toggle.tint(accent)` → Material3 `Switch` + `SwitchDefaults.colors(checkedTrackColor=accent)`.
+- iOS `DatePicker(.hourAndMinute)` → Material3 `TimePicker` + `rememberTimePickerState(...)` + `Dialog`.
+- iOS `Stepper(in: 1...N)` → `-/+` IconButton Row + `coerceIn(min, max)`.
+- iOS `UIActivityViewController` → `Intent.ACTION_SEND` + `FileProvider.getUriForFile()` + `Intent.createChooser`. `FLAG_GRANT_READ_URI_PERMISSION` 필수.
+- iOS `OQSafariView` → `Intent.ACTION_VIEW` 또는 Chrome Custom Tabs (`androidx.browser:browser`).
+- iOS `@AppStorage(key)` enum 영속화 → DataStore `stringPreferencesKey(key)` 에 `enum.id` 저장, `Enum.fromId(...)` 복원.
+- iOS `TipKit` → Material3 `TooltipBox` + `RichTooltip` 기반 `BarNoteTip(tip = ..., anchor = { ... })` (`app/ui/tip/`). 새 tip 추가는 `BarnoteTip` enum 에 항목 + titleRes/messageRes 만 정의. dismiss 상태는 `TipPreferences` DataStore 의 `stringSetPreferencesKey` 에 tip ID 누적.
+
+**SDK / 시스템 통합**
+- iOS Auth0 `CredentialsManager` → Auth0 Android `SecureCredentialsManager`.
+- iOS `UNUserNotificationCenter + UNCalendarNotificationTrigger` → `NotificationManager` + `AlarmManager.setExactAndAllowWhileIdle`. SCHEDULE_EXACT_ALARM 31+ user-grantable, `canScheduleExactAlarms()` 체크 + inexact fallback.
+- iOS `Messaging.delegate` → `FirebaseMessagingService.onNewToken`/`onMessageReceived`.
+- iOS `StoreKit Transaction.updates` → Google Play `BillingClient` + `PurchasesUpdatedListener` (`BillingManager` wrap).
+- iOS `SubscriptionStoreView` → 직접 UI 작성 + `BillingClient.launchBillingFlow(activity, ...)`.
+- iOS `OQMediaAttachmentPicker` → `ActivityResultContracts.PickVisualMedia` (`app/ui/picker/`).
+- **Activity 컨텍스트 필요한 SDK 호출** (Auth0 WebAuth, BillingClient.launchBillingFlow): Composable 에서 `LocalContext.current.findActivity()` (ContextWrapper 체인 추출) → ViewModel 의 `fun launchX(activity)` 에 전달. SDK 의존성도 필요하면 Hilt `@EntryPoint` + `EntryPointAccessors.fromApplication(...)`.
+- **`enableEdgeToEdge()` + Scaffold inset**: Activity `onCreate` 에서 호출 → `Scaffold { innerPadding -> NavHost(contentPadding=innerPadding) }`.
+- **AppCompatDelegate 적용**: `setDefaultNightMode`/`setApplicationLocales` 는 Activity 재생성을 유발. DataStore 저장은 ViewModel, 실제 적용은 Application/Activity scope 의 `Applicator` 클래스 (`@Singleton` collect 루프 + `applyOnStartup()`).
+
+**ML Kit / CameraX / Tasks**
+- **ML Kit 번역**: `TranslatorOptions.Builder().setSource().setTarget()` + `Translation.getClient(...)`. 첫 호출 시 `downloadModelIfNeeded(DownloadConditions.Builder().build())` (~30MB/언어쌍).
+- **ML Kit Barcode**: `BarcodeScannerOptions.Builder().setBarcodeFormats(...)` + `barcodeScanner.process(InputImage.fromMediaImage(image, rotationDegrees))`. Manifest 에 `<meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode" />` 추가 시 사전 다운로드.
+- **CameraX + Compose**: `AndroidView(factory = { PreviewView(it) })` + `ProcessCameraProvider.getInstance(ctx).addListener({...}, ContextCompat.getMainExecutor(ctx))`. `ImageAnalysis` 는 `STRATEGY_KEEP_ONLY_LATEST`. `DisposableEffect` 로 `executor.shutdown()` + `analyzer.close()`. 캡처는 `ImageCapture.takePicture(executor, OnImageCapturedCallback)` + `imageProxy.planes[0].buffer` JPEG.
+- **Google Tasks → suspend**: `kotlinx-coroutines-play-services` 없이 직접 wrapping:
+  ```kotlin
+  suspend fun <T> Task<T>.awaitTask(): T = suspendCancellableCoroutine { cont ->
+      addOnSuccessListener { if (cont.isActive) cont.resume(it) }
+      addOnFailureListener { if (cont.isActive) cont.resumeWithException(it) }
+  }
+  ```
+
+**자체 Canvas (외부 라이브러리 없이)**
+- 막대 차트: `Canvas { drawRect(color, Offset.Zero, Size(width=size.width*ratio, height=size.height)) }`.
+- 월별 캘린더: `Row { repeat(7) { ... } }` 7열. 첫 주 시작 = `firstOfMonth.dayOfWeek.value % 7`.
+
+**글로벌 네비게이션 / 알림 / 딥링크 / 앱 init** (iOS `AppNavigationFeature` + `BarNoteApp` 대응)
+- **글로벌 orchestrator**: `AppNavigationViewModel` 이 NotificationScheduler events / deep link / 로그인 필요 alert / requestAddNote 제한 통합 관리. Composable `AppRoot` 가 `navEffect` collect 해 `NavController.navigate(...)`.
+- **NotificationScheduler.eventStream() 처리**: ViewModel `init { collect }`. TappedReservation → ProductDetail + requestAddNote, NewFollower → 팔로워 목록, NewNote → UserNoteList.
+- **Deep link**: Manifest `<intent-filter><data scheme=... host=.../></intent-filter>` + Activity `onCreate(intent.dataString)` + `onNewIntent(intent)` 모두 캐치 → ViewModel 이 `Uri.pathSegments` 파싱.
+- **FCM 토큰 자동 등록**: Singleton `FcmTokenObserver` 가 `FcmTokenProvider.tokenStream().distinctUntilChanged().collect` → 로그인 사용자 있으면 `repository.registerFCMToken`. `BarNoteApp.onCreate` 에서 `start()`.
+- **글로벌 로딩/토스트**: `AppController.globalLoading` → `GlobalLoadingOverlay` 반투명 spinner. `AppController.toastEvent` → `GlobalToastHost.showSnackbar(...)`.
+- **BottomNavBar special tab**: `MainBottomBar(onTabClick: (MainTab) -> Boolean)` 에서 true 반환 시 기본 navigate 차단 (예: Barcode 탭).
+- **무료 사용자 제한**: `requestAddNote(product)` → `checkSubscriptionStatus()` + `noteCount.value >= FREE_NOTE_COUNT` → 미구독+초과면 `GoSubscription`, 그 외 `GoAddNote`.
+- **앱 init 순서** (`BarNoteApp.onCreate` 모든 글로벌 observer / applicator / preload):
+  1. `AuthSessionObserver.start()` (로그아웃 시 UserStore 자동 정리)
+  2. `AppThemeApplicator.start()` + `AppLanguageApplicator.start()` (DataStore + AppCompatDelegate)
+  3. `FcmTokenObserver.start()` (FCM 토큰 → 서버 자동 등록)
+  4. `@Inject lateinit var notificationScheduler: NotificationScheduler` 명시 inject — `@Singleton init { ensureChannel() }` 보장 (iOS `_ = NotificationClient.liveValue` 패턴, 콜드 스타트 push 유실 방지)
+  5. `userStore.startSubscriptionObservation()` (BillingClient 연결 + 캐시 예열)
+- **Billing (Google Play vs iOS StoreKit2)**: iOS 가 OS 차원에서 자동 처리하는 것들이 안드로이드는 클라이언트 책임. 누락 시 환불 사고 가능.
+  - **acknowledgePurchase 필수**: `OK + PURCHASED` 콜백 + `refreshSubscriptionStatus()` 시 `Purchase.isAcknowledged == false` 면 `BillingClient.acknowledgePurchase(AcknowledgePurchaseParams)` 호출. 3일 내 미호출 시 자동 환불.
+  - **obfuscatedAccountId 필수**: `BillingFlowParams.Builder().setObfuscatedAccountId(userId)` — iOS `appAccountToken(userId)` 대응. 영수증에 user UUID 매칭.
+  - **외부 갱신 동기화**: `PurchasesUpdatedListener` 는 이 클라이언트 내 결제만 받음. `MainActivity.onResume` 에서 `userStore.refreshSubscriptionStatus()` 호출해 다른 기기 결제 / Play Console 환불 / 자동 갱신을 동기화.
+  - 서버 영수증 검증 / Real-time developer notifications 는 "사용자가 앱 열 때만 구독 상태 확인" 정책이면 불필요 (iOS 도 동일 정책).
+- **NoteDetail 화면 패턴**: iOS `NoteDetailFeature` 와 1:1 매핑.
+  - **3-section** 구조: `HeroSection` (이미지 + publicScope 태그 + image count + 제품명 + 별점) / `TastingSection` (본문 + 향미 + 상세 평가) / `MetaSection` (작성자 + 작성일 + 공개 범위). 단일 `NoteDetailRow` 평탄화 회피.
+  - **공유 FAB**: `isEditable && info != null` 일 때만 우하단 floating. Hilt `@EntryPoint` (`ShareEntryPoint`) 로 `OQSNSShareManager` 를 Composable 컨텍스트에서 가져와 `OQSNSShareBottomSheet` 호출. ViewModel 책임 분리.
+  - **번역 inline**: AlertDialog 대신 `translatedBody ?? originalBody` 로 본문 텍스트 자체 교체. 번역 적용 후 "원본 보기" 토글로 `DismissTranslation` → null 복원.
+  - **풀스크린 이미지 뷰어**: `Dialog(usePlatformDefaultWidth=false)` + `HorizontalPager` (ProductDetail 과 동일 패턴, 추후 공용 컴포넌트 추출 후보).
+  - **공유 URL 조립**: `NoteInfo.shareUrl` computed property 가 도메인에 부재하므로 (`Constants.S.WEB_BASE_URL` 의존 격리 의도). 호출부 (NoteDetailScreen.toShareData) 에서 `"${Constants.S.WEB_BASE_URL}/note/${note.id}"` 직접 조립. UserDetail / 기타 공유 진입점도 동일 패턴.
+- **ProductDetail 화면 패턴**: iOS `ProductDetailFeature` 와 1:1 매핑된 풍부한 화면. 다음 12개 동작이 1개 ViewModel 에서 orchestrate.
+  - **TastedBanner**: `AnimatedVisibility` + 그라디언트 배경. `info.myNoteIds?.isNotEmpty() == true` 일 때만 표시. 첫 myNote 의 rating 이 0 이면 unrated alert, 아니면 NoteDetail.
+  - **하단 듀얼 CTA**: `isTastedProduct = false` → "마셔본 제품 등록" 1개. `true` → "노트 작성하기" + "나중에 작성하기" 2개. 두 번째는 `AnimatedVisibility` 로 등장/사라짐.
+  - **알림 예약**: `SharedPreferences("product_detail_prefs")` 의 `HAS_CONFIRMED_RESERVATION_KEY` 가 false 면 confirm alert → true 면 바로 `confirmReservation` → `NotificationScheduler.requestAuthorization()` + `ReservationStore.scheduleReservation(product)` → 토스트.
+  - **마셔본 등록**: 무료 사용자 + 노트 카운트 ≥ `Constants.N.FREE_NOTE_COUNT` 면 `GoSubscription` effect. 그 외에는 빈 NoteDraft (rating=0, body="", publicScope=Private) 로 `repository.submitNote()` → 성공 시 `info.myNoteIds` 갱신 + 탭 전환 + `userStore.setNeededReviewProduct(true)` + 토스트.
+  - **번역**: `NoteTranslator` (ML Kit) 사용. `translateName` / `translateDesc` 두 트리거. iOS 의 trigger UUID 패턴 대신 boolean flag (`isTranslatingName/Desc`) + result string (`translatedName/Desc`).
+  - **클립보드 복사**: `tappedProductName` → `ClipboardManager.setPrimaryClip` + 토스트. iOS `UIPasteboard` 대응.
+  - **풀스크린 이미지 뷰어**: `Dialog(DialogProperties(usePlatformDefaultWidth = false))` + `HorizontalPager(rememberPagerState)`. iOS `fullScreenCover` 대응.
+  - **무한 페이지네이션**: `LazyColumn` 의 마지막 itemIndex 에서 `LaunchedEffect(notes.size)` 으로 `FetchNotesNextPage` 이벤트. iOS 의 `if note == store.noteInfos.last { send(.fetchNotes) }` 대응. ratingCounts 는 **첫 페이지에 한해** 계산 (iOS 동일).
+  - **InfoPopOver**: `core/designsystem/component/InfoPopOver` 가 anchor 옆 popover 대신 `AlertDialog` 로 단순화 (Compose 한계). IBU 안내, 풍미 상세 설명 등에 사용.
+  - **detail rows**: `Product.details: Map<ProductDetailInfo, String>` 을 `style/grape/manufacturer/country/alcohol/ibu` 순으로 표시. `composeDetailDisplayValue` @Composable 헬퍼가 `ProductStyle.title()` / `GrapeVariety.title()` / `Country.display(code)` 매핑 (iOS `displayValue` 4-인자 시그니처 대응).
+  - **Vivino 섹션**: `product.type == ProductType.Wine` 일 때만. `URLEncoder.encode(name)` + `Intent.ACTION_VIEW`.
+  - **Report 사전 alert**: `tappedReport` → `showReportAlert = true` → confirm 시에만 `Report` NavEffect. 사용자 실수 방지.
+- **Kakao SDK (카카오톡 공유)**: iOS `KakaoSDKShare.ShareApi.shareCustom` 동등 흐름.
+  - **의존성**: `com.kakao.sdk:v2-share` (libs `kakao-share`). 모듈 위치는 `core/oqcore` (OQSNSShare 가 거기).
+  - **초기화**: `BarNoteApp.onCreate` 의 0-1단계에서 `KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)`. nativeAppKey 는 `local.properties` 의 `kakao.nativeAppKey` 에서 BuildConfig + manifestPlaceholder 로 주입.
+  - **Manifest**: `<queries><package android:name="com.kakao.talk" /></queries>` (Android 11+ 패키지 가시성), `kakao{nativeAppKey}://oauth` intent-filter (콜백).
+  - **shareCustom 호출**: `ShareClient.instance.isKakaoTalkSharingAvailable(context)` 분기 → `ShareClient.shareCustom(context, templateId, templateArgs)` 콜백에서 `result.intent` 으로 `startActivity` (FLAG_ACTIVITY_NEW_TASK 필수, Application context 사용 시).
+  - **fallback**: 카카오톡 미설치 시 `WebSharerClient.instance.makeCustomUrl(templateId, templateArgs)` → `Intent.ACTION_VIEW` 으로 브라우저.
+  - **이미지 캐싱**: iOS 의 `ShareApi.imageUpload(image:)` → Android `ShareClient.scrapImage(url)` (외부 URL → 카카오 서버 캐싱 1-step). result `infos.original.url` 사용.
+  - **templateId 분기**: iOS 와 동일 — 이미지 0~1개 = 131000, 2개 = 131001, 3개+ = 130706. templateArgs key: `TITLE / DESC / NICK / PROFILE / IMG1 / IMG2 / IMG3 / SHARE_URL / PATH` + shareUrl 의 query params.
+- **Firebase Crashlytics / Analytics 통합**: iOS 와 동등하게 자동 수집만 사용 (명시 이벤트 호출 없음).
+  - **OQLog → Crashlytics 어댑터**: `core/oqcore` 가 Firebase 의존하지 않도록 `OQLog.exceptionLogger: ExceptionLogger?` (fun interface) 콜백만 노출. app 모듈의 `CrashlyticsInstaller.install()` 가 lambda 로 어댑팅. `BarNoteApp.onCreate` 의 0번째 단계에서 호출 (이후 단계의 에러도 보고되도록).
+  - **OQLog.e 시그니처**: `e(message, throwable, prefix, saveLog)` — throwable 함께 전달하면 Crashlytics issue 로 묶임. message 만 있으면 stack trace 가 없어 추적 어려우므로 throwable 우선 전달.
+  - **자동 screen view 비활성**: `AndroidManifest <meta-data android:name="google_analytics_automatic_screen_reporting_enabled" android:value="false" />` — iOS `FirebaseAutomaticScreenReportingEnabled: false` 대응. 화면 추적은 명시 호출 시에만.
+  - **user id 매칭**: `AuthSessionObserver.AnalyticsBridge` (fun interface) → `CrashlyticsInstaller.setUserId(userId)`. 로그인/로그아웃 시 자동.
+  - **Gradle plugin**: root `apply false` + app `alias(libs.plugins.google.services)` + `alias(libs.plugins.firebase.crashlytics)`. `google-services.json` 없으면 plugin 자체가 빌드 실패 (사용자 작업 필요).
+- **Auth0 (안드로이드 SDK)**: iOS `AuthStore` + `NetworkClient` 의 자동 처리들을 명시 구현.
+  - **scope 명시 필수**: `WebAuthProvider.login(auth0).withScope("openid profile offline_access")` — `offline_access` 없으면 refresh token 미발급 → `SecureCredentialsManager` 자동 갱신 동작 안 함. iOS `Auth0.webAuth().scope(...)` 대응.
+  - **401 자동 처리**: OkHttp `Authenticator` 인터페이스로 별도 구현 (`TokenAuthenticator`). 401 응답 시 `AuthStore.forceRefreshCredentials()` → refresh 성공 시 자동 retry, 실패 시 `AuthStore.clear()` → `AuthSessionObserver` 가 UserStore 정리. `responseCount >= 2` 가드로 무한 루프 방지. iOS `NetworkClient.failure(.unauthorized)` 분기 대응.
+  - **forceRefreshCredentials**: `SecureCredentialsManager.getCredentials(minTtl = 1년)` 으로 SDK 가 무조건 refresh token 사용. `currentCredentials()` 의 60초 만료 마진보다 강력.
+  - **Interceptor vs Authenticator 역할 분리**: `AuthInterceptor` 는 every request 헤더 첨부 (SDK 캐시 hit 이라 빠름). `TokenAuthenticator` 는 401 응답 시에만 호출. 둘 다 OkHttp worker thread 의 `runBlocking` 이지만 dispatcher 블로킹은 아님 (worker pool 별도).
+  - **HeadersProvider / TokenRefresher 패턴**: `core/oqcore` 모듈에 인터페이스만 두고 `core/data` 에 `AuthStore` 어댑팅. core/oqcore 가 core/domain 의존을 피함.
+- **Firebase 초기화**: `com.google.gms.google-services` plugin 이 자동. 명시 호출 불필요. plugin 비활성 시 Firebase 의존 기능 자동 비활성.
+- **콜드 스타트 push 유실 방지**: `MutableSharedFlow(extraBufferCapacity = N)` 으로 collect 전 emit 도 buffer 보존. `replay = 0` 유지 (중복 실행 방지). `companion object` static SharedFlow 는 process scope 유지.
+
+### 7.2 잠재적 함정 / 작업 시 누락 주의
+- **새 모듈**: `kotlin-kapt` + `hilt.android` + `kapt(libs.hilt.compiler)` 셋트. 빠지면 Hilt 주입 조용히 누락.
+- **새 `@Serializable`**: 모듈에 `kotlin-serialization` plugin 적용 확인 (`core:domain/network/data/oqcore`).
+- **새 Composable**: 모듈 `build.gradle.kts` 에 `buildFeatures { compose = true }`.
+- **`core:domain` 추가 시**: `androidx.*`/`android.*` import 금지. UI 텍스트 매핑은 `app/extension/DomainStrings.kt`.
+- **Receiver / Service**: `@AndroidEntryPoint` + `AndroidManifest.xml` 등록 둘 다 필요. 하나라도 빠지면 NPE.
+- **새 라이브러리**: `libs.versions.toml` `[versions]` + `[libraries]` 등록 → `libs.x.y` 참조. 직접 표기 금지.
+- **새 화면**: `BarNoteNavHost` + `Destinations.kt` 양쪽 등록. 미구현은 `PlaceholderScreen`.
+- **ViewModel 에서 string resource**: `@Inject constructor(@ApplicationContext context: Context)` → `context.getString(R.string.xxx)`. Composable 의 `stringResource` 사용 불가.
+- **새 BTN domain-dependent 컴포넌트**: `app/ui/component/` 에 둡니다 (Constants/strings 의존). 도메인 의존 없는 atomic 컴포넌트만 `core:designsystem/component/` 에 둡니다.
+- **suspend IO/long-running**: `withContext(Dispatchers.IO)` 또는 `Mutex.withLock`. UI 스레드 차단 회피.
+- **이미지/파일 업로드 후 정리**: 업로드된 imageId 는 노트/제품에 연결. 취소 시 ViewModel 이 `repository.deleteImage(id)` 정리 책임.
+- **callback 시그니처 매핑**: `(a, b) -> Unit` 람다에 인자 무시 시 `{ _, _ -> ... }`. 인자 0개 람다 직접 전달은 type mismatch.
+- **`Modifier` fully-qualified path 금지**: `Modifier.androidx.compose...width(...)` invalid. import 후 `Modifier.width(...)`. 이름 충돌 시 `import ... as Xxx`.
+- **`R` 클래스 충돌**: 한 파일에서 `com.oq.barnote.R` (앱 strings) 과 `com.oq.barnote.core.designsystem.R` (color/dimen) 동시 필요 시 — 한쪽만 `import` 하고 다른 쪽은 fully-qualified (`com.oq.barnote.R.string.xxx`) 로 인라인 참조. `import ... as` 별칭도 가능.
+- **Multipart 업로드의 client-generated id**: iOS `NetworkClient.upload` 는 `id` form-data part 를 항상 함께 전송. Retrofit 도 `@Part("id") id: RequestBody, @Part image: MultipartBody.Part` 둘 다 명시 필요. `MediaAttachment.id` 의 `UUID.randomUUID().toString()` 가 서버 영수증 매칭 / 중복 차단에 활용됨. 빠지면 optimistic update 불가.
+- **인증 분기는 `currentCredentials() != null`**: `authStore.hasCredentials()` 는 만료 직전 토큰 갱신을 트리거하지 않음. iOS 와 동일하게 `authStore.currentCredentials() != null` 호출해 SDK 의 60초 마진 자동 refresh 를 활용해야 race 회피 (예: `BarNoteRepositoryImpl.authedPath`, `uploadImage`).
+- **다단계 form step 변경 시 입력값 보존**: ViewModel `UiState` 가 모든 입력값 보관 → `step` 만 갱신. Composable `remember { }` 로 step-local state 두면 초기화 위험.
+- **`FileProvider` 임시 파일 공유**: ① Manifest `<provider>` 등록 ② `res/xml/file_paths.xml` 정의 ③ `FLAG_GRANT_READ_URI_PERMISSION`. 셋 중 하나라도 빠지면 SecurityException.
+- **DataStore 파일 분리**: 화면별 `preferencesDataStore(name=...)` 격리. 같은 키 (예: `IS_NOTIFICATION_ENABLED_KEY`) 는 반드시 같은 파일에서만 read/write.
+
+### 7.3 외부 환경 설정 가이드
+- **Firebase**: Firebase Console 에서 Android 앱 (`com.oq.barnote`) 등록 → `google-services.json` 다운로드 → `app/` 배치. `app/build.gradle.kts` 에 `id("com.google.gms.google-services")` 활성화.
+- **Auth0**: `local.properties` (VCS 제외) 에 정의 — `app/build.gradle.kts` 가 `buildConfigField` + `manifestPlaceholders` 로 주입.
+  ```
+  auth0.domain=<your-domain>.auth0.com
+  auth0.clientId=<client-id>
+  auth0.scheme=https           # 또는 com.oq.barnote
+  ```
+- **Google Play Billing**: Play Console 에서 구독 product 등록 → `Constants.S.SUBSCRIPTION_PRODUCT_ID` / `SUBSCRIPTION_BASE_PLAN_ID` 갱신. 결제는 Activity 컨텍스트에서 `BillingClient.launchBillingFlow(activity, params)`.
+- **App Links (`https://barnote.net/...`)**: Manifest 의 https intent-filter 는 `autoVerify="true"` (iOS Universal Links 등가). 검증을 위해 **서버가 `https://barnote.net/.well-known/assetlinks.json` 을 호스팅**해야 함 (iOS `apple-app-site-association` 과 동일 모델). 템플릿: `app/src/main/assetlinks.template.json` — `sha256_cert_fingerprints` 를 release 서명(+Play 앱 서명 사용 시 업로드 키) 지문으로 치환. 호스팅 전까지 https 링크는 시스템 브라우저로 폴백되며, 앱 내 deep link 는 `barnote://note|user/{id}` 커스텀 스킴이 항상 처리.
+- **R8/minify (release)**: `isMinifyEnabled = true` 활성. keep 규칙은 `app/proguard-rules.pro`. 리플렉션/직렬화 라이브러리(Auth0/kotlinx.serialization/Hilt/Retrofit/Kakao/ML Kit) 추가·변경 시 keep 규칙 점검. **release(minified) 빌드 스모크 테스트 필수** — 로그인/직렬화/API/결제/FCM/공유 경로.
+
+### 7.4 미해결 TODO
+- ⏳ `google-services.json` 추가 (사용자 작업, Firebase Console 다운로드 → `app/google-services.json`). plugin 은 이미 활성화 상태이므로 파일만 배치하면 FCM/Crashlytics/Analytics 자동 활성.
+- ⏳ Play Console 실제 구독 productId/basePlanId 를 `Constants.S.SUBSCRIPTION_PRODUCT_ID` 에 반영 (현재 placeholder `"barnote_premium"`).
+- ⏳ `local.properties` 에 `kakao.nativeAppKey=...` 추가 (Kakao 개발자센터 → 앱 → 일반 → 네이티브 앱 키, iOS `06624a49189cbb69a20c013756fee51d` 와 동일 값). 누락 시 카카오톡 공유 자동 비활성 (앱 동작 자체에는 영향 없음).
+- ⏳ `assetlinks.json` 서버 호스팅 (사용자/서버 작업, `https://barnote.net/.well-known/assetlinks.json`). 템플릿 `app/src/main/assetlinks.template.json` 의 SHA256 지문 치환 후 배포 → https App Links 자동 검증. 호스팅 전엔 https 링크가 브라우저로 폴백 (barnote:// 스킴은 영향 없음).
+
+### 7.5 자발적 업데이트 허용
+영구 지침 (컨벤션 / 함정 / 외부 설정 / 매핑 패턴) 발견 시 사용자 요청 없이도 RULES.md 추가 가능. 단 **§7.0 작성 규칙을 엄격히** — 이력성/시점 의존 정보는 절대 추가하지 마세요.
+
+---
+
+## 8. Quick Reference
+
+### 8.1 새 코드 위치 가이드
 | 추가할 코드 | 위치 |
 |---|---|
-| 새 도메인 모델 (`data class`) | `core:domain` |
-| 새 enum (rawValue + emoji 등 정적 데이터) | `core:domain` |
+| 새 도메인 모델 (`data class`) / enum (rawValue+emoji 등 정적 데이터) | `core:domain` |
 | 도메인 enum → `@StringRes` 매핑 | `app/extension/DomainStrings.kt` |
 | 도메인 enum → `ImageVector` 매핑 | `core:designsystem/DomainIcons.kt` |
 | Repository 인터페이스 | `core:domain` |
 | Repository 구현체 + Hilt `@Binds` | `core:data` (+ `core:data/di/`) |
 | 새 Retrofit endpoint | `core:network/BarNoteApi.kt` |
-| 단일 화면용 ViewModel | feature 모듈 (작성 시) 또는 `app` 임시 |
+| 단일 화면용 ViewModel | feature 모듈 또는 `app` 임시 |
 | 공용 atomic UI 컴포넌트 (텍스트 외부 주입) | `core:designsystem/component/` |
-| 도메인 모델을 직접 받는 UI 컴포넌트 | `app/ui/component/` (추후 designsystem 이전 후보) |
+| 도메인 모델 직접 받는 UI 컴포넌트 | `app/ui/component/` |
 | `OQ` prefix UI 컴포넌트 (앱 무관) | `core:oqcore/ui/component/` 또는 `views/` |
-| 권한/Picker 등 Activity 의존 헬퍼 | `app/ui/permission/`, `app/ui/picker/` |
+| 권한 / Picker 등 Activity 의존 헬퍼 | `app/ui/permission/`, `app/ui/picker/` |
 | 새 Hilt 모듈 | 같은 모듈의 `di/` 패키지 |
 
-### 8.3 iOS → Android 매핑 cheatsheet
+### 8.2 Hilt 컨벤션
+- **`@HiltAndroidApp`** → `BarNoteApp`.
+- **`@AndroidEntryPoint`** → Activity / Fragment / BroadcastReceiver / Service. Receiver/Service 는 Manifest 등록 필수.
+- **`@Binds`** (인터페이스↔구현 바인딩) / **`@Provides`** (SDK 객체 생성) 패턴 → 모듈은 같은 모듈의 `di/` 에.
+- **`@Named` qualifier** → 동일 타입 구분 (예: `@Named("auth0Domain")`).
+- **`@ApplicationScope`** → 앱 lifecycle CoroutineScope (`core:data/di/CoroutineScopeModule`).
+- **`@ApplicationContext`** → Application Context (Hilt 기본).
 
-| iOS | Android |
-|---|---|
-| `UUID` | `String` (서버 응답 그대로) |
-| `Date` | `String` (ISO8601). 표시 시 `Instant.parse(...)` |
-| `Codable` + custom `init(from:)` | `@Serializable` + custom `KSerializer` (fallback 처리) |
-| `Result<T, CommonError>` | Kotlin `Result<T>` (실패는 `CommonError` throw → `Result.failure` wrap) |
-| `actor` (Swift) | `@Singleton` + `Mutex.withLock` |
-| `@Dependency(\.x)` (TCA) | Hilt `@Inject` constructor |
-| `@MainActor @Observable` 싱글톤 | Hilt `@Singleton` + `StateFlow`/`SharedFlow` |
-| `@Published` 프로퍼티 | `MutableStateFlow` / `StateFlow` |
-| `AsyncStream<T>` | `Flow<T>` / `SharedFlow<T>` |
-| `UserDefaults` | `DataStore Preferences` (값) 또는 `EncryptedSharedPreferences` (비밀) |
-| `Keychain` | `EncryptedSharedPreferences` (`androidx.security:security-crypto`) |
-| `.localized` String | `stringResource(R.string.xxx)` (key 매핑은 `app/res/key_mapping.txt`) |
-| SF Symbol `Image(systemName:)` | Material Icons `Icons.Filled.*` (`material-icons-extended`) |
-| SwiftUI `popover` | `AlertDialog` / `ModalBottomSheet` |
-| SwiftUI `FlowLayout` | `androidx.compose.foundation.layout.FlowRow` |
-| `OQHapticService.selection.run()` | `LocalHapticFeedback.current.performHapticFeedback(HapticFeedbackType.TextHandleMove)` |
-| iOS `task(id:) { @Dependency... }` | ViewModel 에서 미리 계산 → Composable 파라미터 |
-| `UNUserNotificationCenter` + `UNCalendarNotificationTrigger` | `NotificationManager` + `AlarmManager.setExactAndAllowWhileIdle` |
-| `Messaging.delegate` (FCM) | `FirebaseMessagingService.onNewToken` / `onMessageReceived` |
-| `StoreKit Transaction.updates` | Google Play `BillingClient` + `PurchasesUpdatedListener` |
-| Auth0 iOS `CredentialsManager` | Auth0 Android `SecureCredentialsManager` |
+### 8.3 빌드 시스템 특이사항
+- `buildConfig = true`: `app/build.gradle.kts` 에서 활성화 (Auth0 `BuildConfig.AUTH0_*` 사용).
+- `kotlinx-serialization` plugin: 새 `@Serializable` 클래스 추가 시 모듈 적용 여부 확인.
+- `compose = true`: `app`, `core:oqcore`, `core:designsystem` 활성화. 다른 모듈에서 Composable 작성 시 활성화 필요.
+- `kotlin-kapt`: Hilt 사용 모듈마다 + `kapt(libs.hilt.compiler)`.
+- `libs.versions.toml` 모든 의존성 등록 의무. 직접 `implementation("...")` 금지.
+- `local.properties` VCS 제외, Auth0 키 보관.
 
-### 8.4 Hilt 관련 컨벤션
+### 8.4 SDK 제약 / 주의
+- **`minSdk = 29`**: `java.time` desugaring 없이 직접 사용. `Locale("ko")` OK.
+- **`targetSdk = 35`** (Android 15): Edge-to-edge 기본 활성화 — `enableEdgeToEdge()` + Scaffold inset 패턴 사용.
+- **POST_NOTIFICATIONS** (33+): 런타임 권한. `rememberNotificationPermission()` 헬퍼.
+- **SCHEDULE_EXACT_ALARM** (31+): user-grantable. `canScheduleExactAlarms()` 체크 + inexact fallback (`NotificationSchedulerImpl` 처리).
+- **Android Photo Picker** (33+): 시스템 picker. `READ_MEDIA_IMAGES` 별도 권한 불필요 (Photo Picker 자체 우회).
 
-- **`@HiltAndroidApp`**: `BarNoteApp` (앱 진입점) — 이미 적용됨.
-- **`@AndroidEntryPoint`**: Activity, Fragment, BroadcastReceiver, Service. 현재 적용된 곳:
-  - `BarNoteMessagingService` (FCM)
-  - `NotificationAlarmReceiver`, `NotificationTapReceiver`
-- **`@Binds` 패턴**: 인터페이스 구현체 바인딩. `core:data/di/` 의 모듈들 참조 (`RepositoryModule`, `AuthModule`, `Auth0BindingModule`, `DependenciesModule`, `StoresModule`).
-- **`@Provides` 패턴**: SDK 객체 (Retrofit, OkHttp, Auth0, Json 등) 생성.
-- **`@Named` qualifier**: Auth0 도메인/클라이언트ID 처럼 동일 타입을 구분 (`@Named("auth0Domain")`).
-- **`@ApplicationScope`**: 앱 lifecycle 동안 살아있는 `CoroutineScope` (커스텀 qualifier, `core:data/di/CoroutineScopeModule`).
-- **`@ApplicationContext`**: Application Context 주입 (Hilt 기본 제공).
-
-### 8.5 빌드 시스템 특이사항
-
-- **`buildConfig = true`**: `app/build.gradle.kts` 에서 활성화됨. `Auth0AuthStore` 가 `BuildConfig.AUTH0_*` 사용.
-- **`kotlinx-serialization` plugin**: `core:domain`, `core:network`, `core:data`, `core:oqcore` 에 적용됨. 새 `@Serializable` 클래스 추가 시 plugin 적용 모듈인지 확인.
-- **`compose = true`**: `app`, `core:oqcore`, `core:designsystem` 에 활성화. 다른 모듈에서 Composable 작성 시 활성화 필요.
-- **`kotlin-kapt`**: Hilt 사용 모듈마다 적용. Hilt 의존성이 있으면 `kapt(libs.hilt.compiler)` 도 함께.
-- **`libs.versions.toml`**: 모든 의존성은 여기에 등록 후 사용. 직접 `implementation("...")` 형태 금지.
-- **`local.properties`**: VCS 제외. Auth0 키 (`auth0.domain`, `auth0.clientId`, `auth0.scheme`) 보관.
-
-### 8.6 알아두면 좋은 SDK 제약
-
-- **`minSdk = 29`**: `java.time` (`Instant`, `LocalTime`, `Duration`) desugaring 없이 직접 사용 가능. `Locale("ko")` 형태 OK.
-- **`compileSdk = 34`**: Predictive back, `Build.VERSION_CODES.UPSIDE_DOWN_CAKE` 사용 가능.
-- **Notification 권한 (`POST_NOTIFICATIONS`)**: 33+ 에서 런타임 권한 필요. `rememberNotificationPermission()` 헬퍼 사용.
-- **Exact alarm 권한 (`SCHEDULE_EXACT_ALARM`)**: 31+ 에서 user-grantable. `alarmManager.canScheduleExactAlarms()` 로 체크 필요. `NotificationSchedulerImpl` 이 자동으로 inexact fallback.
-- **Android Photo Picker**: 33+ 시스템 picker, 그 이전은 자동으로 호환 모드. `READ_MEDIA_IMAGES` 권한 별도로 안 받아도 됨 (Photo Picker 자체가 권한 우회).
-
-### 8.7 자주 참고하는 파일
-
-- **String 매핑 검증**: `app/src/main/res/key_mapping.txt` (한글 ↔ romanized key)
-- **모든 enum 정적 데이터**: `core/domain/src/main/kotlin/com/oq/barnote/core/domain/`
-- **모든 도메인 enum → 표시 매핑**: `app/src/main/java/com/oq/barnote/extension/DomainStrings.kt`
-- **컬러 토큰**: `core/designsystem/src/main/res/values/colors.xml` + `values-night/colors.xml`
+### 8.5 자주 참고하는 파일
+- **String 매핑**: `app/src/main/res/key_mapping.txt` (한글 ↔ romanized)
+- **도메인 enum 정적 데이터**: `core/domain/src/main/kotlin/com/oq/barnote/core/domain/`
+- **enum → 표시 텍스트 매핑**: `app/src/main/java/com/oq/barnote/extension/DomainStrings.kt`
+- **컬러 토큰**: `core/designsystem/src/main/res/values{,-night}/colors.xml`
 - **dp 토큰**: `core/designsystem/src/main/java/com/oq/barnote/core/designsystem/Dimens.kt`
 - **앱 상수 (URL/PrefsKey)**: `app/src/main/java/com/oq/barnote/Constants.kt`
-
-### 8.8 자주 빠뜨리는 실수 방지 체크리스트
-
-- [ ] 새 `@Serializable` 모델 추가 시: 해당 모듈에 `kotlin-serialization` plugin 적용됐는지 확인.
-- [ ] 새 Composable 추가 시: 모듈에 `compose = true` 활성화됐는지 확인.
-- [ ] `R.string.xxx` 참조 시: 해당 모듈 또는 의존 모듈의 strings.xml 에 키가 있는지 확인 (현재 대부분은 `app/res`).
-- [ ] `core:domain` 에 코드 추가 시: `androidx.*`, `android.*` import 금지 (순수 Kotlin 모듈 원칙).
-- [ ] BroadcastReceiver / Service 작성 시: `@AndroidEntryPoint` + AndroidManifest 등록 둘 다 필요.
-- [ ] suspend 함수가 메인 스레드에서 안전한지: `Mutex`, `withContext(Dispatchers.IO)` 적절히 사용.
-- [ ] Repository 메서드는 `Result<T>` 반환. throw 대신 `safeCall { }` 헬퍼 사용 (`BarNoteRepositoryImpl` 참조).
+- **NavHost / Destinations**: `app/src/main/java/com/oq/barnote/ui/navigation/`

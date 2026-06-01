@@ -189,17 +189,24 @@ interface BarNoteApi {
 
     // region Image ---------------------------------------------------------
 
-    /** auth 여부에 따라 `/api/images` 또는 `/images` */
+    /**
+     * auth 여부에 따라 `/api/images` 또는 `/images`.
+     *
+     * iOS `NetworkClient.upload(path, id:, data:, name:)` 와 동일하게 client-generated UUID 를
+     * `id` form part 로 함께 전송. 서버는 이 id 로 영수증 매칭 / 중복 업로드 차단에 활용 가능.
+     */
     @Multipart
     @POST
     suspend fun uploadImage(
         @Url url: String,
+        @Part("id") id: RequestBody,
         @Part image: MultipartBody.Part,
     ): APIResponse<String>
 
     @Multipart
     @POST("api/images/profile")
     suspend fun uploadProfileImage(
+        @Part("id") id: RequestBody,
         @Part image: MultipartBody.Part,
     ): APIResponse<String>
 

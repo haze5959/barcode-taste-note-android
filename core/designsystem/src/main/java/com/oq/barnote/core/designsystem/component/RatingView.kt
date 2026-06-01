@@ -21,10 +21,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -84,7 +83,7 @@ fun RatingInputView(
     isEnabled: Boolean = true,
 ) {
     var isInteracting by remember { mutableStateOf(false) }
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberOQHaptic()
     val scale by animateFloatAsState(
         targetValue = if (isInteracting) 1.08f else 1f,
         animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium),
@@ -96,7 +95,9 @@ fun RatingInputView(
         val clampedX = x.coerceIn(0f, width)
         val scaled = ceil((clampedX / width) * 10).toInt().coerceIn(1, 10)
         if (scaled != value) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            // iOS RatingView 와 동일하게 selection + lightImpact 이중 haptic.
+            haptic.selection()
+            haptic.lightImpact()
             onValueChange(scaled)
         }
     }

@@ -1,7 +1,9 @@
 package com.oq.barnote.core.data.di
 
 import com.oq.barnote.core.data.auth.AuthStoreHeadersProvider
+import com.oq.barnote.core.data.auth.AuthStoreTokenRefresher
 import com.oq.barnote.core.oqcore.network.AuthInterceptor
+import com.oq.barnote.core.oqcore.network.TokenAuthenticator
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,6 +16,7 @@ import javax.inject.Singleton
  * - [com.oq.barnote.core.domain.AuthStore] → [com.oq.barnote.core.data.auth.Auth0AuthStore]
  *   (`Auth0BindingModule` 에서 바인딩).
  * - [AuthInterceptor.HeadersProvider] → [AuthStoreHeadersProvider]
+ * - [TokenAuthenticator.TokenRefresher] → [AuthStoreTokenRefresher]
  *
  * NoOpAuthStore 는 더 이상 바인딩되지 않습니다 (Auth0 통합 완료).
  * 다만 테스트/preview 용으로 클래스 자체는 보존.
@@ -27,4 +30,10 @@ abstract class AuthModule {
     abstract fun bindHeadersProvider(
         impl: AuthStoreHeadersProvider,
     ): AuthInterceptor.HeadersProvider
+
+    @Binds
+    @Singleton
+    abstract fun bindTokenRefresher(
+        impl: AuthStoreTokenRefresher,
+    ): TokenAuthenticator.TokenRefresher
 }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.oq.barnote.core.domain.MediaAttachment
+import com.oq.barnote.core.oqcore.util.OQImageOptimize
 import com.oq.barnote.core.oqcore.utils.OQLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,6 +27,12 @@ import java.util.UUID
  *
  * 선택된 [Uri] 들은 내부 state 에 보관되고, [LaunchedEffect] 안에서 백그라운드 디코딩 후
  * [onPicked] 콜백으로 [MediaAttachment] 목록이 전달됩니다.
+ *
+ * 이미지는 iOS `optimizeImageForUpload(toKBtye:)` 와 동일하게 업로드 전 리사이즈/압축
+ * ([OQImageOptimize]) 됩니다. 비디오는 최적화 없이 원본 바이트를 그대로 전달합니다.
+ *
+ * `launchSingle` / `launchMultiple` 에 [allowVideo] 를 전달하면 Photo Picker 의 필터가
+ * `ImageOnly` 대신 `ImageAndVideo` 로 열립니다 (iOS `configuration.filter` 대응).
  *
  * 사용 예:
  * ```
@@ -67,37 +74,58 @@ fun rememberPhotoPicker(
 
     return remember(maxItems) {
         object : PhotoPickerState {
-            override fun launchSingle() {
-                singleLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                )
+            override fun launchSingle(allowVideo: Boolean) {
+                singleLauncher.launch(PickVisualMediaRequest(mediaType(allowVideo)))
             }
 
-            override fun launchMultiple() {
-                multipleLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                )
+            override fun launchMultiple(allowVideo: Boolean) {
+                multipleLauncher.launch(PickVisualMediaRequest(mediaType(allowVideo)))
             }
         }
     }
 }
 
-private fun Uri.toMediaAttachment(context: Context): MediaAttachment? = runCatching {
+/** 요청 미디어 타입 → Photo Picker 필터. iOS `configuration.filter = .images / .any([.images,.videos])` 대응. */
+private fun mediaType(allowVideo: Boolean): ActivityResultContracts.PickVisualMedia.VisualMediaType =
+    if (allowVideo) {
+        ActivityResultContracts.PickVisualMedia.ImageAndVideo
+    } else {
+        ActivityResultContracts.PickVisualMedia.ImageOnly
+    }
+
+/**
+ * 선택된 [Uri] 를 [MediaAttachment] 로 변환.
+ *
+ * - 이미지: 원본 바이트를 [OQImageOptimize.optimizeForUpload] 로 리사이즈/압축 후 `image/jpeg` 로 첨부.
+ * - 비디오: 최적화/편집 없이 원본 바이트를 mime type 그대로 전달 (iOS 와 동일).
+ */
+internal fun Uri.toMediaAttachment(context: Context): MediaAttachment? = runCatching {
     val bytes = context.contentResolver.openInputStream(this)
         ?.use { it.readBytes() } ?: return@runCatching null
     val mime = context.contentResolver.getType(this) ?: "image/jpeg"
-    MediaAttachment(
-        id = UUID.randomUUID().toString(),
-        data = bytes,
-        mimeType = mime,
-        fileName = "image_${System.currentTimeMillis()}",
-    )
+    val isVideo = mime.startsWith("video")
+
+    if (isVideo) {
+        MediaAttachment(
+            id = UUID.randomUUID().toString(),
+            data = bytes,
+            mimeType = mime,
+            fileName = "video_${System.currentTimeMillis()}",
+        )
+    } else {
+        MediaAttachment(
+            id = UUID.randomUUID().toString(),
+            data = OQImageOptimize.optimizeForUpload(bytes),
+            mimeType = "image/jpeg",
+            fileName = "image_${System.currentTimeMillis()}",
+        )
+    }
 }.getOrElse { e ->
     OQLog.e("Failed to load media: $e")
     null
 }
 
 interface PhotoPickerState {
-    fun launchSingle()
-    fun launchMultiple()
+    fun launchSingle(allowVideo: Boolean = false)
+    fun launchMultiple(allowVideo: Boolean = false)
 }

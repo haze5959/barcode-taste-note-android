@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.oq.barnote.core.oqcore"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 29
@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.hilt.android)
@@ -48,4 +49,10 @@ dependencies {
     
     implementation(libs.androidx.security.crypto)
     implementation(libs.coil.compose)
+
+    // Chrome Custom Tabs (OQSafariView). iOS `SFSafariViewController` 대응.
+    implementation(libs.androidx.browser)
+
+    // Kakao SDK (카카오톡 공유). iOS `KakaoSDKShare` 대응.
+    implementation(libs.kakao.share)
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  iOS App Transport Security(ATS) 의 안드로이드 등가물.
+
+  앱의 모든 트래픽(api.barnote.net / barnote.net / 이미지 / Auth0 / Firebase 등)은 HTTPS 이므로
+  cleartext(HTTP) 를 전면 차단합니다. 평문 통신 시도는 시스템이 차단 → 중간자 공격/평문 노출 방지.
+
+  시스템 신뢰 앵커만 사용 (사용자 설치 CA 미신뢰) — iOS ATS 기본 정책과 동일한 강도.
+
+  주의: 로컬 개발 서버(http://10.0.2.2 등)가 필요해지면 별도 debug 전용 network_security_config 를
+  `src/debug/res/xml` 에 두어 cleartext 를 허용하세요. (현재는 prod/debug 모두 HTTPS 전용)
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

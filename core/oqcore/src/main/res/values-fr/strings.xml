@@ -62,7 +62,6 @@ Pour les photos iCloud ou panoramiques, ouvrez-les d\'abord dans l\'application 
     <string name="nyeon">Année</string>
     <string name="nyeon_weol_seontaeg">Sélectionner l\'année/le mois</string>
     <string name="picker_no_content">Aucun contenu.</string>
-    <string name="picker_year_month_title">Sélectionner Année/Mois</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Échec de l\'enregistrement dans la photothèque.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">Enregistré dans la photothèque.</string>
     <string name="sns_share_title">Partager</string>
@@ -80,4 +79,12 @@ Pour les photos iCloud ou panoramiques, ouvrez-les d\'abord dans l\'application 
     <string name="weekday_wed">Mer</string>
     <string name="weol">Mois</string>
     <string name="yeolgi">Ouvrir</string>
+    <string name="sns_share_instagram">Story Instagram</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">Autres options</string>
+    <string name="notification_reservation_channel_name">Rappel de note de dégustation</string>
+    <string name="notification_reservation_title">Il est temps d\'écrire votre note de dégustation !</string>
+    <string name="notification_reservation_body">Veuillez compléter l\'inscription de %s 📝</string>
+    <string name="notification_new_follower_channel_name">Nouvel Abonné</string>
+    <string name="notification_new_note_channel_name">Nouvelle Note</string>
 </resources>

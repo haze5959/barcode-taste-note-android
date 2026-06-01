@@ -62,7 +62,6 @@ Per foto di iCloud o panoramiche, aprile prima nell\'app Foto e riprova.</string
     <string name="nyeon">Anno</string>
     <string name="nyeon_weol_seontaeg">Seleziona anno/mese</string>
     <string name="picker_no_content">Nessun contenuto.</string>
-    <string name="picker_year_month_title">Seleziona anno/mese</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Salvataggio nella libreria foto non riuscito.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">Salvato nella libreria foto.</string>
     <string name="sns_share_title">Condividi</string>
@@ -80,4 +79,12 @@ Per foto di iCloud o panoramiche, aprile prima nell\'app Foto e riprova.</string
     <string name="weekday_wed">Mer</string>
     <string name="weol">Mese</string>
     <string name="yeolgi">Apri</string>
+    <string name="sns_share_instagram">Storia Instagram</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">Altre opzioni</string>
+    <string name="notification_reservation_channel_name">Promemoria nota di degustazione</string>
+    <string name="notification_reservation_title">È ora di scrivere la tua nota di degustazione!</string>
+    <string name="notification_reservation_body">Si prega di completare la registrazione di %s 📝</string>
+    <string name="notification_new_follower_channel_name">Nuovo Follower</string>
+    <string name="notification_new_note_channel_name">Nuova Nota</string>
 </resources>

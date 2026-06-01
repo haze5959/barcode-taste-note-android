@@ -62,7 +62,6 @@
     <string name="nyeon">Jahr</string>
     <string name="nyeon_weol_seontaeg">Jahr/Monat auswählen</string>
     <string name="picker_no_content">Kein Inhalt.</string>
-    <string name="picker_year_month_title">Jahr/Monat auswählen</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Speichern in der Fotomediathek fehlgeschlagen.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">In der Fotomediathek gespeichert.</string>
     <string name="sns_share_title">Teilen</string>
@@ -80,4 +79,12 @@
     <string name="weekday_wed">Mi</string>
     <string name="weol">Monat</string>
     <string name="yeolgi">Öffnen</string>
+    <string name="sns_share_instagram">Instagram-Story</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">Weitere Optionen</string>
+    <string name="notification_reservation_channel_name">Verkostungsnotiz-Erinnerung</string>
+    <string name="notification_reservation_title">Zeit, deine Verkostungsnotiz zu schreiben!</string>
+    <string name="notification_reservation_body">Bitte vervollständigen Sie die Registrierung von %s 📝</string>
+    <string name="notification_new_follower_channel_name">Neuer Follower</string>
+    <string name="notification_new_note_channel_name">Neue Notiz</string>
 </resources>

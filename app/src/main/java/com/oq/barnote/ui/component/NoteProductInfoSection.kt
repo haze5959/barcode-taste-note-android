@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
@@ -34,8 +35,9 @@ fun NoteProductInfoSection(
         verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
         Text(
-            text = "선택한 제품",
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            text = stringResource(R.string.seontaeghan_jepum),
+            // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
         )
         Column(
             modifier = Modifier

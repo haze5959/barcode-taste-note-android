@@ -22,6 +22,15 @@ interface AuthStore {
     /** 현재 유효한 자격증명. 만료가 임박했으면 갱신 시도. 실패 시 null. */
     suspend fun currentCredentials(): Credentials?
 
+    /**
+     * 만료 마진 무시하고 refresh token 으로 강제 갱신.
+     *
+     * OkHttp `Authenticator` 가 401 응답 시 호출. [currentCredentials] 는 만료 60초 마진에서만
+     * 갱신을 트리거하므로 서버 측에서 토큰을 invalidate 했거나 만료 마진 안에 들어가지 않은 케이스에
+     * 대응하려면 이 메서드가 별도 필요. 실패 시 null 반환 → 호출자가 자동 로그아웃 트리거.
+     */
+    suspend fun forceRefreshCredentials(): Credentials?
+
     /** 로그인 직후 자격증명 저장. */
     suspend fun save(credentials: Credentials)
 

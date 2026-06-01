@@ -1,6 +1,7 @@
 package com.oq.barnote.core.oqcore.views
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,10 +11,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.oqcore.models.Palette
+import com.oq.barnote.core.oqcore.ui.modifier.scaleOnPress
+import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
 
 @Composable
 fun OQButton(
@@ -23,9 +27,13 @@ fun OQButton(
     color: Color = Palette().accent,
     enabled: Boolean = true
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val haptic = rememberOQHaptic()
+    val onClickWithHaptic: () -> Unit = { haptic.lightImpact(); onClick() }
     OutlinedButton(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        onClick = onClickWithHaptic,
+        interactionSource = interaction,
+        modifier = modifier.fillMaxWidth().scaleOnPress(interaction),
         enabled = enabled,
         shape = RoundedCornerShape(0.dp),
         border = BorderStroke(1.dp, color),
@@ -47,9 +55,13 @@ fun OQFillButton(
     radius: Float = 0f,
     enabled: Boolean = true
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val haptic = rememberOQHaptic()
+    val onClickWithHaptic: () -> Unit = { haptic.lightImpact(); onClick() }
     Button(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        onClick = onClickWithHaptic,
+        interactionSource = interaction,
+        modifier = modifier.fillMaxWidth().scaleOnPress(interaction),
         enabled = enabled,
         shape = RoundedCornerShape(radius.dp),
         contentPadding = PaddingValues(15.dp),
@@ -85,9 +97,13 @@ fun OQRoundedButton(
         OQRoundedButtonStyleType.TextSecondary -> palette.textSecondary
     }
 
+    val interaction = remember { MutableInteractionSource() }
+    val haptic = rememberOQHaptic()
+    val onClickWithHaptic: () -> Unit = { haptic.lightImpact(); onClick() }
     OutlinedButton(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        onClick = onClickWithHaptic,
+        interactionSource = interaction,
+        modifier = modifier.fillMaxWidth().scaleOnPress(interaction),
         enabled = enabled,
         shape = RoundedCornerShape(radius.dp),
         border = BorderStroke(cornerWidth.dp, if (enabled) baseColor else palette.disabledButton),
@@ -109,9 +125,13 @@ fun OQCapsuleButton(
     palette: Palette = Palette(),
     enabled: Boolean = true
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val haptic = rememberOQHaptic()
+    val onClickWithHaptic: () -> Unit = { haptic.lightImpact(); onClick() }
     Button(
-        onClick = onClick,
-        modifier = modifier.height(48.dp),
+        onClick = onClickWithHaptic,
+        interactionSource = interaction,
+        modifier = modifier.height(48.dp).scaleOnPress(interaction),
         enabled = enabled,
         shape = RoundedCornerShape(50), // Capsule
         border = if (!isAccent) BorderStroke(1.dp, palette.divider) else null,

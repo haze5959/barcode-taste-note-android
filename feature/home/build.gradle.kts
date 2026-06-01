@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.oq.barnote.feature.home"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 29
@@ -32,7 +32,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(project(":core:domain"))
     implementation(project(":core:designsystem"))
-    
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)

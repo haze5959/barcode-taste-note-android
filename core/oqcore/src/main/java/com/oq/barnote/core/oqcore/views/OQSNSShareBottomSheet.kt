@@ -13,9 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.oq.barnote.core.oqcore.R
 import com.oq.barnote.core.oqcore.models.Palette
 import com.oq.barnote.core.oqcore.utils.OQSNSShareData
 import com.oq.barnote.core.oqcore.utils.OQSNSShareManager
@@ -52,7 +54,7 @@ fun OQSNSShareBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "공유하기", // Localization could be applied here
+                    text = stringResource(R.string.sns_share_title),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.textPrimary
@@ -89,6 +91,7 @@ private fun ShareItem(
     palette: Palette,
     onClick: () -> Unit
 ) {
+    val title = stringResource(type.titleRes)
     Column(
         modifier = Modifier
             .clickable(onClick = onClick)
@@ -106,13 +109,13 @@ private fun ShareItem(
             // Depending on the iconName/logoName, load the appropriate resource.
             // Since we don't have the literal icons, we'll just show the initial for now.
             Text(
-                text = type.title.first().toString(),
+                text = title.first().toString(),
                 fontSize = 24.sp,
                 color = palette.textPrimary
             )
         }
         Text(
-            text = type.title,
+            text = title,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             color = palette.textPrimary

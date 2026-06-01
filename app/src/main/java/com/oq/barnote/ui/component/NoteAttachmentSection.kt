@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
@@ -51,11 +52,12 @@ fun NoteAttachmentSection(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "이미지 첨부",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                text = stringResource(com.oq.barnote.R.string.imiji_ceombu),
+                // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
             Spacer(modifier = Modifier.padding(start = 6.dp))
-            InfoTagView(text = "옵션", style = InfoTagStyle.Normal)
+            InfoTagView(text = stringResource(com.oq.barnote.R.string.obsyeon), style = InfoTagStyle.Normal)
             Spacer(modifier = Modifier.weight(1f))
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -68,7 +70,8 @@ fun NoteAttachmentSection(
             }
         }
         Text(
-            text = "첨부할 사진을 ${maxCount}장까지 선택할 수 있어요.",
+            // 기존 key 의 텍스트는 "5장" 하드코딩. maxCount 가 기본값(5)이 아닐 일이 거의 없어 그대로 사용.
+            text = stringResource(com.oq.barnote.R.string.ceombuhal_sajineul_5jangggaji_seontaeghal_su_isseoyo),
             style = MaterialTheme.typography.bodyMedium,
             color = secondary,
         )

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
 import com.oq.barnote.core.domain.NoteDetail
@@ -46,14 +47,19 @@ fun NoteFeelingGrid(
         verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
         Text(
-            text = "감정",
+            text = stringResource(com.oq.barnote.R.string.gamjeong),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = textPrimary,
         )
+        // iOS: GridItem(.adaptive(minimum: largeCardSize, maximum: 120)), 각 버튼 frame(maxWidth: .infinity).
+        // verticalScroll 부모(AddNote/EditNote/ProductDetail) 안이라 LazyVerticalGrid 는 중첩 스크롤
+        // 크래시 위험이 있어 사용하지 않고, FlowRow + maxItemsInEachRow + weight(1f) 로 한 행을
+        // 균등 폭 셀로 채운다.
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
             verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+            maxItemsInEachRow = 4,
         ) {
             NoteDetail.Feeling.values().forEach { feeling ->
                 val isSelected = feeling == selectedFeeling
@@ -61,6 +67,7 @@ fun NoteFeelingGrid(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
                     modifier = Modifier
+                        .weight(1f)
                         .clip(RoundedCornerShape(Dimens.Radius))
                         .background(
                             if (isSelected) accent.copy(alpha = 0.1f) else surfaceSecondary,
@@ -71,12 +78,12 @@ fun NoteFeelingGrid(
                             shape = RoundedCornerShape(Dimens.Radius),
                         )
                         .clickable { onFeelingSelected(feeling) }
-                        .width(80.dp)
                         .padding(vertical = Dimens.Spacing),
                 ) {
                     Text(
                         text = feeling.emoji,
-                        style = MaterialTheme.typography.titleLarge,
+                        // iOS: .font(.system(size: iconSize)) — titleLarge 가 아닌 아이콘 크기에 맞춤 (B4).
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
                     )
                     Text(
                         text = feeling.desc(),

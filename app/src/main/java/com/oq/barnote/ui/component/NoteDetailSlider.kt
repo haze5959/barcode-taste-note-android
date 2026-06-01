@@ -26,12 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.colorResource
+import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -55,14 +54,15 @@ fun NoteDetailSlider(
     val secondary = colorResource(R.color.text_secondary)
     val surfaceSecondary = colorResource(R.color.surface_secondary)
     val textPrimary = colorResource(R.color.text_primary)
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberOQHaptic()
 
     var width by remember { mutableStateOf(0f) }
 
     fun update(x: Float) {
         if (x < 0f) {
             if (value != 0) {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                // iOS NoteDetailSlider 와 동일: 단계 변경 시 selection haptic.
+                haptic.selection()
                 onValueChanged(0)
             }
             return
@@ -72,7 +72,7 @@ fun NoteDetailSlider(
         val raw = ceil(x / segmentWidth).toInt()
         val clamped = raw.coerceIn(0, 5)
         if (clamped != value) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            haptic.selection()
             onValueChanged(clamped)
         }
     }

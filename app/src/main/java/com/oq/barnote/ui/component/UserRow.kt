@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
@@ -126,7 +127,10 @@ fun UserRow(
                 modifier = Modifier.width(120.dp),
             ) {
                 Text(
-                    text = if (isFollowing) "팔로잉 취소" else "팔로잉",
+                    text = stringResource(
+                        if (isFollowing) com.oq.barnote.R.string.palroing_cwiso
+                        else com.oq.barnote.R.string.palroing
+                    ),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                     ),

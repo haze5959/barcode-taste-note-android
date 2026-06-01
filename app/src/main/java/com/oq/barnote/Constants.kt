@@ -22,6 +22,11 @@ object Constants {
         const val IS_NOTIFICATION_ENABLED_KEY: String = "is_notification_enabled"
         const val HAS_CONFIRMED_RESERVATION_KEY: String = "has_confirmed_reservation"
         const val IS_LIST_VIEW_ENABLED_KEY: String = "is_list_view_enabled"
+
+        // Google Play Billing — Play Console 에 등록된 실제 productId 로 교체 필요.
+        const val SUBSCRIPTION_PRODUCT_ID: String = "barnote_premium"
+        /** null 이면 첫 번째 base plan 자동 선택. 명시하려면 Play Console 의 base plan id 사용. */
+        val SUBSCRIPTION_BASE_PLAN_ID: String? = null
     }
 
     /** 숫자 상수 */

@@ -61,7 +61,6 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="nyeon">Year</string>
     <string name="nyeon_weol_seontaeg">Select Year/Month</string>
     <string name="picker_no_content">No content</string>
-    <string name="picker_year_month_title">Select Month</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Failed to save to photo library.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">Saved to photo library.</string>
     <string name="sns_share_title">Share</string>
@@ -79,4 +78,12 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="weekday_wed">Wed</string>
     <string name="weol">Month</string>
     <string name="yeolgi">Open</string>
+    <string name="sns_share_instagram">Instagram Story</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">Other options</string>
+    <string name="notification_reservation_channel_name">Tasting Note Reservation</string>
+    <string name="notification_reservation_title">It\'s time to write your tasting note!</string>
+    <string name="notification_reservation_body">Please complete the registration of %s 📝</string>
+    <string name="notification_new_follower_channel_name">New Follower</string>
+    <string name="notification_new_note_channel_name">New Note</string>
 </resources>

@@ -62,7 +62,6 @@
     <string name="nyeon">年</string>
     <string name="nyeon_weol_seontaeg">选择年月</string>
     <string name="picker_no_content">没有内容。</string>
-    <string name="picker_year_month_title">选择年月</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">保存到相册失败。</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">已保存到相册。</string>
     <string name="sns_share_title">分享</string>
@@ -80,4 +79,12 @@
     <string name="weekday_wed">周三</string>
     <string name="weol">月</string>
     <string name="yeolgi">打开</string>
+    <string name="sns_share_instagram">Instagram 故事</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">其他选项</string>
+    <string name="notification_reservation_channel_name">品鉴笔记预约</string>
+    <string name="notification_reservation_title">是时候写品鉴笔记了！</string>
+    <string name="notification_reservation_body">请完成 %s 的注册 📝</string>
+    <string name="notification_new_follower_channel_name">新粉丝</string>
+    <string name="notification_new_note_channel_name">新笔记</string>
 </resources>

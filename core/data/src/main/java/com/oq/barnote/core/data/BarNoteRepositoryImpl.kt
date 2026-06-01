@@ -26,6 +26,7 @@ import com.oq.barnote.core.oqcore.network.NetworkError
 import com.oq.barnote.core.oqcore.utils.OQLog
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -291,12 +292,13 @@ class BarNoteRepositoryImpl @Inject constructor(
     // region Image --------------------------------------------------------
 
     override suspend fun uploadImage(attachment: MediaAttachment): Result<String> = safeCall {
-        val url = if (authStore.hasCredentials()) "api/images" else "images"
-        api.uploadImage(url, attachment.toPart()).unwrap()
+        // iOS `authStore.currentCredentials() != nil` 분기와 동등. 만료 마진 안에 있으면 자동 refresh.
+        val url = if (authStore.currentCredentials() != null) "api/images" else "images"
+        api.uploadImage(url, attachment.toIdPart(), attachment.toFilePart()).unwrap()
     }
 
     override suspend fun uploadProfileImage(attachment: MediaAttachment): Result<String> =
-        safeCall { api.uploadProfileImage(attachment.toPart()).unwrap() }
+        safeCall { api.uploadProfileImage(attachment.toIdPart(), attachment.toFilePart()).unwrap() }
 
     override suspend fun deleteImage(id: String): Result<Boolean> = safeCallBool {
         api.deleteImage(id)
@@ -354,9 +356,15 @@ class BarNoteRepositoryImpl @Inject constructor(
 
     // region Helpers ------------------------------------------------------
 
-    /** auth 자격증명이 있으면 `api/` prefix 를 붙입니다. iOS 의 path 분기와 동일. */
+    /**
+     * auth 자격증명이 있으면 `api/` prefix 를 붙입니다. iOS 의 path 분기와 동일.
+     *
+     * iOS `await authStore.currentCredentials() != nil` 과 동등: 만료 60초 마진 안에 있다면
+     * SDK 가 자동 refresh token 사용. `hasCredentials()` 의 단순 boolean 보다 안전하며,
+     * 만료 직전 토큰으로 인해 public 경로로 잘못 빠지는 race 조건을 회피합니다.
+     */
     private suspend fun authedPath(path: String): String =
-        if (authStore.hasCredentials()) "api/$path" else path
+        if (authStore.currentCredentials() != null) "api/$path" else path
 
     private fun NoteDraft.toBody(): Map<String, Any?> = buildMap {
         put("product_id", productId)
@@ -376,7 +384,15 @@ class BarNoteRepositoryImpl @Inject constructor(
         imageId?.let { put("image_id", it) }
     }
 
-    private fun MediaAttachment.toPart(): MultipartBody.Part {
+    /**
+     * iOS `NetworkClient.upload` 의 form-data `name="id"` 파트.
+     * 서버가 client-generated UUID 를 받아 영수증 매칭 / 중복 업로드 차단에 활용 가능.
+     */
+    private fun MediaAttachment.toIdPart(): RequestBody =
+        id.toRequestBody("text/plain".toMediaTypeOrNull())
+
+    /** iOS `NetworkClient.upload` 의 `name="image"` 파일 파트. */
+    private fun MediaAttachment.toFilePart(): MultipartBody.Part {
         val body = data.toRequestBody(mimeType.toMediaTypeOrNull())
         return MultipartBody.Part.createFormData("image", fileName, body)
     }
@@ -433,10 +449,10 @@ private fun APIResponseWithEmptyData.unwrap(): Boolean {
 private inline fun <T> safeCall(block: () -> T): Result<T> = try {
     Result.success(block())
 } catch (e: CommonError) {
-    OQLog.e(e)
+    OQLog.e(e.message ?: "CommonError", e)
     Result.failure(e)
 } catch (e: Throwable) {
-    OQLog.e(e)
+    OQLog.e(e.message ?: "Throwable", e)
     Result.failure(CommonError.Network(NetworkError.Transport(e)))
 }
 

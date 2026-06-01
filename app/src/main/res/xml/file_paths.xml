@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 데이터 내보내기 등 cacheDir 하위 임시 파일을 외부 앱에 공유할 때 사용 -->
+    <cache-path
+        name="exports"
+        path="exports/" />
+    <!-- 첨부 카메라 촬영(TakePicture) 결과를 받을 cacheDir 하위 임시 파일 -->
+    <cache-path
+        name="camera"
+        path="camera/" />
+</paths>

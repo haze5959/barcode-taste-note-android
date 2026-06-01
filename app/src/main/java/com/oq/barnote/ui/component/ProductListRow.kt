@@ -30,6 +30,7 @@ import com.oq.barnote.core.designsystem.R
 import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.ProductInfo
 import com.oq.barnote.core.oqcore.views.SkeletonView
+import com.oq.barnote.extension.ratingStarText
 import com.oq.barnote.extension.title
 
 /**
@@ -85,7 +86,7 @@ fun ProductListRow(
                     )
                     info.getRating()?.let { rating ->
                         Text(
-                            text = "⭐️ %.1f".format(rating),
+                            text = rating.ratingStarText(),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Medium,
                             ),

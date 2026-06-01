@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
@@ -41,18 +42,20 @@ import com.oq.barnote.core.oqcore.views.SkeletonView
 /**
  * 노트 카드 (정사각형, 상단 이미지 + 본문). iOS `NoteRowView` 에 대응.
  *
- * @param isBlocked iOS task() 로 확인하던 차단 여부. ViewModel 에서 미리 계산해 전달.
+ * 차단된 사용자 여부는 [rememberIsUserBlocked] 가 내부에서 자동 조회합니다 (iOS `.task(id: userId)`
+ * 등가). 호출자 ViewModel 이 미리 계산해서 넘길 필요가 없으며, N+1 으로 호출자가 잊어 차단 효과가
+ * 적용되지 않는 버그가 발생하지 않습니다.
  */
 @Composable
 fun NoteRow(
     info: NoteInfo?,
     modifier: Modifier = Modifier,
-    isBlocked: Boolean = false,
 ) {
     val accent = colorResource(R.color.accent_color)
     val divider = colorResource(R.color.divider)
     val secondary = colorResource(R.color.text_secondary)
     val surfacePrimary = colorResource(R.color.surface_primary)
+    val isBlocked = rememberIsUserBlocked(info?.user?.id)
 
     Box(
         modifier = modifier
@@ -155,6 +158,8 @@ fun NoteRow(
                         text = info.note.body,
                         style = MaterialTheme.typography.bodySmall,
                         color = secondary,
+                        // iOS: lineLimit(2) + fixedSize(vertical) → 2줄 높이를 항상 예약 (B10).
+                        minLines = 2,
                         maxLines = 2,
                     )
                     info.flavors?.takeIf { it.isNotEmpty() }?.let { flavors ->
@@ -193,7 +198,7 @@ private fun BlockedView(secondary: Color) {
             tint = secondary.copy(alpha = 0.4f),
         )
         Text(
-            text = "차단된 사용자입니다",
+            text = stringResource(com.oq.barnote.R.string.cadandoen_sayongjaibnida),
             style = MaterialTheme.typography.labelSmall,
             color = secondary.copy(alpha = 0.6f),
             modifier = Modifier.padding(top = 8.dp),

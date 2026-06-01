@@ -62,7 +62,6 @@ Para fotos de iCloud o panorámicas, ábrelas primero en la aplicación Fotos y 
     <string name="nyeon">Año</string>
     <string name="nyeon_weol_seontaeg">Seleccionar año/mes</string>
     <string name="picker_no_content">Sin contenido.</string>
-    <string name="picker_year_month_title">Seleccionar año/mes</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Error al guardar en la biblioteca de fotos.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">Guardado en la biblioteca de fotos.</string>
     <string name="sns_share_title">Compartir</string>
@@ -80,4 +79,12 @@ Para fotos de iCloud o panorámicas, ábrelas primero en la aplicación Fotos y 
     <string name="weekday_wed">Mié</string>
     <string name="weol">Mes</string>
     <string name="yeolgi">Abrir</string>
+    <string name="sns_share_instagram">Historia de Instagram</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">Otras opciones</string>
+    <string name="notification_reservation_channel_name">Recordatorio de nota de cata</string>
+    <string name="notification_reservation_title">¡Es hora de escribir tu nota de cata!</string>
+    <string name="notification_reservation_body">Por favor completa el registro de %s 📝</string>
+    <string name="notification_new_follower_channel_name">Nuevo Seguidor</string>
+    <string name="notification_new_note_channel_name">Nueva Nota</string>
 </resources>

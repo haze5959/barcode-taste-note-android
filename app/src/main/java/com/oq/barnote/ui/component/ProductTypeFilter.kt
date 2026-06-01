@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -48,7 +49,7 @@ fun ProductTypeFilter(
         horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
         FilterChip(
-            label = "전체",
+            label = stringResource(com.oq.barnote.R.string.jeonce),
             isSelected = selectedType == null,
             onClick = { onSelect(null) },
             accent = accent,

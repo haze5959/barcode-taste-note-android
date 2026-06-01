@@ -111,6 +111,7 @@
     <string name="gaeinjeongbo_ceoribangcim">개인정보 처리방침</string>
     <string name="gaeui_hangmog_pyeongga_wanryo">%s개의 항목 평가 완료</string>
     <string name="gaeunhan">개운한</string>
+    <string name="gaelreori">갤러리</string>
     <string name="gaibil">가입일</string>
     <string name="gajang_manhi_neuggyeojin_hyangmi">가장 많이 느껴진 향미</string>
     <string name="gajyeool_peiji_1peijidang_dgae">가져올 페이지 (1페이지당 %d개)</string>
@@ -298,6 +299,7 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="juro_3hoe_jeungryuhae_budeureoun_ailraendeu_wiseuki_gabyeobg">주로 3회 증류해 부드러운 아일랜드 위스키. 가볍고 깔끔한 스타일.</string>
     <string name="juryu_taib">주류 타입</string>
     <string name="kaenadian_wiseuki">캐나디안 위스키</string>
+    <string name="kamera">카메라</string>
     <string name="kapucino">카푸치노</string>
     <string name="keulraesig_kagteil">클래식 칵테일</string>
     <string name="keuraepeuteu_kagteil">크래프트 칵테일</string>
@@ -379,9 +381,11 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="ogsusu_51_isang_migugeseo_sae_okeutonge_sugseonghan_wiseuki">옥수수 51% 이상, 미국에서 새 오크통에 숙성한 위스키. 바닐라·캐러멜 풍미.</string>
     <string name="okeu_namu_songjin">오크, 나무, 송진</string>
     <string name="okeutongeseo_orae_sugseonghae_saegi_jitgo_pungmiga_mugjighan">오크통에서 오래 숙성해 색이 짙고 풍미가 묵직한 럼. 캐러멜·향신료 뉘앙스.</string>
+    <string name="oryu">오류</string>
     <string name="oryu_jebo">오류 제보</string>
     <string name="oryu_jebohagi">오류 제보하기</string>
     <string name="oryu_naeyongeul_jasehi_jagseonghaejuseyo">오류 내용을 자세히 작성해주세요.</string>
+    <string name="hwagin">확인</string>
     <string name="palroing">팔로잉</string>
     <string name="palroing_cwiso">팔로잉 취소</string>
     <string name="palroinghaneun_yujeoga_eobsseubnida">팔로잉하는 유저가 없습니다.</string>
@@ -461,6 +465,9 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="seobiseu_iyongyaggwan">서비스 이용약관</string>
     <string name="seoljeong">설정</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">설정에서 알림을 허용해주세요.</string>
+    <string name="alrim_gwonhani_pilyohabnida">알림 권한이 필요합니다.</string>
+    <string name="kamera_gwonhani_pilyohabnida">카메라 권한이 필요합니다.</string>
+    <string name="seoljeongeseo_kamerareul_heoyonghaejuseyo">설정에서 카메라를 허용해주세요.</string>
     <string name="seontaeghan_jepum">선택한 제품</string>
     <string name="seontaeghan_jepum_jeongboreul_hwaginhaseyo">선택한 제품 정보를 확인하세요</string>
     <string name="seukaen_hanaro_wanseongdoeneun_sieumnoteu">스캔 하나로 완성되는 시음노트</string>
@@ -548,4 +555,26 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="yujeo_geomsaeg">유저 검색</string>
     <string name="yujeo_noteu">유저 노트</string>
     <string name="yujeoreul_cajeul_su_eobsseubnida">\'%s\' 유저를 찾을 수 없습니다.</string>
+    <string name="beonyeog">번역</string>
+    <string name="cadan_haeje">차단 해제</string>
+    <string name="beonyeog_gyeolgwa">번역 결과</string>
+    <string name="seontaeghan_yeyageul_sagjehasigessseubnigga">이 사용자를 차단하시겠습니까? 차단 시 이 사용자가 작성한 모든 노트가 숨겨집니다.</string>
+    <string name="sieum_noteu_yeyag_alrim_caeneol">시음 노트 예약</string>
+    <string name="url_bogsa">URL 복사</string>
+    <string name="i_jepumui_jalmosdoen_jeongbo_singo_hwagin">이 제품의 잘못된 정보를 신고하시겠습니까?</string>
+    <string name="masyeobon_mogrogeseo_jegeohagi_btn">마셔본 목록에서 제거하기</string>
+    <string name="giroghdoen_sangse_noteuga_eobseubnida">기록된 상세 노트가 없습니다.</string>
+    <string name="jagseong_il">작성일</string>
+    <string name="weonbon_bogi">원본 보기</string>
+    <string name="palrowo">팔로워</string>
+    <string name="jagseong_jung_noteureul_dadeulggayo">작성 중인 노트를 닫을까요?</string>
+    <string name="jagseong_jung_naeyongi_modu_sarajibnida">작성 중인 내용이 모두 사라집니다.</string>
+    <string name="geoeui_da_wasseoyo">거의 다 왔어요!</string>
+    <string name="rogeuinhago_coejong_dangyereul_wanryohaseyo">로그인하고 최종 단계를 완료하세요.\n작성한 내용은 그대로 안전하게 유지돼요!</string>
+    <string name="gateun_ireumui_jepumi_imi_isseoyo_geomsaeghagireo_gaboseyo">같은 이름의 제품이 이미 있어요. 검색해서 확인해보세요.</string>
+    <string name="jepum_seolmyeongina_imijireul_biwoduasimyeon_aiga_jadong">제품 설명이나 이미지를 비워두시면, AI가 자동으로 정보를 채워드립니다.</string>
+    <string name="dayanghan_juryureul_pog_seontaeghal_su_isseoyo">다양한 주류를 폭넓게 선택할 수 있어요</string>
+    <string name="ibu_annae">IBU 안내</string>
+    <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">예약을 취소하려면 삭제 버튼을 누르세요.</string>
+    <string name="gumae_bogwon">구매 복원</string>
 </resources>

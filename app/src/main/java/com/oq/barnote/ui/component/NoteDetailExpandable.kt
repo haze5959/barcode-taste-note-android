@@ -1,10 +1,12 @@
 package com.oq.barnote.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
@@ -92,28 +95,29 @@ fun NoteDetailExpandable(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "상세 평가",
-                        style = MaterialTheme.typography.titleSmall.copy(
+                        text = stringResource(com.oq.barnote.R.string.sangse_pyeongga),
+                        // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                         ),
                         color = textPrimary,
                     )
                     if (isOption) {
                         Spacer(modifier = Modifier.padding(start = 6.dp))
-                        InfoTagView(text = "옵션", style = InfoTagStyle.Material)
+                        InfoTagView(text = stringResource(com.oq.barnote.R.string.obsyeon), style = InfoTagStyle.Material)
                     }
                     Spacer(modifier = Modifier.padding(start = 6.dp))
-                    InfoPopOver(title = "상세 평가 항목 설명", items = popoverItems)
+                    InfoPopOver(title = stringResource(com.oq.barnote.R.string.sangse_pyeongga_hangmog_seolmyeong), items = popoverItems)
                 }
                 if (!isExpanded && details.isNotEmpty()) {
                     Text(
-                        text = "${details.size}개의 항목 평가 완료",
+                        text = stringResource(com.oq.barnote.R.string.lldgaeui_hangmog_pyeongga_wanryo, details.size),
                         style = MaterialTheme.typography.bodySmall,
                         color = accent,
                     )
                 } else {
                     Text(
-                        text = "입 안에서 느껴지는 맛과 감정 등을 추가로 기록해보세요.",
+                        text = stringResource(com.oq.barnote.R.string.ib_aneseo_neuggyeojineun_masgwa_gamjeong_deungeul_cugaro_gir),
                         style = MaterialTheme.typography.bodySmall,
                         color = secondary,
                     )
@@ -128,10 +132,18 @@ fun NoteDetailExpandable(
         }
 
         // Expanded Content
+        // iOS: withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) + opacity/move transition.
+        // Compose 등가 — fade + expand/shrink 세로, spring 스펙으로 부드럽게 (B1).
         AnimatedVisibility(
             visible = isExpanded,
-            enter = fadeIn() + slideInHorizontally(),
-            exit = fadeOut() + slideOutHorizontally(),
+            enter = fadeIn(animationSpec = spring(dampingRatio = 0.8f)) +
+                expandVertically(
+                    animationSpec = spring(
+                        dampingRatio = 0.8f,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                ),
+            exit = fadeOut() + shrinkVertically(),
         ) {
             Column(
                 modifier = Modifier

@@ -14,9 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,17 +22,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
 import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.NoteInfo
-import com.oq.barnote.core.domain.PublicScope
 import com.oq.barnote.core.oqcore.util.RelativeTime
 import com.oq.barnote.core.oqcore.views.SkeletonView
+import com.oq.barnote.extension.ratingStarText
 
 /**
  * 노트 리스트 행. iOS `NoteListRowView` 에 대응.
@@ -90,7 +87,8 @@ fun NoteListRow(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Icon(
-                            imageVector = info.note.publicScope.scopeIcon(),
+                            // designsystem 의 PublicScope.icon() 사용 — iOS systemName(SF Symbol) 매핑
+                            imageVector = info.note.publicScope.icon(),
                             contentDescription = null,
                             tint = secondary,
                             modifier = Modifier.size(13.dp),
@@ -106,7 +104,7 @@ fun NoteListRow(
                     val rating = info.getRating()
                     if (rating != null && rating > 0f) {
                         Text(
-                            text = "⭐️ %.1f".format(rating),
+                            text = rating.ratingStarText(),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Medium,
                             ),
@@ -114,7 +112,7 @@ fun NoteListRow(
                         )
                     } else {
                         Text(
-                            text = "📝 테이스팅 노트 미작성",
+                            text = stringResource(com.oq.barnote.R.string.teiseuting_noteu_mijagseong),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Medium,
                             ),
@@ -153,8 +151,3 @@ fun NoteListRow(
     }
 }
 
-private fun PublicScope.scopeIcon(): ImageVector = when (this) {
-    PublicScope.Private -> Icons.Filled.Lock
-    PublicScope.FriendsOnly -> Icons.Filled.Group
-    PublicScope.Public -> Icons.Filled.Groups
-}

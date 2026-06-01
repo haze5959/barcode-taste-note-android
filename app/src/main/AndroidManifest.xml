@@ -16,12 +16,31 @@
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- Kakao SDK: Android 11+ package visibility 정책. KakaoTalk 앱 설치 여부 조회 시 필요.
+         iOS `LSApplicationQueriesSchemes: kakaolink` 대응. -->
+    <queries>
+        <package android:name="com.kakao.talk" />
+    </queries>
+
     <application
         android:name=".BarNoteApp"
         android:allowBackup="true"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+
+        <!-- ML Kit Barcode 모델 사전 다운로드 (앱 설치 직후) -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
+
+        <!-- Firebase Analytics: 자동 screen view 보고 비활성 (iOS `FirebaseAutomaticScreenReportingEnabled: false` 대응).
+             현재 명시적 screen view 호출도 없으므로 사실상 화면 추적 미사용. -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -39,6 +58,40 @@
                     android:host="${auth0Domain}"
                     android:pathPrefix="/android/${applicationId}/callback"
                     android:scheme="${auth0Scheme}" />
+            </intent-filter>
+
+            <!-- App deep link (barnote://note/{uuid}, barnote://user/{uuid}) -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="barnote" android:host="note" />
+                <data android:scheme="barnote" android:host="user" />
+            </intent-filter>
+
+            <!-- 웹 App Link (https://barnote.net/note/{uuid}, https://barnote.net/user/{uuid})
+                 iOS Universal Links 등가. autoVerify="true" 로 App Links 자동 검증 활성화 →
+                 검증 성공 시 "어떤 앱으로 열까요?" 다이얼로그 없이 곧바로 앱이 처리.
+
+                 ⚠️ 서버 의존: 검증을 위해 https://barnote.net/.well-known/assetlinks.json 호스팅 필요
+                 (iOS apple-app-site-association 과 동일 모델). 템플릿: app/src/main/assetlinks.template.json.
+                 서버 호스팅 전까지는 https 링크가 시스템 브라우저로 폴백되며, 앱 내 deep link 는
+                 barnote:// 커스텀 스킴(아래 verify 불필요)으로 항상 동작합니다. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="barnote.net" android:pathPrefix="/note/" />
+                <data android:scheme="https" android:host="barnote.net" android:pathPrefix="/user/" />
+            </intent-filter>
+
+            <!-- Kakao SDK 콜백 (카카오톡 공유 / 향후 카카오 로그인 콜백용).
+                 iOS `CFBundleURLSchemes: kakao{appKey}` 대응. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="kakao${kakaoNativeAppKey}" android:host="oauth" />
             </intent-filter>
         </activity>
 
@@ -60,14 +113,21 @@
             </intent-filter>
         </receiver>
 
-        <!-- 알림 탭 처리 -->
-        <receiver
-            android:name="com.oq.barnote.core.data.notification.NotificationTapReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.oq.barnote.NOTE_RESERVATION_TAP" />
-            </intent-filter>
-        </receiver>
+        <!-- 알림 탭 처리: 별도 Receiver 가 없습니다.
+             모든 알림은 PendingIntent.getActivity 로 MainActivity 를 직접 launch 하고,
+             MainActivity 가 NotificationTapDispatch.parseEvent 로 이벤트를 추출해
+             NotificationSchedulerImpl.emitEvent 합니다 (iOS `didReceive response` 등가). -->
+
+        <!-- 시음노트 데이터 내보내기 등 외부 앱과 임시 파일 공유 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

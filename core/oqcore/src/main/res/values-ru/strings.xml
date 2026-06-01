@@ -62,7 +62,6 @@
     <string name="nyeon">Год</string>
     <string name="nyeon_weol_seontaeg">Выбрать год/месяц</string>
     <string name="picker_no_content">Нет контента.</string>
-    <string name="picker_year_month_title">Выберите год/месяц</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Не удалось сохранить в фотопленку.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">Сохранено в фотопленку.</string>
     <string name="sns_share_title">Поделиться</string>
@@ -80,4 +79,12 @@
     <string name="weekday_wed">Ср</string>
     <string name="weol">Месяц</string>
     <string name="yeolgi">Открыть</string>
+    <string name="sns_share_instagram">Instagram Stories</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">Другие варианты</string>
+    <string name="notification_reservation_channel_name">Напоминание о дегустации</string>
+    <string name="notification_reservation_title">Время написать заметку о дегустации!</string>
+    <string name="notification_reservation_body">Пожалуйста, завершите регистрацию %s 📝</string>
+    <string name="notification_new_follower_channel_name">Новый подписчик</string>
+    <string name="notification_new_note_channel_name">Новая заметка</string>
 </resources>

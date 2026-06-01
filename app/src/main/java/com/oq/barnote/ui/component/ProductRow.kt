@@ -26,7 +26,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
+import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.ProductInfo
+import com.oq.barnote.extension.ratingStarText
 import com.oq.barnote.core.oqcore.ui.component.InfoTagStyle
 import com.oq.barnote.core.oqcore.ui.component.InfoTagView
 import com.oq.barnote.core.oqcore.views.SkeletonView
@@ -52,12 +54,12 @@ fun ProductRow(
             .background(surfacePrimary),
     ) {
         if (info != null) {
-            // 배경 이미지
+            // 배경 이미지 (이미지 없을 때 iOS 처럼 제품 타입 심볼을 fallback 으로 표시, B14)
             BTNImage(
                 path = info.displayImageIds.firstOrNull(),
                 modifier = Modifier.fillMaxSize(),
                 cornerRadius = Dimens.Radius,
-                fallbackIcon = null,
+                fallbackIcon = info.product.type.icon(),
             )
 
             // 하단 그라데이션
@@ -86,7 +88,7 @@ fun ProductRow(
                 Column(verticalArrangement = Arrangement.spacedBy(Dimens.Padding)) {
                     info.getRating()?.let { rating ->
                         InfoTagView(
-                            text = "⭐️ %.1f".format(rating),
+                            text = rating.ratingStarText(),
                             style = InfoTagStyle.Material,
                         )
                     }

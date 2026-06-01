@@ -1,0 +1,140 @@
+package com.oq.barnote.ui.mypage
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.oq.barnote.core.domain.AuthStore
+import com.oq.barnote.core.domain.UserStore
+import com.oq.barnote.core.oqcore.util.AppController
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/**
+ * 마이페이지 ViewModel. iOS `MyPageFeature` 에 대응.
+ *
+ * - 로그인 상태에 따라 `myInfo` / 카운트 등을 갱신
+ * - `AuthStore.isLoggedIn` 을 구독해 로그인 / 로그아웃 시 자동 재조회
+ * - 네비게이션은 [navEffect] 채널로 전달
+ */
+@HiltViewModel
+class MyPageViewModel @Inject constructor(
+    private val authStore: AuthStore,
+    private val userStore: UserStore,
+    private val appController: AppController,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(MyPageUiState())
+    val uiState: StateFlow<MyPageUiState> = _uiState.asStateFlow()
+
+    private val _navEffect = Channel<MyPageNavEffect>(capacity = Channel.BUFFERED)
+    val navEffect = _navEffect.receiveAsFlow()
+
+    init {
+        // iOS `onReceive(appController.$isLogin)` 대응. 최초 값 이후 변화만 반응 (재진입 시 onAppear 가 별도로 처리).
+        viewModelScope.launch {
+            authStore.isLoggedIn
+                .drop(1)
+                .distinctUntilChanged()
+                .collect { _ ->
+                    if (!_uiState.value.isLoading) checkLogin()
+                }
+        }
+    }
+
+    fun onEvent(event: MyPageUiEvent) {
+        when (event) {
+            MyPageUiEvent.OnAppear -> handleOnAppear()
+            MyPageUiEvent.TappedLogin -> emitNav(MyPageNavEffect.Login)
+            MyPageUiEvent.TappedLogout -> handleLogout()
+            MyPageUiEvent.TappedMyInfo -> emitNav(MyPageNavEffect.UserDetail)
+            MyPageUiEvent.TappedMyNotes -> emitNav(MyPageNavEffect.NoteList(isMine = true))
+            MyPageUiEvent.TappedFavorites ->
+                emitNav(MyPageNavEffect.ProductList(ProductListType.Favorites))
+            MyPageUiEvent.TappedFollowing ->
+                emitNav(MyPageNavEffect.UserList(UserListType.Following))
+            MyPageUiEvent.TappedFollowers ->
+                emitNav(MyPageNavEffect.UserList(UserListType.Followers))
+            MyPageUiEvent.TappedTastedProducts ->
+                emitNav(MyPageNavEffect.ProductList(ProductListType.Tasted))
+            MyPageUiEvent.TappedNeededReviewNotes ->
+                emitNav(MyPageNavEffect.NeededReviewNoteList)
+            MyPageUiEvent.TappedProfile -> {
+                _uiState.value.myInfo?.id?.let { id ->
+                    emitNav(MyPageNavEffect.UserNoteList(userId = id))
+                }
+            }
+            MyPageUiEvent.TappedSubscribe -> emitNav(MyPageNavEffect.Subscribe)
+        }
+    }
+
+    /**
+     * iOS `onAppear` 의 두 갈래:
+     *  - 이미 로드된 상태 + 새로고침 불필요 → 구독 상태만 경량 갱신
+     *  - 그 외 → 전체 재조회 (`checkLogin`)
+     */
+    private fun handleOnAppear() {
+        val state = _uiState.value
+        if (state.isLoading) return
+
+        if (state.myInfo != null && !appController.neededToRefresh) {
+            viewModelScope.launch {
+                val isSubscribed = userStore.checkSubscriptionStatus()
+                _uiState.update { it.copy(isSubscribed = isSubscribed) }
+            }
+            return
+        }
+        appController.neededToRefresh = false
+        checkLogin()
+    }
+
+    private fun checkLogin() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            if (userStore.isLoggedIn()) {
+                fetchMyInfo()
+            } else {
+                _uiState.update { MyPageUiState(isLoading = false) }
+            }
+        }
+    }
+
+    private suspend fun fetchMyInfo() {
+        val user = userStore.getUser()
+        val noteCount = userStore.noteCount.value
+        val favoriteCount = userStore.getFavoriteProductIds().size
+        val neededReviewProduct = userStore.neededReviewProduct.value ?: false
+        val followerCount = userStore.followerCount.value ?: 0
+        val isSubscribed = userStore.checkSubscriptionStatus()
+
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                myInfo = user,
+                noteCount = noteCount,
+                favoriteCount = favoriteCount,
+                neededReviewProduct = neededReviewProduct,
+                followerCount = followerCount,
+                isSubscribed = isSubscribed,
+            )
+        }
+    }
+
+    private fun handleLogout() {
+        viewModelScope.launch {
+            authStore.clear(clearWebSession = true)
+            // AuthStore.isLoggedIn flow 가 false 로 전환되어 checkLogin 이 자동 호출됨.
+        }
+    }
+
+    private fun emitNav(effect: MyPageNavEffect) {
+        viewModelScope.launch { _navEffect.send(effect) }
+    }
+}

@@ -62,7 +62,6 @@ Para fotos do iCloud ou panorâmicas, abra-as primeiro no aplicativo Fotos e ten
     <string name="nyeon">Ano</string>
     <string name="nyeon_weol_seontaeg">Selecionar ano/mês</string>
     <string name="picker_no_content">Sem conteúdo.</string>
-    <string name="picker_year_month_title">Selecionar ano/mês</string>
     <string name="sajinceob_jeojange_silpaehaessseubnida">Falha ao salvar na biblioteca de fotos.</string>
     <string name="sajinceobe_jeojangdoeeossseubnida">Salvo na biblioteca de fotos.</string>
     <string name="sns_share_title">Compartilhar</string>
@@ -80,4 +79,12 @@ Para fotos do iCloud ou panorâmicas, abra-as primeiro no aplicativo Fotos e ten
     <string name="weekday_wed">Qua</string>
     <string name="weol">Mês</string>
     <string name="yeolgi">Abrir</string>
+    <string name="sns_share_instagram">Story do Instagram</string>
+    <string name="sns_share_kakao">KakaoTalk</string>
+    <string name="sns_share_other">Outras opções</string>
+    <string name="notification_reservation_channel_name">Lembrete de nota de degustação</string>
+    <string name="notification_reservation_title">É hora de escrever sua nota de degustação!</string>
+    <string name="notification_reservation_body">Por favor, complete o registro de %s 📝</string>
+    <string name="notification_new_follower_channel_name">Novo Seguidor</string>
+    <string name="notification_new_note_channel_name">Nova Nota</string>
 </resources>

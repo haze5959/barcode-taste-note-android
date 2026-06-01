@@ -22,6 +22,12 @@ interface MediaAttachmentPicker {
         val maxSelection: Int = 5,
         /** 카메라 직접 촬영을 허용할지. */
         val allowsCamera: Boolean = true,
+        /**
+         * 선택 후 이미지 편집기 (`OQImageEditor`) 를 띄울지 여부.
+         * iOS 의 `OQMediaAttachmentPicker(useEditor: true)` 에 대응.
+         * 다중 선택의 경우 각 이미지를 순차적으로 편집한다.
+         */
+        val useEditor: Boolean = false,
     )
 
     enum class Type { Photo, Video }

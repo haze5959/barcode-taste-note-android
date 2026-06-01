@@ -11,10 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,9 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
@@ -51,7 +51,7 @@ fun NoteFlavorSelector(
     val divider = colorResource(R.color.divider)
     val surfaceSecondary = colorResource(R.color.surface_secondary)
     val textPrimary = colorResource(R.color.text_primary)
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberOQHaptic()
 
     // InfoPopOver 에 전달할 (title, detail) 페어. Composable 컨텍스트에서 미리 만든다.
     val flavorItems: List<Pair<String, String>> = Flavor.values().map { flavor ->
@@ -64,28 +64,35 @@ fun NoteFlavorSelector(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "풍미 선택",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                text = stringResource(com.oq.barnote.R.string.pungmi_seontaeg),
+                // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
             Spacer(modifier = Modifier.padding(start = 6.dp))
-            InfoTagView(text = "옵션", style = InfoTagStyle.Normal)
+            InfoTagView(text = stringResource(com.oq.barnote.R.string.obsyeon), style = InfoTagStyle.Normal)
             Spacer(modifier = Modifier.weight(1f))
-            InfoPopOver(title = "풍미 상세 설명", items = flavorItems)
+            InfoPopOver(title = stringResource(com.oq.barnote.R.string.pungmi_sangse_seolmyeong), items = flavorItems)
         }
         Text(
-            text = "느껴지는 향과 맛들을 선택해주세요!",
+            text = stringResource(com.oq.barnote.R.string.neuggyeojineun_hyanggwa_masdeuleul_seontaeghaejuseyo),
             style = MaterialTheme.typography.bodyMedium,
             color = secondary,
         )
+        // iOS: GridItem(.adaptive(minimum: smallRowWSize)), 버튼 frame(maxWidth: .infinity).
+        // verticalScroll 부모(AddNote/EditNote/ProductDetail) 안이라 LazyVerticalGrid 는 중첩 스크롤
+        // 크래시 위험이 있어 사용하지 않고, FlowRow + maxItemsInEachRow + weight(1f) 로 한 행을
+        // 균등 폭(고정 140dp 대신)으로 채운다 (B5).
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
             verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+            maxItemsInEachRow = 2,
         ) {
             Flavor.values().forEach { flavor ->
                 val isSelected = flavor in selectedFlavors
                 Row(
                     modifier = Modifier
+                        .weight(1f)
                         .clip(RoundedCornerShape(Dimens.Radius))
                         .background(
                             if (isSelected) accent.copy(alpha = 0.18f) else surfaceSecondary,
@@ -96,10 +103,10 @@ fun NoteFlavorSelector(
                             shape = RoundedCornerShape(Dimens.Radius),
                         )
                         .clickable {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            // iOS NoteFlavorSelectorView 와 동일: chip toggle 시 lightImpact.
+                            haptic.lightImpact()
                             onToggle(flavor)
                         }
-                        .width(140.dp)
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -109,11 +116,16 @@ fun NoteFlavorSelector(
                             fontWeight = FontWeight.Medium,
                         ),
                         color = if (isSelected) accent else textPrimary,
+                        // iOS: lineLimit(1) + minimumScaleFactor(0.5). Compose 1.7 엔 autosize 가 없어
+                        // ellipsis 로 대체한다 (B7).
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     )
                     if (isSelected) {
                         Icon(
-                            imageVector = Icons.Filled.CheckCircle,
+                            // iOS: checkmark.seal.fill 에 가장 가까운 Material 아이콘 (B6).
+                            imageVector = Icons.Filled.Verified,
                             contentDescription = null,
                             tint = accent,
                         )

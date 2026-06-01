@@ -35,13 +35,20 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        tokenAuthenticator: TokenAuthenticator,
+    ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        // - [authInterceptor]: 매 요청에 Authorization 헤더 첨부 (every request)
+        // - [tokenAuthenticator]: 서버가 401 반환 시에만 호출되어 토큰 갱신 + 자동 재시도
+        //   (iOS `NetworkClient.failure(.unauthorized)` 자동 분기 대응)
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
+            .authenticator(tokenAuthenticator)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

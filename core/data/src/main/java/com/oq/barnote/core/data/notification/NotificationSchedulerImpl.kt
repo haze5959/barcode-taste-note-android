@@ -15,11 +15,12 @@ import androidx.core.content.getSystemService
 import com.oq.barnote.core.domain.NoteReservation
 import com.oq.barnote.core.domain.NotificationEvent
 import com.oq.barnote.core.domain.NotificationScheduler
+import com.oq.barnote.core.oqcore.R
 import com.oq.barnote.core.oqcore.utils.OQLog
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.serialization.json.Json
 import java.time.Instant
 import javax.inject.Inject
@@ -32,12 +33,16 @@ import javax.inject.Singleton
  *
  * - 예약 알림: [AlarmManager.setExactAndAllowWhileIdle] 로 정확 시간 알림.
  *   [Build.VERSION_CODES.S] (API 31)+ 에서는 SCHEDULE_EXACT_ALARM 권한 필요.
- * - 알림 탭 콜백: [NotificationTapReceiver] 가 broadcast 받아 [NotificationScheduler.eventStream] 로 전달.
+ * - 알림 탭 콜백: 알림 PendingIntent 가 MainActivity 를 launch 하고, MainActivity 가
+ *   [NotificationTapDispatch.parseEvent] 로 Intent extras 를 [com.oq.barnote.core.domain.NotificationEvent] 로
+ *   변환해 [emitEvent] 합니다 (iOS `didReceive response` 와 등가).
  * - 원격 푸시 (FCM data payload) 처리는 별도 `FirebaseMessagingService.onMessageReceived` 에서
- *   본 클래스의 [emitEvent] 를 호출해 동일 stream 으로 흘려보냅니다.
+ *   알림을 표시하고, 사용자 탭 시 위의 동일 경로로 [emitEvent] 흐릅니다.
  *
- * 권한 요청 (POST_NOTIFICATIONS) 자체는 UI 컨텍스트가 필요해 [requestAuthorization] 은 현재 권한 상태만
- * 조회합니다. 실제 권한 요청은 Activity / Composable 레벨에서 ActivityResultContracts 로 진행하세요.
+ * 권한 요청 (POST_NOTIFICATIONS) 자체는 UI 컨텍스트가 필요해 [isAuthorizationGranted] 는 권한
+ * **상태 조회만** 합니다. 실제 권한 요청 다이얼로그는 Activity / Composable 레벨에서
+ * `rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission())` 로 진행하세요
+ * (예: `app/ui/component/NotificationPermissionLauncher.kt`).
  */
 @Singleton
 class NotificationSchedulerImpl @Inject constructor(
@@ -49,10 +54,10 @@ class NotificationSchedulerImpl @Inject constructor(
         context.getSystemService() ?: error("NotificationManager unavailable")
 
     init {
-        ensureChannel()
+        ensureChannels()
     }
 
-    override suspend fun requestAuthorization(): Boolean {
+    override suspend fun isAuthorizationGranted(): Boolean {
         // Android 13+ : POST_NOTIFICATIONS 권한 체크
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val granted = ContextCompat.checkSelfPermission(
@@ -119,28 +124,64 @@ class NotificationSchedulerImpl @Inject constructor(
         notificationManager.cancel(id.hashCode())
     }
 
-    override fun eventStream(): SharedFlow<NotificationEvent> = events.asSharedFlow()
+    override fun eventStream(): Flow<NotificationEvent> = events.receiveAsFlow()
 
-    private fun ensureChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_NOTE_RESERVATION,
-                "시음 노트 예약",
-                NotificationManager.IMPORTANCE_DEFAULT,
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
+    /**
+     * 3종 NotificationChannel 을 보장 생성.
+     *
+     * iOS 는 단일 권한 모델 (UNAuthorizationOptions) 이지만 안드로이드 8.0+ 부터는 채널 단위로
+     * 사용자가 개별 ON/OFF / 중요도 / 사운드를 조정할 수 있어 알림의 성격에 따라 분리합니다:
+     *
+     * - [CHANNEL_NOTE_RESERVATION] : 시음 노트 작성 예약 알람 (사용자가 직접 예약)
+     * - [CHANNEL_NEW_FOLLOWER]     : 새 팔로워 (소셜 — 사용자가 끄고 싶을 가능성 있음)
+     * - [CHANNEL_NEW_NOTE]         : 팔로잉 유저의 새 노트
+     *
+     * 모두 IMPORTANCE_DEFAULT (banner + sound) — iOS `[.banner, .sound, .badge]` 와 같은 강도.
+     */
+    private fun ensureChannels() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+        val reservation = NotificationChannel(
+            CHANNEL_NOTE_RESERVATION,
+            context.getString(R.string.notification_reservation_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        )
+        val newFollower = NotificationChannel(
+            CHANNEL_NEW_FOLLOWER,
+            context.getString(R.string.notification_new_follower_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        )
+        val newNote = NotificationChannel(
+            CHANNEL_NEW_NOTE,
+            context.getString(R.string.notification_new_note_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        )
+        notificationManager.createNotificationChannels(
+            listOf(reservation, newFollower, newNote),
+        )
     }
 
     companion object {
         const val CHANNEL_NOTE_RESERVATION = "note_reservation"
+        const val CHANNEL_NEW_FOLLOWER = "new_follower"
+        const val CHANNEL_NEW_NOTE = "new_note"
 
-        /** 알림 탭 / 도착 등 모든 이벤트를 전역적으로 broadcast. */
-        internal val events = MutableSharedFlow<NotificationEvent>(extraBufferCapacity = 16)
+        /**
+         * 알림 탭 이벤트 전용 채널.
+         *
+         * Channel 을 쓰는 이유 — `MutableSharedFlow(replay = 0)` 는 emit 시점에 collector 가 없으면 값을
+         * 잃어버립니다. 콜드 스타트로 알림에서 앱이 깨어나면 MainActivity.onCreate 가 emit 하는 시점에
+         * 아직 [com.oq.barnote.ui.navigation.AppNavigationViewModel] 의 collector 가 활성화되어 있지
+         * 않아 이벤트가 누락됩니다. Channel(BUFFERED) 은 consumer 가 등장할 때까지 값을 보관하므로
+         * VM 의 collect 가 시작되는 순간 안전하게 전달됩니다 (`Channel.BUFFERED` = 기본 64 슬롯).
+         *
+         * 단점: 단일 consumer 전제. 두 곳에서 collect 하면 이벤트가 한 쪽에만 전달됩니다.
+         */
+        internal val events: Channel<NotificationEvent> = Channel(Channel.BUFFERED)
 
-        /** 외부(예: FirebaseMessagingService) 에서 이벤트 주입할 때 사용. */
+        /** 외부(예: FirebaseMessagingService, MainActivity) 에서 이벤트 주입할 때 사용. */
         fun emitEvent(event: NotificationEvent) {
-            events.tryEmit(event)
+            events.trySend(event)
         }
     }
 }

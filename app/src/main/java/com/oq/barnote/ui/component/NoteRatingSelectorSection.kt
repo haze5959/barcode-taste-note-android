@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,12 +45,13 @@ fun NoteRatingSelectorSection(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "별점",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                text = stringResource(com.oq.barnote.R.string.byeoljeom),
+                // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
             if (isRequired) {
                 Spacer(modifier = Modifier.padding(start = 6.dp))
-                InfoTagView(text = "필수", style = InfoTagStyle.Accent)
+                InfoTagView(text = stringResource(com.oq.barnote.R.string.pilsu), style = InfoTagStyle.Accent)
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
@@ -62,12 +64,13 @@ fun NoteRatingSelectorSection(
             )
         }
         Text(
-            text = "별을 터치하거나 드래그하면 0.5점 단위로 선택돼요.",
+            text = stringResource(com.oq.barnote.R.string.byeoleul_teocihageona_deuraegeuhamyeon_0_5jeom_danwiro_seont),
             style = MaterialTheme.typography.bodySmall,
             color = secondary,
         )
         RatingInputView(
-            value = rating.coerceAtLeast(1),
+            // iOS: raw rating 그대로 전달 (0 허용) — 숫자 라벨과 별 표시 불일치 방지.
+            value = rating,
             onValueChange = onRatingChange,
             modifier = Modifier.fillMaxWidth(),
             size = 30.dp,

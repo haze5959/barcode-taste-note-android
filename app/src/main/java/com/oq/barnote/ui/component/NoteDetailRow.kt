@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
@@ -46,19 +47,21 @@ import com.oq.barnote.extension.title
 /**
  * 노트 상세 행 (좌측 이미지 + 우측 본문). iOS `NoteDetailRowView` 에 대응.
  *
- * @param isBlocked ViewModel 에서 미리 계산.
+ * 차단된 사용자 여부는 [rememberIsUserBlocked] 가 내부에서 자동 조회합니다 (iOS `.task(id: userId)`
+ * 등가). 호출자 ViewModel 이 미리 계산해서 넘길 필요가 없으며, N+1 으로 호출자가 잊어 차단 효과가
+ * 적용되지 않는 버그가 발생하지 않습니다.
  */
 @Composable
 fun NoteDetailRow(
     info: NoteInfo?,
     modifier: Modifier = Modifier,
-    isBlocked: Boolean = false,
 ) {
     val accent = colorResource(R.color.accent_color)
     val divider = colorResource(R.color.divider)
     val secondary = colorResource(R.color.text_secondary)
     val surfacePrimary = colorResource(R.color.surface_primary)
     val textPrimary = colorResource(R.color.text_primary)
+    val isBlocked = rememberIsUserBlocked(info?.user?.id)
 
     Box(
         modifier = modifier
@@ -88,7 +91,7 @@ fun NoteDetailRow(
                 )
                 Spacer(modifier = Modifier.width(Dimens.Spacing))
                 Text(
-                    text = "차단된 사용자입니다",
+                    text = stringResource(com.oq.barnote.R.string.cadandoen_sayongjaibnida),
                     style = MaterialTheme.typography.bodyMedium,
                     color = secondary.copy(alpha = 0.6f),
                 )
@@ -109,9 +112,12 @@ fun NoteDetailRow(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         if (info.note.publicScope != PublicScope.Public) {
+                            // iOS NoteDetailRowView 의 InfoTagView(text: publicScope.title, systemName: ...)
+                            // 와 동등 — Material 변종 + 다국어 title + leadingIcon (Material icon).
                             InfoTagView(
-                                text = scopeLabel(info.note.publicScope),
+                                text = info.note.publicScope.title(),
                                 style = InfoTagStyle.Material,
+                                leadingIcon = info.note.publicScope.icon(),
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
@@ -148,14 +154,14 @@ fun NoteDetailRow(
                             verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
                         ) {
                             Text(
-                                text = "📝 테이스팅 노트 미작성",
+                                text = stringResource(com.oq.barnote.R.string.teiseuting_noteu_mijagseong),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontWeight = FontWeight.Bold,
                                 ),
                                 color = accent,
                             )
                             Text(
-                                text = "이 제품에 대한 경험을 기록해 보세요.",
+                                text = stringResource(com.oq.barnote.R.string.i_jepume_daehan_gyeongheomeul_giroghae_boseyo),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = secondary,
                             )
@@ -222,8 +228,3 @@ fun NoteDetailRow(
     }
 }
 
-private fun scopeLabel(scope: PublicScope): String = when (scope) {
-    PublicScope.Private -> "🔒"
-    PublicScope.FriendsOnly -> "👥"
-    PublicScope.Public -> "🌐"
-}
