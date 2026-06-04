@@ -186,8 +186,9 @@ internal fun UserDetailScreen(
         }
 
         if (state.isEditingProfile) {
-            // iOS `.presentationDetents([.medium, .large])` 대응 — 부분(중간) 높이에서도 멈출 수 있게.
-            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+            // 시트를 처음부터 최대 높이(Expanded)로 띄워 모든 요소 + 하단 패딩까지 보이게 한다.
+            // (중간 detent 로 두면 자기소개 텍스트필드 하단이 잘려 보임)
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
                 onDismissRequest = { onEvent(UserDetailUiEvent.SetEditingProfile(false)) },
                 sheetState = sheetState,
@@ -674,7 +675,9 @@ private fun EditProfileSheet(
                         .offset(x = Dimens.Padding, y = Dimens.Padding)
                         .clip(CircleShape)
                         .background(surfaceSecondary)
-                        .padding(Dimens.Padding),
+                        .padding(Dimens.Padding)
+                        // 메인 프로필(ProfileSection)의 카메라 버튼과 동일 크기 — 글리프 12dp + padding(8) ≈ 28dp 원.
+                        .size(12.dp),
                 )
             }
             Text(
