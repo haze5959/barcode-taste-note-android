@@ -137,7 +137,9 @@ class NoteListViewModel @Inject constructor(
                     appController.neededToRefresh = false
                     val state = _uiState.value
                     if (state.viewMode == NoteListViewMode.Calendar) {
-                        jumpToMonth(state.currentMonth)
+                        // 선택 날짜를 유지한 채 점 + 선택 날짜 노트 목록 재조회 (삭제/추가 반영).
+                        // iOS `.task` 의 calendar 분기(`fetchCalendarData`) 대응.
+                        refreshCalendar()
                     } else {
                         fetch(reset = true)
                     }
@@ -273,6 +275,42 @@ class NoteListViewModel @Inject constructor(
             repository.getNoteDetails(noteIds).fold(
                 onSuccess = { notes ->
                     _uiState.update { it.copy(selectedDateNotes = notes) }
+                },
+                onFailure = { appController.showError(it) },
+            )
+        }
+    }
+
+    /**
+     * 캘린더 새로고침 — iOS `.task` 의 calendar 분기(`fetchCalendarData`)에 대응하되 **선택 날짜를 유지**한다.
+     *
+     * 점(calendarData) 재조회 후, 선택된 날짜가 있으면 그 날짜의 노트 목록([NoteListUiState.selectedDateNotes])도
+     * 재조회한다. → 상세 화면에서 노트를 삭제하고 돌아왔을 때 캘린더 점과 선택 날짜의 리스트가 모두 갱신된다.
+     *
+     * 월 이동용 [jumpToMonth] 와 달리 `selectedDate` 를 초기화하지 않으므로, 보고 있던 날짜의 목록이
+     * 사라지지 않고 제자리에서 갱신된다 (삭제된 노트 제거 / 날짜에 노트가 없어지면 empty state).
+     */
+    private fun refreshCalendar() {
+        val state = _uiState.value
+        val month = state.currentMonth
+        val selected = state.selectedDate
+        viewModelScope.launch {
+            repository.fetchNoteIdsWithMonth(year = month.year, month = month.monthValue).fold(
+                onSuccess = { data ->
+                    _uiState.update { it.copy(calendarData = data) }
+                    if (selected != null) {
+                        val ids = data[selected.dayOfMonth].orEmpty()
+                        if (ids.isEmpty()) {
+                            _uiState.update { it.copy(selectedDateNotes = emptyList()) }
+                        } else {
+                            repository.getNoteDetails(ids).fold(
+                                onSuccess = { notes ->
+                                    _uiState.update { it.copy(selectedDateNotes = notes) }
+                                },
+                                onFailure = { appController.showError(it) },
+                            )
+                        }
+                    }
                 },
                 onFailure = { appController.showError(it) },
             )

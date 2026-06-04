@@ -10,6 +10,9 @@ plugins {
     // google-services.json 누락 시 plugin 자체가 빌드 실패 → 사용자 작업 필요 (RULES §7.4).
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
+    // Gradle Play Publisher (Play Console 자동 업로드). 서비스계정 JSON 이 있을 때만 적용(하단 조건부 apply)
+    // → 키 등록 전에는 일반 빌드/실행에 전혀 영향 없음.
+    alias(libs.plugins.play.publisher) apply false
 }
 
 // local.properties 에서 비밀값 로드. 키가 없으면 빈 문자열 폴백.
@@ -18,6 +21,12 @@ val localProps = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 fun localProp(key: String): String = localProps.getProperty(key, "")
+
+// ─── Release 서명 (Play 업로드용 AAB) ───
+// local.properties 의 release.* 키로 업로드 키스토어를 지정. 미설정 시 release 는 unsigned (현행 유지).
+//   release.storeFile / release.storePassword / release.keyAlias / release.keyPassword
+val releaseStoreFilePath = localProp("release.storeFile")
+val releaseKeystoreFile = releaseStoreFilePath.takeIf { it.isNotBlank() }?.let { rootProject.file(it) }
 
 android {
     namespace = "com.oq.barnote"
@@ -58,8 +67,22 @@ android {
         manifestPlaceholders["kakaoNativeAppKey"] = kakaoNativeAppKey
     }
 
+    signingConfigs {
+        // 업로드 키스토어 파일이 실제로 있을 때만 release 서명 설정 생성 (없으면 unsigned 유지).
+        if (releaseKeystoreFile != null && releaseKeystoreFile.exists()) {
+            create("release") {
+                storeFile = releaseKeystoreFile
+                storePassword = localProp("release.storePassword")
+                keyAlias = localProp("release.keyAlias")
+                keyPassword = localProp("release.keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // 서명 설정이 있으면 적용 (Play 업로드용 서명된 AAB), 없으면 unsigned.
+            signingConfig = signingConfigs.findByName("release")
             // R8 코드 축소/난독화 + 리소스 축소 활성화 (앱 크기/보안/성능).
             // keep 규칙은 proguard-rules.pro 참조 (Auth0 / kotlinx.serialization / Hilt / Retrofit /
             // Firebase / Kakao / ML Kit 등 리플렉션 사용 라이브러리).
@@ -84,6 +107,21 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+// ─── Gradle Play Publisher (Play Console 자동 업로드) ───
+// play-service-account.json (또는 local.properties 의 play.serviceAccountFile 경로)이 있을 때만 GPP 적용.
+// → 키 등록 전에는 일반 빌드/실행에 전혀 영향 없음. 등록 후 deploy-playstore.command 또는:
+//     gradlew publishReleaseBundle   (서명된 AAB 를 Play 트랙[기본 internal]에 업로드)
+val playServiceAccountFile =
+    rootProject.file(localProp("play.serviceAccountFile").ifEmpty { "play-service-account.json" })
+if (playServiceAccountFile.exists()) {
+    apply(plugin = "com.github.triplet.play")
+    configure<com.github.triplet.gradle.play.PlayPublisherExtension> {
+        serviceAccountCredentials.set(playServiceAccountFile)
+        track.set(localProp("play.track").ifEmpty { "internal" })
+        defaultToAppBundles.set(true)
     }
 }
 

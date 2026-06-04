@@ -1,16 +1,32 @@
 package com.oq.barnote.core.oqcore.utils
 
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RectF
+import android.graphics.Typeface
 import android.net.Uri
+import android.text.StaticLayout
+import android.text.TextPaint
+import android.text.TextUtils
 import androidx.annotation.StringRes
+import androidx.core.content.FileProvider
 import com.kakao.sdk.share.ShareClient
 import com.kakao.sdk.share.WebSharerClient
 import com.kakao.sdk.share.model.ImageUploadResult
 import com.oq.barnote.core.oqcore.R
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -57,21 +73,60 @@ class OQSNSShareManager @Inject constructor(
         }
     }
 
+    /**
+     * Instagram Stories 공유. iOS `shareToInstagramStory` 대응.
+     *
+     * 동작 흐름 (iOS 와 동일):
+     *  1. 배경 = 첫 이미지 URL 다운로드 → FileProvider content URI (없으면 그라디언트 #231557→#FF1361 폴백)
+     *  2. 스티커 = 프로필 + 닉/제목/설명 브랜드 카드 비트맵 ([buildStickerBitmap]) → FileProvider URI (interactive asset)
+     *  3. `com.instagram.share.ADD_TO_STORY` 인텐트로 Instagram 호출 (대상 앱에 URI read 권한 부여)
+     *  4. 미설치/실패 → Play 스토어 폴백 (iOS: App Store)
+     *
+     * 다운로드·비트맵 생성은 IO 에서, 실제 [Context.startActivity] 는 Main 에서 수행.
+     * @see <a href="https://developers.facebook.com/docs/instagram-platform/sharing-to-stories">IG Stories 공유</a>
+     */
     private suspend fun shareToInstagramStory(data: OQSNSShareData) {
-        val intent = Intent("com.instagram.share.ADD_TO_STORY").apply {
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            // TODO: Generate sticker image and use FileProvider to grant URI access
-            // putExtra("interactive_asset_uri", stickerUri)
-            putExtra("top_background_color", "#231557")
-            putExtra("bottom_background_color", "#FF1361")
+        val (backgroundUri, stickerUri) = withContext(Dispatchers.IO) {
+            // 배경 = 첫 이미지 (iOS: data.imageURLs.first)
+            val bg = data.imageURLs.firstOrNull()?.takeIf { it.isNotBlank() }
+                ?.let { downloadBytes(it) }
+                ?.let { writeShareFile("ig_background.jpg", it) }
+            // 스티커 = 프로필(있으면) + 브랜드 카드. 생성 실패해도 공유는 진행(graceful).
+            val profile = data.profileImgUrl?.takeIf { it.isNotBlank() }
+                ?.let { downloadBytes(it) }
+                ?.let { runCatching { BitmapFactory.decodeByteArray(it, 0, it.size) }.getOrNull() }
+            val sticker = runCatching { buildStickerBitmap(data, profile) }.getOrNull()
+                ?.let { writeShareBitmap("ig_sticker.png", it) }
+            bg to sticker
         }
-        
-        try {
-            val chooser = Intent.createChooser(intent, "Share to Instagram").apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        val intent = Intent("com.instagram.share.ADD_TO_STORY").apply {
+            // iOS 는 source_application=bundleID. Android 는 패키지명 (FB App ID 등록 시 그 값 권장).
+            putExtra("source_application", context.packageName)
+            if (backgroundUri != null) {
+                setDataAndType(backgroundUri, "image/jpeg")
+            } else {
+                // 배경 이미지가 없으면 iOS 와 동일한 그라디언트
+                putExtra("top_background_color", "#231557")
+                putExtra("bottom_background_color", "#FF1361")
             }
-            context.startActivity(chooser)
+            stickerUri?.let { putExtra("interactive_asset_uri", it) }
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        // Instagram 에 임시 파일 read 권한 부여 (FLAG 만으론 일부 단말에서 누락될 수 있어 명시).
+        listOfNotNull(backgroundUri, stickerUri).forEach { uri ->
+            context.grantUriPermission("com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        try {
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            // 미설치 → Play 스토어 (iOS: App Store 폴백)
+            fallbackToBrowser("https://play.google.com/store/apps/details?id=com.instagram.android")
         } catch (e: Exception) {
+            OQLog.e("Instagram story share failed: ${e.message}")
             fallbackToBrowser("https://play.google.com/store/apps/details?id=com.instagram.android")
         }
     }
@@ -212,5 +267,120 @@ class OQSNSShareManager @Inject constructor(
         } catch (e: Exception) {
             OQLog.e("Failed to open browser: ${e.message}")
         }
+    }
+
+    // ───────── Instagram Stories 공유 헬퍼 ─────────
+
+    /** 외부 이미지 URL → 바이트 (IO). connect/read 타임아웃 적용. 실패 시 null. */
+    private fun downloadBytes(urlStr: String): ByteArray? = runCatching {
+        val conn = (URL(urlStr).openConnection() as HttpURLConnection).apply {
+            connectTimeout = 10_000
+            readTimeout = 15_000
+        }
+        conn.inputStream.use { it.readBytes() }
+    }.onFailure { OQLog.w("Instagram share: download failed for $urlStr: ${it.message}") }.getOrNull()
+
+    /** 바이트를 `cacheDir/share/<name>` 에 저장 후 FileProvider content URI 반환. */
+    private fun writeShareFile(name: String, bytes: ByteArray): Uri? = runCatching {
+        val dir = File(context.cacheDir, "share").apply { mkdirs() }
+        val file = File(dir, name).apply { writeBytes(bytes) }
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    }.onFailure { OQLog.w("Instagram share: writeShareFile failed: ${it.message}") }.getOrNull()
+
+    /** 비트맵을 PNG 로 `cacheDir/share/<name>` 에 저장 후 FileProvider content URI 반환. */
+    private fun writeShareBitmap(name: String, bitmap: Bitmap): Uri? = runCatching {
+        val dir = File(context.cacheDir, "share").apply { mkdirs() }
+        val file = File(dir, name)
+        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    }.onFailure { OQLog.w("Instagram share: writeShareBitmap failed: ${it.message}") }.getOrNull()
+
+    /**
+     * Instagram Stories 오버레이 스티커(브랜드 카드) 비트맵. iOS `OQInstagramStickerView` 대응.
+     * 어두운 라운드 카드에 [프로필 + 닉네임/앱이름] / 제목 / 설명을 배치 (좌측 정렬).
+     */
+    private fun buildStickerBitmap(data: OQSNSShareData, profile: Bitmap?): Bitmap {
+        val width = 720
+        val outer = 24          // 카드 바깥 여백
+        val pad = 36            // 카드 안쪽 여백
+        val avatar = 72         // 프로필/헤더 높이
+        val gapAvatarText = 20
+        val gapHeaderTitle = 30
+        val gapTitleDesc = 14
+        val left = outer + pad
+        val contentWidth = width - left * 2
+
+        val nickPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE; textSize = 34f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+        val subPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(150, 255, 255, 255); textSize = 22f
+        }
+        val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE; textSize = 44f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+        val descPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(220, 255, 255, 255); textSize = 26f
+        }
+
+        fun textBlock(text: String, paint: TextPaint, maxLines: Int): StaticLayout =
+            StaticLayout.Builder.obtain(text, 0, text.length, paint, contentWidth)
+                .setMaxLines(maxLines)
+                .setEllipsize(TextUtils.TruncateAt.END)
+                .build()
+
+        val titleLayout = textBlock(data.title, titlePaint, 3)
+        val descLayout = data.description.takeIf { it.isNotBlank() }?.let { textBlock(it, descPaint, 4) }
+
+        val cardTop = outer
+        val cardBottom = outer + pad + avatar + gapHeaderTitle + titleLayout.height +
+            (descLayout?.let { gapTitleDesc + it.height } ?: 0) + pad
+        val height = cardBottom + outer
+
+        val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+
+        val cardRect = RectF(outer.toFloat(), cardTop.toFloat(), (width - outer).toFloat(), cardBottom.toFloat())
+        canvas.drawRoundRect(cardRect, 44f, 44f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(204, 20, 20, 24)   // 어두운 반투명 카드 (iOS frosted dark 근사)
+        })
+        canvas.drawRoundRect(cardRect, 44f, 44f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; strokeWidth = 2f; color = Color.argb(70, 255, 255, 255)
+        })
+
+        var y = (outer + pad).toFloat()
+        // 프로필 (원형) — 있으면 원형 크롭, 없으면 반투명 원 placeholder
+        val cx = left + avatar / 2f
+        val cy = y + avatar / 2f
+        if (profile != null) {
+            val scaled = Bitmap.createScaledBitmap(profile, avatar, avatar, true)
+            canvas.save()
+            canvas.clipPath(Path().apply { addCircle(cx, cy, avatar / 2f, Path.Direction.CW) })
+            canvas.drawBitmap(scaled, left.toFloat(), y, null)
+            canvas.restore()
+        } else {
+            canvas.drawCircle(cx, cy, avatar / 2f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.argb(60, 255, 255, 255)
+            })
+        }
+        // 닉네임 + 앱 이름
+        val textX = (left + avatar + gapAvatarText).toFloat()
+        canvas.drawText(data.nick, textX, y + nickPaint.textSize, nickPaint)
+        runCatching { context.applicationInfo.loadLabel(context.packageManager).toString() }
+            .getOrNull()?.takeIf { it.isNotBlank() }
+            ?.let { canvas.drawText(it, textX, y + nickPaint.textSize + subPaint.textSize + 10f, subPaint) }
+
+        y += avatar + gapHeaderTitle
+        // 제목
+        canvas.save(); canvas.translate(left.toFloat(), y); titleLayout.draw(canvas); canvas.restore()
+        y += titleLayout.height
+        // 설명
+        descLayout?.let {
+            y += gapTitleDesc
+            canvas.save(); canvas.translate(left.toFloat(), y); it.draw(canvas); canvas.restore()
+        }
+        return bmp
     }
 }

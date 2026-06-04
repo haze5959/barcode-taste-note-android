@@ -8,4 +8,8 @@
     <cache-path
         name="camera"
         path="camera/" />
+    <!-- Instagram Stories 공유용 임시 배경/스티커 이미지 (OQSNSShare.shareToInstagramStory) -->
+    <cache-path
+        name="share"
+        path="share/" />
 </paths>

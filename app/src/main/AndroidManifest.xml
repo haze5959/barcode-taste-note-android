@@ -18,10 +18,12 @@
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
-    <!-- Kakao SDK: Android 11+ package visibility 정책. KakaoTalk 앱 설치 여부 조회 시 필요.
-         iOS `LSApplicationQueriesSchemes: kakaolink` 대응. -->
+    <!-- Android 11+ package visibility 정책. 외부 앱 설치 여부 조회/실행 시 필요.
+         iOS `LSApplicationQueriesSchemes` 대응 (kakaolink / instagram-stories). -->
     <queries>
         <package android:name="com.kakao.talk" />
+        <!-- Instagram Stories 공유(ADD_TO_STORY) 대상 / 설치 여부 조회. -->
+        <package android:name="com.instagram.android" />
     </queries>
 
     <application

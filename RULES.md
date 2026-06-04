@@ -49,7 +49,7 @@ app
 2. **코드/카탈로그/manifest 만 보면 알 수 있는가?** 컴포넌트 목록, 추가 권한, destination 이름 등은 해당 파일이 권위. RULES 에는 **언제/어떻게 추가할지의 컨벤션**만.
 3. **다음 세션이 비슷한 작업 시 도움이 되는가?** 일반화 가능한 패턴/함정/외부 설정만 남기기.
 
-**RULES 에 두는 것** ✅: 영구 컨벤션 / iOS↔Android 매핑 / 잠재적 함정 / 미해결 TODO / 외부 세팅 가이드.
+**RULES 에 두는 것** ✅: 영구 컨벤션 / iOS↔Android 매핑 / 잠재적 함정 / 미해결 TODO.
 **RULES 에 두지 않는 것** ❌: 작업 결과 이력, 추가한 라이브러리·권한·destination 목록, 버전 변경 이력, "✅ 완료" TODO, 특정 화면의 구성/strings 키 목록.
 
 ### 7.1 iOS → Android 매핑 컨벤션
@@ -174,6 +174,12 @@ app
   - **fallback**: 카카오톡 미설치 시 `WebSharerClient.instance.makeCustomUrl(templateId, templateArgs)` → `Intent.ACTION_VIEW` 으로 브라우저.
   - **이미지 캐싱**: iOS 의 `ShareApi.imageUpload(image:)` → Android `ShareClient.scrapImage(url)` (외부 URL → 카카오 서버 캐싱 1-step). result `infos.original.url` 사용.
   - **templateId 분기**: iOS 와 동일 — 이미지 0~1개 = 131000, 2개 = 131001, 3개+ = 130706. templateArgs key: `TITLE / DESC / NICK / PROFILE / IMG1 / IMG2 / IMG3 / SHARE_URL / PATH` + shareUrl 의 query params.
+- **Instagram Stories 공유**: iOS `shareToInstagramStory` 동등 흐름 (`OQSNSShare`, `core/oqcore`).
+  - **인텐트**: `com.instagram.share.ADD_TO_STORY`. 배경 = 첫 이미지 다운로드 → FileProvider URI 를 `setDataAndType(uri, "image/jpeg")` (없으면 `top/bottom_background_color` 그라디언트 `#231557`→`#FF1361`). 스티커(브랜드 카드 비트맵) = `interactive_asset_uri`. `source_application` = `packageName`.
+  - **인프라**: 임시 파일은 `cacheDir/share/` (`file_paths.xml` `<cache-path name="share">`), `FLAG_GRANT_READ_URI_PERMISSION` + `grantUriPermission("com.instagram.android", …)`. Manifest `<queries><package com.instagram.android></queries>` (설치 조회/실행).
+  - **스티커 렌더**: `buildStickerBitmap` 가 Canvas 로 어두운 라운드 카드(프로필 원형 + 닉/앱이름 + 제목 + 설명) 그림 (iOS `OQInstagramStickerView` 대응). 생성 실패해도 `runCatching`→null 로 공유는 진행(graceful).
+  - **fallback**: 미설치(`ActivityNotFoundException`) → Play 스토어.
+  - ⚠️ **source_application 한계**: iOS 는 bundleID. Android Instagram 은 정식 attribution 에 **Facebook App ID** 를 기대 — 미등록이면 출처 표시가 제한될 수 있음(기본 공유 동작에는 보통 영향 없음). 필요 시 FB App ID 등록 후 그 값으로 교체.
 - **Firebase Crashlytics / Analytics 통합**: iOS 와 동등하게 자동 수집만 사용 (명시 이벤트 호출 없음).
   - **OQLog → Crashlytics 어댑터**: `core/oqcore` 가 Firebase 의존하지 않도록 `OQLog.exceptionLogger: ExceptionLogger?` (fun interface) 콜백만 노출. app 모듈의 `CrashlyticsInstaller.install()` 가 lambda 로 어댑팅. `BarNoteApp.onCreate` 의 0번째 단계에서 호출 (이후 단계의 에러도 보고되도록).
   - **OQLog.e 시그니처**: `e(message, throwable, prefix, saveLog)` — throwable 함께 전달하면 Crashlytics issue 로 묶임. message 만 있으면 stack trace 가 없어 추적 어려우므로 throwable 우선 전달.
@@ -211,25 +217,12 @@ app
 - **`FileProvider` 임시 파일 공유**: ① Manifest `<provider>` 등록 ② `res/xml/file_paths.xml` 정의 ③ `FLAG_GRANT_READ_URI_PERMISSION`. 셋 중 하나라도 빠지면 SecurityException.
 - **DataStore 파일 분리**: 화면별 `preferencesDataStore(name=...)` 격리. 같은 키 (예: `IS_NOTIFICATION_ENABLED_KEY`) 는 반드시 같은 파일에서만 read/write.
 
-### 7.3 외부 환경 설정 가이드
-- **Firebase**: Firebase Console 에서 Android 앱 (`com.oq.barnote`) 등록 → `google-services.json` 다운로드 → `app/` 배치. `app/build.gradle.kts` 에 `id("com.google.gms.google-services")` 활성화.
-- **Auth0**: `local.properties` (VCS 제외) 에 정의 — `app/build.gradle.kts` 가 `buildConfigField` + `manifestPlaceholders` 로 주입.
-  ```
-  auth0.domain=<your-domain>.auth0.com
-  auth0.clientId=<client-id>
-  auth0.scheme=https           # 또는 com.oq.barnote
-  ```
-- **Google Play Billing**: Play Console 에서 구독 product 등록 → `Constants.S.SUBSCRIPTION_PRODUCT_ID` / `SUBSCRIPTION_BASE_PLAN_ID` 갱신. 결제는 Activity 컨텍스트에서 `BillingClient.launchBillingFlow(activity, params)`.
-- **App Links (`https://barnote.net/...`)**: Manifest 의 https intent-filter 는 `autoVerify="true"` (iOS Universal Links 등가). 검증을 위해 **서버가 `https://barnote.net/.well-known/assetlinks.json` 을 호스팅**해야 함 (iOS `apple-app-site-association` 과 동일 모델). 템플릿: `app/src/main/assetlinks.template.json` — `sha256_cert_fingerprints` 를 release 서명(+Play 앱 서명 사용 시 업로드 키) 지문으로 치환. 호스팅 전까지 https 링크는 시스템 브라우저로 폴백되며, 앱 내 deep link 는 `barnote://note|user/{id}` 커스텀 스킴이 항상 처리.
-- **R8/minify (release)**: `isMinifyEnabled = true` 활성. keep 규칙은 `app/proguard-rules.pro`. 리플렉션/직렬화 라이브러리(Auth0/kotlinx.serialization/Hilt/Retrofit/Kakao/ML Kit) 추가·변경 시 keep 규칙 점검. **release(minified) 빌드 스모크 테스트 필수** — 로그인/직렬화/API/결제/FCM/공유 경로.
-
-### 7.4 미해결 TODO
+### 7.3 미해결 TODO
 - ⏳ Play Console 실제 구독 productId/basePlanId 를 `Constants.S.SUBSCRIPTION_PRODUCT_ID` 에 반영 (현재 placeholder `"barnote_premium"`).
-- ⏳ `local.properties` 에 `kakao.nativeAppKey=...` 추가 (Kakao 개발자센터 → 앱 → 일반 → 네이티브 앱 키, iOS `06624a49189cbb69a20c013756fee51d` 와 동일 값). 누락 시 카카오톡 공유 자동 비활성 (앱 동작 자체에는 영향 없음).
-- ⏳ `assetlinks.json` 서버 호스팅 (사용자/서버 작업, `https://barnote.net/.well-known/assetlinks.json`). 템플릿 `app/src/main/assetlinks.template.json` 의 SHA256 지문 치환 후 배포 → https App Links 자동 검증. 호스팅 전엔 https 링크가 브라우저로 폴백 (barnote:// 스킴은 영향 없음).
+- ⏳ Play Store 배포 키 등록: 업로드 키스토어(`release.*`) + Play 서비스계정 JSON(`play.serviceAccountFile`)을 `local.properties` 에 등록 (`deploy-playstore.command` 동작 조건).
 
-### 7.5 자발적 업데이트 허용
-영구 지침 (컨벤션 / 함정 / 외부 설정 / 매핑 패턴) 발견 시 사용자 요청 없이도 RULES.md 추가 가능. 단 **§7.0 작성 규칙을 엄격히** — 이력성/시점 의존 정보는 절대 추가하지 마세요.
+### 7.4 자발적 업데이트 허용
+영구 지침 (컨벤션 / 함정 / 매핑 패턴) 발견 시 사용자 요청 없이도 RULES.md 추가 가능. 단 **§7.0 작성 규칙을 엄격히** — 이력성/시점 의존 정보는 절대 추가하지 마세요.
 
 ---
 

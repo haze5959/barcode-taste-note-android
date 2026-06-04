@@ -33,6 +33,7 @@ import com.oq.barnote.core.designsystem.BarNoteTypography
 import com.oq.barnote.core.designsystem.barNoteColorScheme
 import com.oq.barnote.core.oqcore.util.AppController
 import com.oq.barnote.core.oqcore.views.OQParticleEmitterHost
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import com.oq.barnote.ui.login.startAuth0Login
 import com.oq.barnote.ui.navigation.AppNavigationNavEffect
@@ -48,6 +49,7 @@ import com.oq.barnote.ui.navigation.MainBottomBar
 import com.oq.barnote.ui.navigation.MainTab
 import com.oq.barnote.ui.navigation.rememberShouldShowBottomBar
 import com.oq.barnote.ui.review.AppReviewRequester
+import com.oq.barnote.ui.settings.SettingsPreferences
 import com.oq.barnote.ui.theme.AppLanguageApplicator
 import com.oq.barnote.ui.theme.AppThemeApplicator
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,6 +78,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var json: Json
 
+    @Inject
+    lateinit var settingsPreferences: SettingsPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -88,6 +93,10 @@ class MainActivity : AppCompatActivity() {
         // 알림 탭으로 launch 된 경우 NotificationEvent 를 emit (iOS `didReceive response` 등가).
         // setIntent 대신 onCreate 의 intent 를 직접 dispatch — savedInstance 가 있어도 같은 intent 가 들어옴.
         dispatchNotificationTap(intent)
+
+        // iOS 처럼 마지막으로 보던 탭으로 바로 시작 — HOME 을 거치지 않아 HomeScreen 의 네트워크
+        // (OnAppear)가 불필요하게 실행되지 않는다. (deep link 가 있으면 HOME 시작 후 그 위로 navigate)
+        val startDestination = resolveStartDestination(intent?.dataString)
 
         setContent {
             // Material 컴포넌트(AlertDialog/DropdownMenu/CircularProgressIndicator 등)는 색 미지정 시
@@ -105,6 +114,7 @@ class MainActivity : AppCompatActivity() {
                     AppRoot(
                         appController = appController,
                         initialDeepLink = intent?.dataString,
+                        startDestination = startDestination,
                     )
                 }
             }
@@ -131,6 +141,29 @@ class MainActivity : AppCompatActivity() {
         NotificationTapDispatch.consume(intent)
     }
 
+    /**
+     * 콜드 스타트 NavHost 시작 destination 결정. iOS 가 앱 실행 시 마지막 탭으로 바로 띄우는 것과 동등.
+     *
+     * HOME 을 startDestination 으로 두고 사후에 navigate 하면 HomeScreen 이 먼저 compose 되어
+     * 불필요한 네트워크(`HomeUiEvent.OnAppear`)가 실행된다. 이를 피하려고 마지막 탭을 **곧바로**
+     * startDestination 으로 지정한다.
+     * - deep link 가 있으면 HOME (deep link 가 그 위로 navigate 하므로 마지막 탭 복원 생략)
+     * - 저장된 탭이 없거나 / top-level 탭이 아니거나 / 바코드(모달 탭)면 HOME
+     *
+     * `runBlocking` 은 [AppThemeApplicator.applyOnStartup] 과 동일하게 메인 스레드 1회 짧은
+     * DataStore read 라 허용 범위.
+     */
+    private fun resolveStartDestination(deepLink: String?): String {
+        if (!deepLink.isNullOrBlank()) return Destinations.HOME
+        val saved = runBlocking { settingsPreferences.readLastSelectedTab() }
+            ?: return Destinations.HOME
+        return when {
+            saved == Destinations.BARCODE_SCANNER -> Destinations.HOME
+            saved !in MainTab.routes -> Destinations.HOME
+            else -> saved
+        }
+    }
+
     // 구독 상태 foreground 동기화는 [BarNoteApp.SubscriptionResumeObserver] (ProcessLifecycleOwner) 가
     // 처리합니다 — Activity 단위가 아닌 process 단위 lifecycle 이라 미래에 Activity 가 추가돼도 일관됩니다.
 }
@@ -139,6 +172,7 @@ class MainActivity : AppCompatActivity() {
 private fun AppRoot(
     appController: AppController,
     initialDeepLink: String? = null,
+    startDestination: String = Destinations.HOME,
     appNavViewModel: AppNavigationViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
@@ -220,22 +254,6 @@ private fun AppRoot(
         }
     }
 
-    // iOS `@AppStorage(lastSelectedTabKey)` 콜드 스타트 복원 — initialDeepLink 가 없을 때만 발효.
-    // (deep link 가 있으면 그 destination 이 우선이라 last tab 으로 jump 하면 안 됨)
-    LaunchedEffect(Unit) {
-        if (!initialDeepLink.isNullOrBlank()) return@LaunchedEffect
-        val savedRoute = appNavViewModel.consumeLastSelectedTab() ?: return@LaunchedEffect
-        if (savedRoute == Destinations.HOME) return@LaunchedEffect // 이미 startDestination 이라 skip.
-        if (savedRoute !in com.oq.barnote.ui.navigation.MainTab.routes) return@LaunchedEffect
-        // BARCODE_SCANNER 는 탭 자체로 모달이라 자동 복원하지 않음 (사용자 의도 위반).
-        if (savedRoute == Destinations.BARCODE_SCANNER) return@LaunchedEffect
-        navController.navigate(savedRoute) {
-            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         // 시스템 바(특히 하단 nav바) 영역에 비치는 배경 — 앱 배경과 일치시켜, 콘텐츠 inset 아래로
@@ -245,6 +263,7 @@ private fun AppRoot(
         Box(modifier = Modifier.fillMaxSize()) {
             BarNoteNavHost(
                 navController = navController,
+                startDestination = startDestination,
                 contentPadding = innerPadding,
             )
             // iOS 투명 탭바 방식 — Scaffold bottomBar 슬롯(콘텐츠를 바 위로 inset 해 뒤가 안 보임) 대신

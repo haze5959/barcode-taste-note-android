@@ -50,12 +50,10 @@ class AppNavigationViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * iOS `@AppStorage(C.S.lastSelectedTabKey)` 와 동등 — 콜드 스타트 시 복원할 마지막 탭 route.
-     * AppRoot 가 첫 composition 에서 1회 호출해 그 값으로 navigate.
+     * 사용자가 탭을 변경할 때마다 호출 → DataStore 영속화 (다음 콜드 스타트 복원용).
+     * 복원은 `MainActivity.resolveStartDestination` 이 `SettingsPreferences.readLastSelectedTab()` 을
+     * 동기 read 해 NavHost startDestination 으로 직접 지정한다.
      */
-    suspend fun consumeLastSelectedTab(): String? = settingsPreferences.readLastSelectedTab()
-
-    /** 사용자가 탭을 변경할 때마다 호출 → DataStore 영속화. */
     fun rememberLastSelectedTab(route: String) {
         viewModelScope.launch { settingsPreferences.setLastSelectedTab(route) }
     }
