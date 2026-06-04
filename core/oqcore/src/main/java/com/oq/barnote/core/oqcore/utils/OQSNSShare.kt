@@ -8,7 +8,7 @@ import android.net.Uri
 import androidx.annotation.StringRes
 import com.kakao.sdk.share.ShareClient
 import com.kakao.sdk.share.WebSharerClient
-import com.kakao.sdk.template.model.ImageUploadResult
+import com.kakao.sdk.share.model.ImageUploadResult
 import com.oq.barnote.core.oqcore.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

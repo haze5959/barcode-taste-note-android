@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,6 +49,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.designsystem.component.AutoResizeText
+import com.oq.barnote.ui.navigation.MainBottomBarHeight
 import com.oq.barnote.core.designsystem.component.ViewAllButton
 import com.oq.barnote.core.oqcore.ui.modifier.dashedBorder
 import com.oq.barnote.core.oqcore.util.formatThousands
@@ -122,7 +123,8 @@ internal fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(bottom = Dimens.Padding),
+                    // MainBottomBar(오버레이) 뒤로 콘텐츠가 스크롤되므로 바 높이만큼 하단 여백 추가.
+                    .padding(bottom = Dimens.Padding + MainBottomBarHeight),
                 verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
             ) {
                 BarcodeScanCta(
@@ -186,11 +188,16 @@ private fun BarcodeScanCta(
             .clickable(onClick = onClick)
             .padding(Dimens.BtnPadding),
     ) {
+        // iOS HomeView 메인 스캔 버튼과 동일한 좌측 정렬 구조:
+        //   [상단 행] 타이틀("바코드 스캔하기") + "N개 제품 등록" 배지를 한 줄에 좌측 정렬
+        //   [그 아래] 설명 서브타이틀(좌측 정렬)
         Column(verticalArrangement = Arrangement.spacedBy(Dimens.Padding)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
             ) {
+                // iOS 의 .layoutPriority(1) 대응 — 타이틀이 폭을 우선 차지. weight(fill=false) 라 짧을 땐
+                // 본문 폭만 쓰고 우측을 비워 좌측 정렬이 되고, 좁으면 2줄/생략으로 줄어든다.
                 Text(
                     text = stringResource(R.string.bakodeu_seukaenhagi),
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -217,7 +224,7 @@ private fun BarcodeScanCta(
                             tint = Color.Yellow,
                             modifier = Modifier.size(10.dp),
                         )
-                        Text(
+                        AutoResizeText(
                             text = stringResource(
                                 R.string.gae_jepum_deungrog,
                                 productCount.formatThousands(),
@@ -226,13 +233,10 @@ private fun BarcodeScanCta(
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                             ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                            minScaleFactor = 0.7f,
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
             }
 
             Text(

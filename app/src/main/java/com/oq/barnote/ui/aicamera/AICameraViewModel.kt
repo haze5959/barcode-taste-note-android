@@ -1,15 +1,19 @@
 package com.oq.barnote.ui.aicamera
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oq.barnote.R
 import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.util.OQImageOptimize
 import com.oq.barnote.core.oqcore.utils.OQHapticService
+import com.oq.barnote.ui.navigation.Destinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
@@ -35,7 +40,14 @@ class AICameraViewModel @Inject constructor(
     private val appController: AppController,
     private val haptic: OQHapticService,
     @ApplicationContext private val context: Context,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    /**
+     * NotFound 바코드로 AI 등록에 진입한 경우 그 바코드를 서버 생성에 연계.
+     * iOS `pendingBarcodeForProductRegistration` → `createProductWithAI(barcodeId:)` 대응.
+     */
+    private val barcodeId: String? = savedStateHandle[Destinations.AI_CAMERA_ARG_BARCODE]
 
     private val _uiState = MutableStateFlow(AICameraUiState())
     val uiState: StateFlow<AICameraUiState> = _uiState.asStateFlow()
@@ -59,9 +71,13 @@ class AICameraViewModel @Inject constructor(
             _uiState.update { it.copy(isProcessing = true) }
             // iOS `appController.isAiScanLoading = true` 대응 — AI 분석 전용 오버레이로 분리.
             appController.setAiScanLoading(true)
+            // iOS `OQCameraView` 의 `optimizeImageForUpload(toKBtye: 200)` 대응 — 업로드 전 ≤720px·≤200KB 리사이즈/압축.
+            val optimized = withContext(Dispatchers.Default) {
+                OQImageOptimize.optimizeForUpload(jpeg)
+            }
             val attachment = MediaAttachment(
                 id = UUID.randomUUID().toString(),
-                data = jpeg,
+                data = optimized,
                 mimeType = "image/jpeg",
                 fileName = "ai_label.jpg",
             )
@@ -70,7 +86,7 @@ class AICameraViewModel @Inject constructor(
                 onSuccess = { imageId ->
                     val createResult = repository.createProductWithAI(
                         imageId = imageId,
-                        barcodeId = null,
+                        barcodeId = barcodeId,
                     )
                     appController.setAiScanLoading(false)
                     _uiState.update { it.copy(isProcessing = false) }

@@ -75,15 +75,15 @@ data class ProductDetailUiState(
     val showReportAlert: Boolean = false,
     val showUnratedAlert: UnratedNoteAlert? = null,
     val isImageViewerPresented: Boolean = false,
+    /** 이미지뷰어에 표시할 이미지 + 시작 인덱스 (Hero=displayImageIds, 이미지 탭=imageIds). */
+    val viewerImageIds: List<String> = emptyList(),
+    val viewerStartIndex: Int = 0,
 
     // Translation
     val translatedDesc: String? = null,
     val translatedName: String? = null,
     val isTranslatingDesc: Boolean = false,
     val isTranslatingName: Boolean = false,
-
-    /** 별점(1-5) 분포 — 인덱스 0 = 1점 ~ 인덱스 4 = 5점. */
-    val ratingCounts: List<Int> = emptyList(),
 ) {
     /** iOS `isTastedProduct` computed property 와 동일. */
     val isTastedProduct: Boolean
@@ -123,6 +123,8 @@ sealed interface ProductDetailUiEvent {
 
     // Hero / name
     data object TappedHeroSection : ProductDetailUiEvent
+    /** 이미지 탭에서 특정 이미지 탭 → 그 인덱스부터 이미지뷰어 표시. */
+    data class PresentImageViewer(val startIndex: Int) : ProductDetailUiEvent
     data object DismissImageViewer : ProductDetailUiEvent
     data object TappedProductName : ProductDetailUiEvent
 
@@ -188,7 +190,12 @@ class ProductDetailViewModel @Inject constructor(
             ProductDetailUiEvent.TappedAddNote -> {
                 val product = _uiState.value.info?.product ?: return
                 viewModelScope.launch {
-                    _navEffect.send(ProductDetailNavEffect.AddNote(product.id))
+                    // iOS requestAddNote 게이트 — 무료 한도 초과 + 비구독이면 구독 화면으로.
+                    if (isOverFreeNoteLimit()) {
+                        _navEffect.send(ProductDetailNavEffect.GoSubscription)
+                    } else {
+                        _navEffect.send(ProductDetailNavEffect.AddNote(product.id))
+                    }
                 }
             }
             ProductDetailUiEvent.TappedAddTasted -> tappedAddTasted()
@@ -227,8 +234,27 @@ class ProductDetailViewModel @Inject constructor(
             ProductDetailUiEvent.FetchImagesNextPage -> fetchImagesPage()
 
             ProductDetailUiEvent.TappedHeroSection -> {
-                if (_uiState.value.info?.displayImageIds?.isNotEmpty() == true) {
-                    _uiState.update { it.copy(isImageViewerPresented = true) }
+                val ids = _uiState.value.info?.displayImageIds.orEmpty()
+                if (ids.isNotEmpty()) {
+                    _uiState.update {
+                        it.copy(
+                            isImageViewerPresented = true,
+                            viewerImageIds = ids,
+                            viewerStartIndex = 0,
+                        )
+                    }
+                }
+            }
+            is ProductDetailUiEvent.PresentImageViewer -> {
+                val ids = _uiState.value.imageIds
+                if (ids.isNotEmpty()) {
+                    _uiState.update {
+                        it.copy(
+                            isImageViewerPresented = true,
+                            viewerImageIds = ids,
+                            viewerStartIndex = event.startIndex.coerceIn(0, ids.size - 1),
+                        )
+                    }
                 }
             }
             ProductDetailUiEvent.DismissImageViewer ->
@@ -299,7 +325,6 @@ class ProductDetailViewModel @Inject constructor(
                 productId = s.productId,
             ).fold(
                 onSuccess = { list ->
-                    val updatedRatingCounts = updateRatingCountsForFirstPage(s, list)
                     _uiState.update {
                         val merged = if (s.notePage == 1) list else it.notes + list
                         it.copy(
@@ -307,7 +332,6 @@ class ProductDetailViewModel @Inject constructor(
                             notes = merged,
                             notePage = it.notePage + 1,
                             hasMoreNotes = list.size >= Constants.N.PAGING_COUNT,
-                            ratingCounts = updatedRatingCounts,
                         )
                     }
                 },
@@ -317,21 +341,6 @@ class ProductDetailViewModel @Inject constructor(
                 },
             )
         }
-    }
-
-    /** 첫 페이지에 한해 별점 분포 계산. 다음 페이지부터는 누적하지 않음 (iOS 와 동일). */
-    private fun updateRatingCountsForFirstPage(
-        prev: ProductDetailUiState,
-        firstPage: List<NoteInfo>,
-    ): List<Int> {
-        if (prev.notePage != 1) return prev.ratingCounts
-        val counts = IntArray(5)
-        for (n in firstPage) {
-            if (n.note.rating <= 0) continue
-            val idx = ((n.note.rating - 1) / 2).coerceIn(0, 4)
-            counts[idx] += 1
-        }
-        return counts.toList()
     }
 
     private fun fetchMyNotes() {
@@ -423,14 +432,21 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
+    /**
+     * iOS `requestAddNote` 의 무료 한도 게이트 — 무료 사용자가 [Constants.N.FREE_NOTE_COUNT] 이상
+     * 노트를 작성했으면 true (→ 구독 화면). checkSubscriptionStatus 는 iOS 와 동일하게 항상 호출.
+     */
+    private suspend fun isOverFreeNoteLimit(): Boolean {
+        val isSubscribed = userStore.checkSubscriptionStatus()
+        return userStore.noteCount.value >= Constants.N.FREE_NOTE_COUNT && !isSubscribed
+    }
+
     private suspend fun addTastedProduct() {
         val s = _uiState.value
         val product = s.info?.product ?: return
 
         // 무료 노트 한도 초과 + 비구독 → 구독 화면
-        val isSubscribed = userStore.checkSubscriptionStatus()
-        val noteCount = userStore.noteCount.value
-        if (noteCount >= Constants.N.FREE_NOTE_COUNT && !isSubscribed) {
+        if (isOverFreeNoteLimit()) {
             _navEffect.send(ProductDetailNavEffect.GoSubscription)
             return
         }
@@ -440,7 +456,7 @@ class ProductDetailViewModel @Inject constructor(
             productId = product.id,
             rating = 0,
             body = "",
-            selectedFlavors = emptySet(),
+            selectedFlavors = emptyList(),
             imageIds = emptyList(),
             publicScope = PublicScope.Private,
         )

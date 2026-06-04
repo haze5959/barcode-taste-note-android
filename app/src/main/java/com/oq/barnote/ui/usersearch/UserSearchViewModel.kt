@@ -78,8 +78,8 @@ class UserSearchViewModel @Inject constructor(
     fun onEvent(event: UserSearchUiEvent) {
         when (event) {
             UserSearchUiEvent.OnAppear -> {
-                // 진입 시 1회 초기 검색 (빈 쿼리 → 서버 기본 목록).
-                if (!_uiState.value.hasSearchedOnce) search(reset = true)
+                // iOS UserSearchView.onAppear: 매 진입마다 초기 검색 디스패치 (디바운스 우회).
+                search(reset = true)
             }
             is UserSearchUiEvent.QueryChanged -> {
                 _uiState.update { it.copy(query = event.text) }

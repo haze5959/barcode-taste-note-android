@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.CircularProgressIndicator
@@ -149,6 +150,7 @@ private fun ReportItem(
     onTap: () -> Unit,
 ) {
     val surfacePrimary = colorResource(com.oq.barnote.core.designsystem.R.color.surface_primary)
+    val surfaceSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.surface_secondary)
     val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
     val textSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
     val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
@@ -237,14 +239,32 @@ private fun ReportItem(
         // iOS: 답변이 있으면 "관리자 답변" + 답변 본문, 없으면 "검토 중".
         if (hasReply) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = stringResource(R.string.gwanrija_dabbyeon),
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = accent,
-                )
+                // iOS: arrow.turn.down.right 아이콘 + "관리자 답변" 라벨.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Reply,
+                        contentDescription = null,
+                        tint = accent,
+                        modifier = Modifier.size(Dimens.MiniIconSize),
+                    )
+                    Text(
+                        text = stringResource(R.string.gwanrija_dabbyeon),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = accent,
+                    )
+                }
+                // iOS: 답변 본문을 별도 배경 박스(cornerRadius/2)에 표시. 행 카드(surfacePrimary)와 대비되게 surfaceSecondary.
                 Text(
                     text = report.reply.orEmpty(),
                     style = MaterialTheme.typography.bodyMedium.copy(color = textPrimary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.Radius / 2f))
+                        .background(surfaceSecondary)
+                        .padding(Dimens.Padding),
                 )
             }
         } else {

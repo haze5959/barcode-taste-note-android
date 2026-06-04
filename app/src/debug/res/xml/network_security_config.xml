@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DEBUG 전용 network security config. (debug 소스셋이 main 의 동일 이름 리소스를 override)
+
+  api.barnote.net 인증서가 NCSOFT 사내 CA(self-signed root, CN=SSLVACERT_ECC)로 발급되어
+  공개 CA만 들어있는 에뮬레이터/비관리 기기의 system 신뢰 저장소로는 검증이 불가합니다
+  (CertPathValidatorException). leaf 에 AIA 가 없어 중간 인증서 자동 보완도 안 됩니다.
+  iOS 는 NCSOFT 관리(MDM) 기기에 해당 CA 가 설치돼 있어 동작합니다.
+
+  → debug 빌드에 한해 res/raw/ncsoft_ca.pem (SSLVACERT_ECC 루트) 를 신뢰 앵커로 추가.
+     `openssl verify -CAfile ncsoft_ca.pem <leaf>` => OK 로 체인 검증 확인됨.
+     system 도 유지하므로 Firebase/Auth0/Google 등 공개 CA 트래픽은 그대로 검증됩니다.
+     user 도 유지(에뮬 수동 설치 CA / 디버깅 프록시 대응). cleartext(HTTP) 는 계속 차단.
+
+  release 빌드는 main 의 system-only 설정 사용(iOS ATS 동일 강도, 사내 CA 미반영).
+  운영 서버가 공개 CA 로 전환되면 release 는 변경 불필요.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+            <certificates src="@raw/ncsoft_ca" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -62,13 +62,15 @@ class OQHapticService @Inject constructor(
     /** iOS `notification(.warning)` 대응. 두 번 짧은 진동. */
     fun warning() {
         if (!vibrator.hasVibrator()) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(
-                VibrationEffect.createWaveform(longArrayOf(0, 30, 80, 30), -1),
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(longArrayOf(0, 30, 80, 30), -1)
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                    VibrationEffect.createWaveform(longArrayOf(0, 30, 80, 30), -1),
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(longArrayOf(0, 30, 80, 30), -1)
+            }
         }
     }
 
@@ -87,13 +89,16 @@ class OQHapticService @Inject constructor(
 
     private fun vibratePredefined(effectId: Int, fallbackMillis: Long) {
         if (!vibrator.hasVibrator()) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            vibrator.vibrate(VibrationEffect.createPredefined(effectId))
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(fallbackMillis, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(fallbackMillis)
+        // 햅틱은 단순 UI 피드백 — 권한 누락/기기 이슈로 vibrate 가 throw 해도 앱이 죽지 않도록 방어.
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vibrator.vibrate(VibrationEffect.createPredefined(effectId))
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(fallbackMillis, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(fallbackMillis)
+            }
         }
     }
 

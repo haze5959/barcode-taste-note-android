@@ -43,10 +43,10 @@ fun NoteDetailSummary(
     val surfaceSecondary = colorResource(R.color.surface_secondary)
     val textPrimary = colorResource(R.color.text_primary)
 
-    val filtered = details.filter { (key, value) -> value > 0 && key != NoteDetail.Feeling }
+    val filtered = details.filter { (key, value) -> value > 0 && key != NoteDetail.feeling }
         .toList()
         .sortedBy { it.first.rawValue }
-    val feeling = details[NoteDetail.Feeling]?.let { NoteDetail.Feeling.fromRaw(it) }
+    val feeling = details[NoteDetail.feeling]?.let { NoteDetail.Feeling.fromRaw(it) }
 
     Column(
         modifier = modifier,

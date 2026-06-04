@@ -9,6 +9,8 @@
     <color name="divider">#39393F</color>
     <color name="surface_primary">#151518</color>
     <color name="surface_secondary">#1D1D21</color>
+    <!-- iOS 탭바 `.ultraThinMaterial` 다크 근사 — 반투명 다크 틴트. 알파 0.70. -->
+    <color name="tabbar_background">#B31D1D21</color>
     <color name="text_primary">#F7F7FA</color>
     <color name="text_secondary">#A7A8B3</color>
 </resources>

@@ -9,6 +9,12 @@ import com.oq.barnote.core.domain.Product
 import com.oq.barnote.core.domain.RemotePushType
 import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.util.AppController
+import android.content.Context
+import com.auth0.android.result.Credentials
+import com.oq.barnote.R
+import com.oq.barnote.core.data.auth.Auth0AuthStore
+import com.oq.barnote.core.oqcore.utils.OQHapticService
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.oq.barnote.core.oqcore.utils.OQLog
 import com.oq.barnote.ui.settings.SettingsPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,6 +44,9 @@ class AppNavigationViewModel @Inject constructor(
     private val notificationScheduler: NotificationScheduler,
     private val appController: AppController,
     private val settingsPreferences: SettingsPreferences,
+    private val authStore: Auth0AuthStore,
+    private val haptic: OQHapticService,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     /**
@@ -93,7 +102,8 @@ class AppNavigationViewModel @Inject constructor(
                 _uiState.update { it.copy(showNeededLoginAlert = false) }
             AppNavigationUiEvent.ConfirmGoLogin -> {
                 _uiState.update { it.copy(showNeededLoginAlert = false) }
-                viewModelScope.launch { _navEffect.send(AppNavigationNavEffect.GoLogin) }
+                // iOS: alert 확인 → 전용 화면 없이 곧장 Auth0 webAuth (AppRoot 가 StartWebLogin 을 받아 launch).
+                viewModelScope.launch { _navEffect.send(AppNavigationNavEffect.StartWebLogin) }
             }
 
             is AppNavigationUiEvent.RequestAddNote -> requestAddNote(event.product)
@@ -111,6 +121,26 @@ class AppNavigationViewModel @Inject constructor(
             is AppNavigationUiEvent.HandleDeepLink -> handleDeepLink(event.uriString)
         }
     }
+
+    // region 로그인 — iOS AppNavigationFeature.showLogin/loginResponse 대응 (전용 화면 없이 글로벌 처리).
+    fun onLoginStarted() = appController.setGlobalLoading(true)
+
+    fun onLoginSuccess(credentials: Credentials) {
+        viewModelScope.launch {
+            authStore.saveAuth0Credentials(credentials)
+            appController.setGlobalLoading(false)
+            haptic.success()
+            appController.showToast(context.getString(R.string.rogeuin_seonggong))
+        }
+    }
+
+    fun onLoginError(message: String) {
+        appController.setGlobalLoading(false)
+        appController.showError(Exception(message))
+    }
+
+    fun onLoginCancelled() = appController.setGlobalLoading(false)
+    // endregion
 
     /**
      * iOS `requestAddNote` 와 동일: 무료 사용자가 [Constants.N.FREE_NOTE_COUNT] 노트 이상이면
@@ -150,17 +180,19 @@ class AppNavigationViewModel @Inject constructor(
     }
 
     /**
-     * iOS `handleDeepLink(url)` 의 안드로이드 등가물. 지원 형식:
-     *  - `barnote://note/{uuid}` → NoteDetail
-     *  - `barnote://user/{uuid}` → UserNoteList
-     *  - `https://barnote.net/note/{uuid}` / `https://barnote.net/user/{uuid}` 도 동일
+     * iOS `handleDeepLink(url)` 의 안드로이드 등가물. 지원 형식 (Manifest intent-filter 와 카카오 공유 모두 대응):
+     *  - 커스텀 스킴 host=type:  `barnote://note/{uuid}` / `barnote://user/{uuid}` (host="note", path=["{uuid}"])
+     *  - App Link path:         `https://barnote.net/note/{uuid}` / `.../user/{uuid}` (path=["note","{uuid}"])
+     *  - 카카오링크 query:       `...?note={uuid}` (query param name=note)
+     *  - 카카오링크 query-path:   `...?note/{uuid}` (query="note/{uuid}")
+     *
+     * iOS 와 동일하게 `id` 가 유효한 UUID 가 아니면 무시 (잘못된 링크 방어).
      */
     private fun handleDeepLink(uriString: String) {
         val uri = runCatching { android.net.Uri.parse(uriString) }.getOrNull() ?: return
-        val segments = uri.pathSegments.orEmpty()
-        if (segments.size < 2) return
-        val type = segments[0]
-        val id = segments[1]
+        val (type, id) = extractDeepLinkTarget(uri) ?: return
+        // iOS `guard let id = UUID(uuidString: idString)` 대응.
+        if (runCatching { java.util.UUID.fromString(id) }.isFailure) return
         viewModelScope.launch {
             when (type) {
                 "note" -> _navEffect.send(
@@ -171,6 +203,34 @@ class AppNavigationViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    /**
+     * 딥링크 URI 에서 (type, id) 추출 — iOS `handleDeepLink` 의 path/query 3종 + 안드로이드 커스텀 스킴(host=type) 대응.
+     * 추출 순서: App Link path → 커스텀 스킴(host) → query param → query-path.
+     */
+    private fun extractDeepLinkTarget(uri: android.net.Uri): Pair<String, String>? {
+        val segments = uri.pathSegments.orEmpty()
+        // App Link: `/note/{uuid}` → path=["note","{uuid}"]
+        if (segments.size >= 2) return segments[0] to segments[1]
+        // 커스텀 스킴: `barnote://note/{uuid}` → host="note", path=["{uuid}"]
+        val host = uri.host
+        if (!host.isNullOrBlank() && segments.size == 1) return host to segments[0]
+        // 카카오링크 query: `?note={uuid}` (name=note, value 에 '/' 없음)
+        uri.queryParameterNames.orEmpty().firstOrNull()?.let { name ->
+            val value = uri.getQueryParameter(name)
+            if (!value.isNullOrBlank() && !value.contains('/')) return name to value
+        }
+        // 카카오링크 query-path: `?note/{uuid}` (query 전체에 '/')
+        uri.query?.let { query ->
+            if (query.contains('/')) {
+                val parts = query.split('/')
+                if (parts.size >= 2 && parts[0].isNotBlank() && parts[1].isNotBlank()) {
+                    return parts[0] to parts[1]
+                }
+            }
+        }
+        return null
     }
 }
 
@@ -188,7 +248,7 @@ sealed interface AppNavigationUiEvent {
 }
 
 sealed interface AppNavigationNavEffect {
-    data object GoLogin : AppNavigationNavEffect
+    data object StartWebLogin : AppNavigationNavEffect
     data class GoAddNote(val productId: String) : AppNavigationNavEffect
     data object GoSubscription : AppNavigationNavEffect
     data object GoAICamera : AppNavigationNavEffect

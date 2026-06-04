@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
+import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.designsystem.component.RatingInputView
 import com.oq.barnote.core.oqcore.ui.component.InfoTagStyle
 import com.oq.barnote.core.oqcore.ui.component.InfoTagView
@@ -51,7 +52,11 @@ fun NoteRatingSelectorSection(
             )
             if (isRequired) {
                 Spacer(modifier = Modifier.padding(start = 6.dp))
-                InfoTagView(text = stringResource(com.oq.barnote.R.string.pilsu), style = InfoTagStyle.Accent)
+                InfoTagView(
+                    text = stringResource(com.oq.barnote.R.string.pilsu),
+                    style = InfoTagStyle.Accent,
+                    palette = barNotePalette(),
+                )
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
@@ -72,7 +77,7 @@ fun NoteRatingSelectorSection(
             // iOS: raw rating 그대로 전달 (0 허용) — 숫자 라벨과 별 표시 불일치 방지.
             value = rating,
             onValueChange = onRatingChange,
-            modifier = Modifier.fillMaxWidth(),
+            // iOS 와 동일하게 content 크기(별 5개)로 둬 leading 정렬 + 제스처 폭 일치 (fillMaxWidth 금지).
             size = 30.dp,
             color = accent,
         )

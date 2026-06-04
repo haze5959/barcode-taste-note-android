@@ -18,6 +18,6 @@ fun OQThumbnailView(
         model = imageUrl,
         contentDescription = contentDescription,
         contentScale = ContentScale.Crop,
-        modifier = modifier.clip(RoundedCornerShape(8.dp))
+        modifier = modifier.clip(RoundedCornerShape(12.dp)) // iOS OQThumbnailView cornerRadius 12
     )
 }

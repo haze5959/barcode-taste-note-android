@@ -14,13 +14,13 @@ import com.oq.barnote.R
 enum class BarnoteTip(
     val id: String,
     @StringRes val titleRes: Int,
-    @StringRes val messageRes: Int,
+    @StringRes val messageRes: Int? = null, // null 이면 title-only (iOS 일부 Tip 대응).
 ) {
     /** MyPage 의 "노트 작성이 필요한 제품" Row 위에 안내. iOS `NeededNoteProductTip` 에 대응. */
     NeededNoteProduct(
         id = "needed_note_product",
         titleRes = R.string.masyeobon_jepum,
-        messageRes = R.string.masyeobon_jepumeuro_deungroghago_sieumnoteureul_jagseo,
+        messageRes = R.string.masyeobon_jepumeuro_deungroghago_sieumnoteureul_jagseonghaji,
     ),
 
     /** ProductDetail 하단 기본 CTA(마셔본 제품 등록) 위에 안내. iOS `TastedTip` 에 대응. */
@@ -28,5 +28,25 @@ enum class BarnoteTip(
         id = "tasted_product",
         titleRes = R.string.masyeobon_jepum_deungrog,
         messageRes = R.string.masyeobon_jepumeuro_deungroghago_teiseuting_noteureul_jagseo,
+    ),
+
+    /** NoteDetail 공유 FAB 안내. iOS `NoteDetailShareTip` 에 대응. */
+    NoteDetailShare(
+        id = "note_detail_share",
+        titleRes = R.string.gongyuhagi,
+        messageRes = R.string.inseuta_web_kakaotogeuro_sieumnoteureul_gongyuhal_su_issseub,
+    ),
+
+    /** UserNoteList 공유 FAB 안내. iOS `UserNoteListShareTip` 에 대응. */
+    UserNoteListShare(
+        id = "user_note_list_share",
+        titleRes = R.string.gongyuhagi,
+        messageRes = R.string.inseuta_web_kakaotogeuro_nae_sieumnoteu_mogroggwa_jeulgyeoca,
+    ),
+
+    /** NoteList 보기 토글 FAB 안내 (title-only). iOS `NoteListViewToggleTip` 에 대응. */
+    NoteListViewToggle(
+        id = "note_list_view_toggle",
+        titleRes = R.string.mogrogeul_ganryaghago_bbareuge_hwaginhaeboseyo,
     ),
 }

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +14,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +37,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
@@ -49,6 +57,7 @@ fun NoteDetailSlider(
     value: Int,
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    onReset: (() -> Unit)? = null,
 ) {
     val accent = colorResource(R.color.accent_color)
     val secondary = colorResource(R.color.text_secondary)
@@ -59,18 +68,14 @@ fun NoteDetailSlider(
     var width by remember { mutableStateOf(0f) }
 
     fun update(x: Float) {
-        if (x < 0f) {
-            if (value != 0) {
-                // iOS NoteDetailSlider 와 동일: 단계 변경 시 selection haptic.
-                haptic.selection()
-                onValueChanged(0)
-            }
-            return
-        }
         if (width <= 0f) return
         val segmentWidth = width / 5f
-        val raw = ceil(x / segmentWidth).toInt()
+        // iOS 는 x<0(트랙 왼쪽 바깥)일 때만 0 으로 본다. 그러나 안드로이드는 좌측 화면 엣지
+        // 밖으로의 드래그가 시스템 뒤로가기 제스처와 충돌해 0 에 닿기 어렵다. 그래서 트랙 안에서도
+        // 0 에 도달할 수 있도록 첫 구간의 절반 이내로 드래그/탭하면 0 으로 처리한다.
+        val raw = if (x < segmentWidth * 0.5f) 0 else ceil(x / segmentWidth).toInt()
         val clamped = raw.coerceIn(0, 5)
+        // iOS NoteDetailSlider 와 동일: 단계 변경 시 selection haptic.
         if (clamped != value) {
             haptic.selection()
             onValueChanged(clamped)
@@ -96,6 +101,24 @@ fun NoteDetailSlider(
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = if (value > 0) accent else secondary,
             )
+            // 값이 입력된 경우에만 초기화(✕) 노출 — 오탭으로 들어간 값을 한 번에 해제.
+            if (value > 0 && onReset != null) {
+                Spacer(modifier = Modifier.width(Dimens.Padding))
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    // a11y 라벨 — 기존 "초기화"/"Reset" 문자열(11 locale 보유) 재사용.
+                    contentDescription = stringResource(com.oq.barnote.core.oqcore.R.string.image_editor_reset),
+                    tint = secondary,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable {
+                            haptic.selection()
+                            onReset()
+                        }
+                        .padding(4.dp)
+                        .size(16.dp),
+                )
+            }
         }
         Row(
             modifier = Modifier

@@ -71,37 +71,43 @@ fun BarNoteTip(
 
     val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
 
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-        tooltip = {
-            RichTooltip(
-                title = { Text(text = stringResource(tip.titleRes)) },
-                action = {
-                    IconButton(onClick = {
-                        scope.launch {
-                            prefs.dismiss(tip.id)
-                            tooltipState.dismiss()
+    // 위치/정렬은 항상 일반 Box 가 담당한다. TooltipBox 에 직접 modifier 를 주면
+    // `align` 같은 parentData 가 보존되지 않아, tip 표시 중일 때 FAB 가 부모 Box 의
+    // 기본 정렬(TopStart=좌상단)로 떨어진다. dismiss 분기와 동일하게 Box(modifier) 로 감싼다.
+    Box(modifier = modifier) {
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+            tooltip = {
+                RichTooltip(
+                    title = { Text(text = stringResource(tip.titleRes)) },
+                    action = {
+                        IconButton(onClick = {
+                            scope.launch {
+                                prefs.dismiss(tip.id)
+                                tooltipState.dismiss()
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = null,
+                                tint = accent,
+                            )
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = null,
-                            tint = accent,
+                    },
+                    colors = TooltipDefaults.richTooltipColors(),
+                ) {
+                    tip.messageRes?.let { msgRes ->
+                        Text(
+                            text = stringResource(msgRes),
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
-                },
-                colors = TooltipDefaults.richTooltipColors(),
-            ) {
-                Text(
-                    text = stringResource(tip.messageRes),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
-        state = tooltipState,
-        modifier = modifier,
-    ) {
-        anchor()
+                }
+            },
+            state = tooltipState,
+        ) {
+            anchor()
+        }
     }
 }
 
@@ -118,7 +124,8 @@ internal interface TipEntryPoint {
     fun tipPreferences(): TipPreferences
 }
 
-private fun tipEntryPoint(context: android.content.Context): TipEntryPoint =
+// internal: 같은 패키지의 BarNoteInlineTip 도 이 EntryPoint 로 TipPreferences 에 접근한다.
+internal fun tipEntryPoint(context: android.content.Context): TipEntryPoint =
     EntryPointAccessors.fromApplication(
         context.applicationContext,
         TipEntryPoint::class.java,

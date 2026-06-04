@@ -1,6 +1,16 @@
 package com.oq.barnote.ui.mypage.subscription
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,12 +44,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,11 +73,6 @@ import com.oq.barnote.core.oqcore.views.OQFillButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType
 import com.oq.barnote.core.oqcore.views.OQSafariView
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 
 /**
  * 구독 화면 라우트. iOS `SubscriptionView` 에 대응.
@@ -127,14 +139,32 @@ internal fun SubscriptionScreen(
 ) {
     val background =
         colorResource(com.oq.barnote.core.designsystem.R.color.background_primary)
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+
+    // 등장 애니메이션 트리거 — 진입 시 한 번 true 로 전환되어 섹션들이 순차적으로 fade + slide-up.
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { appeared = true }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(background),
     ) {
+        // 상단 accent 그라디언트 백드롭 — 프리미엄 느낌의 은은한 광원 (스크롤과 무관하게 고정).
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(Dimens.HeroSectionHSize + Dimens.LargeCardSize)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(accent.copy(alpha = 0.12f), Color.Transparent),
+                    ),
+                ),
+        )
+
         when {
             state.isLoadingUser -> CircularProgressIndicator(
+                color = accent,
                 modifier = Modifier.align(Alignment.Center),
             )
             else -> Column(
@@ -143,12 +173,13 @@ internal fun SubscriptionScreen(
                     .verticalScroll(rememberScrollState()),
             ) {
                 TopBar(onBack = onBack)
-                HeaderSection()
-                FeatureList()
+                HeaderSection(modifier = Modifier.appearAnim(appeared, delayMillis = 40))
+                FeatureList(appeared = appeared)
                 CtaSection(
                     isPurchasing = state.isPurchasing,
                     onSubscribe = { onEvent(SubscriptionUiEvent.TappedSubscribe) },
                     onRestore = { onEvent(SubscriptionUiEvent.TappedRestorePurchases) },
+                    modifier = Modifier.appearAnim(appeared, delayMillis = 560),
                 )
                 Spacer(modifier = Modifier.height(Dimens.SectionSpacing))
             }
@@ -166,6 +197,27 @@ internal fun SubscriptionScreen(
                 },
             )
         }
+    }
+}
+
+/**
+ * 진입 시 한 번 재생되는 fade + slide-up 모디파이어.
+ * [delayMillis] 로 섹션마다 시차를 줘 부드러운 cascade 연출.
+ */
+@Composable
+private fun Modifier.appearAnim(appeared: Boolean, delayMillis: Int): Modifier {
+    val progress by animateFloatAsState(
+        targetValue = if (appeared) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 520,
+            delayMillis = delayMillis,
+            easing = FastOutSlowInEasing,
+        ),
+        label = "appear",
+    )
+    return this.graphicsLayer {
+        alpha = progress
+        translationY = (1f - progress) * 40.dp.toPx()
     }
 }
 
@@ -192,31 +244,71 @@ private fun TopBar(onBack: () -> Unit) {
 }
 
 @Composable
-private fun HeaderSection() {
+private fun HeaderSection(modifier: Modifier = Modifier) {
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
     val textPrimary =
         colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
     val textSecondary =
         colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
 
+    // 앱 아이콘의 은은한 호흡(scale) + 광원(alpha) 펄스.
+    val transition = rememberInfiniteTransition(label = "hero")
+    val breath by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.045f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "breath",
+    )
+    val glow by transition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "glow",
+    )
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(top = Dimens.ViewSpacing),
+            .padding(top = Dimens.Padding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
     ) {
-        Image(
-            painter = painterResource(R.drawable.launch_icon),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .size(Dimens.LargeCardSize)
-                .shadow(
-                    elevation = 15.dp,
-                    shape = RoundedCornerShape(24.dp),
-                )
-                .clip(RoundedCornerShape(24.dp)),
-        )
+        Box(contentAlignment = Alignment.Center) {
+            // 아이콘 뒤 라디얼 글로우.
+            Box(
+                modifier = Modifier
+                    .size(Dimens.HeroSectionHSize - Dimens.LargeCardSize)
+                    .graphicsLayer { alpha = glow }
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(accent.copy(alpha = 0.30f), Color.Transparent),
+                        ),
+                    ),
+            )
+            Image(
+                painter = painterResource(R.drawable.launch_icon),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(Dimens.LargeCardSize)
+                    .graphicsLayer {
+                        scaleX = breath
+                        scaleY = breath
+                    }
+                    .shadow(
+                        elevation = 18.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        spotColor = accent,
+                    )
+                    .clip(RoundedCornerShape(24.dp)),
+            )
+        }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -253,39 +345,67 @@ private val featureItems = listOf(
 )
 
 @Composable
-private fun FeatureList() {
-    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
-    val textPrimary =
-        colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
-
+private fun FeatureList(appeared: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = Dimens.Spacing,
+                top = Dimens.SectionSpacing,
                 bottom = Dimens.SectionSpacing,
-                start = Dimens.SectionSpacing,
-                end = Dimens.SectionSpacing,
+                start = Dimens.BtnPadding,
+                end = Dimens.BtnPadding,
             ),
-        verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+        verticalArrangement = Arrangement.spacedBy(Dimens.Padding + 2.dp),
     ) {
-        featureItems.forEach { item ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
-            ) {
-                Icon(
-                    imageVector = item.icon,
-                    contentDescription = null,
-                    tint = accent,
-                    modifier = Modifier.size(Dimens.IconSize),
-                )
-                Text(
-                    text = stringResource(item.textRes),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = textPrimary),
-                )
-            }
+        featureItems.forEachIndexed { index, item ->
+            FeatureCard(
+                item = item,
+                modifier = Modifier.appearAnim(appeared, delayMillis = 160 + index * 80),
+            )
         }
+    }
+}
+
+@Composable
+private fun FeatureCard(item: FeatureItem, modifier: Modifier = Modifier) {
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    val textPrimary =
+        colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val surfaceSecondary =
+        colorResource(com.oq.barnote.core.designsystem.R.color.surface_secondary)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Dimens.Radius))
+            .background(surfaceSecondary)
+            .padding(Dimens.Spacing),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+    ) {
+        // accent 틴트 아이콘 칩.
+        Box(
+            modifier = Modifier
+                .size(Dimens.CardSize)
+                .clip(RoundedCornerShape(Dimens.Radius))
+                .background(accent.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = item.icon,
+                contentDescription = null,
+                tint = accent,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Text(
+            text = stringResource(item.textRes),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = textPrimary,
+                fontWeight = FontWeight.Medium,
+            ),
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
@@ -294,21 +414,47 @@ private fun CtaSection(
     isPurchasing: Boolean,
     onSubscribe: () -> Unit,
     onRestore: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val palette = barNotePalette()
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+
+    // 구독 버튼 뒤 은은한 accent 글로우 펄스.
+    val transition = rememberInfiniteTransition(label = "cta")
+    val glowElevation by transition.animateFloat(
+        initialValue = 6f,
+        targetValue = 16f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1900, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "ctaGlow",
+    )
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Dimens.BtnPadding),
         verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
-        OQFillButton(
-            text = stringResource(R.string.gudoghagi),
-            onClick = onSubscribe,
-            palette = palette,
-            radius = Dimens.Radius.value,
-            enabled = !isPurchasing,
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = glowElevation.dp,
+                    shape = RoundedCornerShape(Dimens.Radius),
+                    spotColor = accent,
+                    ambientColor = accent,
+                ),
+        ) {
+            OQFillButton(
+                text = stringResource(R.string.gudoghagi),
+                onClick = onSubscribe,
+                palette = palette,
+                radius = Dimens.Radius.value,
+                enabled = !isPurchasing,
+            )
+        }
         // iOS `.storeButton(.visible, for: .restorePurchases)` — "구매 복원" 의미에 맞는 라벨 사용.
         OQRoundedButton(
             text = stringResource(R.string.gumae_bogwon),

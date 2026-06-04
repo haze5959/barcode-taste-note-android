@@ -16,22 +16,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -49,9 +41,9 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.ImageNotSupported
-import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Translate
@@ -60,8 +52,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -106,9 +96,9 @@ import com.oq.barnote.extension.title
 import com.oq.barnote.ui.component.BTNGridImages
 import com.oq.barnote.ui.component.BTNImage
 import com.oq.barnote.ui.component.EmptyStateView
+import com.oq.barnote.ui.component.ZoomableImageViewer
 import com.oq.barnote.ui.component.FlavorCountChips
-import com.oq.barnote.ui.component.NoteListRow
-import com.oq.barnote.ui.component.RatingDistributionChart
+import com.oq.barnote.ui.component.NoteDetailRow
 
 /**
  * iOS `ProductDetailView` 와 1:1 매핑.
@@ -273,9 +263,10 @@ internal fun ProductDetailScreen(
     }
 
     // 풀스크린 이미지 뷰어
-    if (state.isImageViewerPresented && state.info != null) {
-        FullscreenImageViewer(
-            imageIds = state.info.displayImageIds,
+    if (state.isImageViewerPresented && state.viewerImageIds.isNotEmpty()) {
+        ZoomableImageViewer(
+            imageIds = state.viewerImageIds,
+            initialPage = state.viewerStartIndex,
             onDismiss = { onEvent(ProductDetailUiEvent.DismissImageViewer) },
         )
     }
@@ -301,7 +292,8 @@ private fun TopBar(
             tint = textPrimary,
             modifier = Modifier.size(Dimens.IconSize).clickable(onClick = onBack).padding(4.dp),
         )
-        Spacer(modifier = Modifier.weight(1f))
+        // 제목은 back·우측 아이콘 사이 남는 공간만 차지(weight) + 길면 … 처리.
+        // weight/ellipsis 가 없으면 긴 제목이 우측 버튼을 화면 밖으로 밀어낸다.
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium.copy(
@@ -309,8 +301,12 @@ private fun TopBar(
                 fontWeight = FontWeight.Bold,
             ),
             maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = Dimens.Padding),
         )
-        Spacer(modifier = Modifier.weight(1f))
         // iOS toolbar 의 exclamationmark.bubble (제품 신고)
         Icon(
             imageVector = Icons.Filled.ReportProblem,
@@ -406,21 +402,9 @@ private fun Content(
             modifier = Modifier.padding(horizontal = Dimens.Padding),
         )
 
-        // 6. 별점 분포
-        if (state.ratingCounts.sum() > 0) {
-            Column(
-                modifier = Modifier.padding(horizontal = Dimens.BtnPadding),
-                verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
-            ) {
-                Text(
-                    text = stringResource(R.string.byeoljeom),
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                )
-                RatingDistributionChart(ratingCounts = state.ratingCounts)
-            }
-        }
+        // iOS ProductDetailView 에는 별점 분포/카운트 섹션이 없음 → 제거 (Android 전용 추가물이었음).
 
-        // 7. Tabs + 리스트
+        // Tabs + 리스트
         if (info.getNoteCount() > 0 || (info.myNoteIds?.isNotEmpty() == true)) {
             TabsSection(state = state, onEvent = onEvent)
         }
@@ -665,12 +649,17 @@ private fun InfoSection(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(R.string.gajang_manhi_neuggyeojin_hyangmi),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        // color 누락 시 LocalContentColor 기본값(Color.Black)이라 다크모드에서 안 보임.
+                        // iOS 의 .primary(라벨색)에 해당하는 text_primary(DayNight) 적용.
+                        color = textPrimary,
+                        fontWeight = FontWeight.Bold,
+                    ),
                 )
                 // PD8: iOS 의 questionmark.circle popover — "향미 옆의 숫자는 …개수입니다." 설명.
                 var showFlavorCountInfo by remember { mutableStateOf(false) }
                 Icon(
-                    imageVector = Icons.Filled.HelpOutline,
+                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
                     contentDescription = null,
                     tint = textSecondary,
                     modifier = Modifier
@@ -763,7 +752,7 @@ private fun VivinoSection(productName: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Dimens.Radius))
-            .background(Color(0xFFAA1C2E)) // Vivino brand red
+            .background(Color(0xFFAB1C2E)) // Vivino brand red (iOS Color(red:0.67,green:0.11,blue:0.18))
             .clickable { context.openUrl(url) }
             .padding(Dimens.BtnPadding),
         verticalAlignment = Alignment.CenterVertically,
@@ -780,7 +769,7 @@ private fun VivinoSection(productName: String, modifier: Modifier = Modifier) {
             modifier = Modifier.weight(1f),
         )
         Icon(
-            imageVector = Icons.Filled.OpenInNew,
+            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
             contentDescription = null,
             tint = Color.White,
         )
@@ -932,15 +921,36 @@ private fun TabsSection(
         }
         add(ProductDetailUiState.Tab.Images to stringResource(R.string.imiji))
     }
-    val selectedIndex = tabs.indexOfFirst { it.first == state.selectedTab }.coerceAtLeast(0)
-
-    TabRow(selectedTabIndex = selectedIndex) {
-        tabs.forEachIndexed { idx, (tab, label) ->
-            Tab(
-                selected = idx == selectedIndex,
-                onClick = { onEvent(ProductDetailUiEvent.SetTab(tab)) },
-                text = { Text(text = label) },
-            )
+    // iOS 세그먼트 탭 색상 — 선택: accent fill + textPrimary, 미선택: 투명 + textSecondary.
+    // (기본 Material3 TabRow 의 보라 primary 색이 앱 컬러 스타일과 안 맞던 문제 해결.)
+    val tabAccent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    val tabTextSelected = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val tabTextUnselected = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.Padding),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
+    ) {
+        tabs.forEach { (tab, label) ->
+            val isSelected = tab == state.selectedTab
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(Dimens.Radius))
+                    .background(if (isSelected) tabAccent else Color.Transparent)
+                    .clickable { onEvent(ProductDetailUiEvent.SetTab(tab)) }
+                    .padding(vertical = Dimens.Padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = if (isSelected) tabTextSelected else tabTextUnselected,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    ),
+                )
+            }
         }
     }
 
@@ -963,6 +973,7 @@ private fun TabsSection(
             imageIds = state.imageIds,
             isLoading = state.isImagesLoading,
             onLastReached = { onEvent(ProductDetailUiEvent.FetchImagesNextPage) },
+            onTapImage = { onEvent(ProductDetailUiEvent.PresentImageViewer(it)) },
         )
     }
 }
@@ -985,18 +996,17 @@ private fun NotesList(
         )
         return
     }
-    // PD20: 고정 height(800dp) → 항목 수 기반 heightIn(max). 짧은 리스트의 빈 공간/클리핑 해소.
-    // verticalScroll 부모 안에서 무한 높이 크래시를 피하려면 유한 상한이 필요하므로 max 로 캡.
-    LazyColumn(
+    // 부모 verticalScroll 안에서 LazyColumn + heightIn(추정치) 은 실제 높이보다 작으면 콘텐츠를 잘랐다.
+    // 항목 수가 많지 않은 화면이므로 일반 Column 으로 자연 높이 렌더 → 부모 스크롤이 처리(잘림 해소).
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = boundedListHeight(notes.size)),
-        contentPadding = PaddingValues(Dimens.Padding),
+            .padding(Dimens.Padding),
         verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
-        itemsIndexed(notes, key = { _, it -> it.id }) { index, info ->
+        notes.forEachIndexed { index, info ->
             Box(modifier = Modifier.clickable { onTapNote(info) }) {
-                NoteListRow(info = info)
+                NoteDetailRow(info = info)
             }
             // iOS: if note == store.noteInfos.last { send(.fetchNotes) }
             if (index >= notes.size - 1) {
@@ -1004,12 +1014,10 @@ private fun NotesList(
             }
         }
         if (isLoading) {
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(Dimens.Padding),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator(modifier = Modifier.size(24.dp)) }
-            }
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(Dimens.Padding),
+                contentAlignment = Alignment.Center,
+            ) { CircularProgressIndicator(modifier = Modifier.size(24.dp)) }
         }
     }
 }
@@ -1034,21 +1042,20 @@ private fun MyNotesList(
             icon = Icons.AutoMirrored.Filled.Article,
             modifier = Modifier.padding(vertical = Dimens.SectionSpacing),
         )
-        else -> LazyColumn(
-            // PD20: 고정 height → 항목 수 기반 heightIn(max).
+        else -> Column(
+            // 부모 verticalScroll 안에서 잘림 방지 — 일반 Column 으로 자연 높이 렌더.
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = boundedListHeight(myNotes.size)),
-            contentPadding = PaddingValues(Dimens.Padding),
+                .padding(Dimens.Padding),
             verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
         ) {
-            items(myNotes, key = { it.id }) { info ->
+            myNotes.forEach { info ->
                 Box(
                     modifier = Modifier.clickable {
                         if (info.note.rating == 0) onUnrated(info.product, info.note.id)
                         else onTapNote(info)
                     },
-                ) { NoteListRow(info = info) }
+                ) { NoteDetailRow(info = info) }
             }
         }
     }
@@ -1059,6 +1066,7 @@ private fun ImagesGrid(
     imageIds: List<String>,
     isLoading: Boolean,
     onLastReached: () -> Unit,
+    onTapImage: (Int) -> Unit,
 ) {
     if (imageIds.isEmpty() && !isLoading) {
         // iOS: ContentUnavailableView("사진이 없습니다", systemImage: "photo.on.rectangle.angled",
@@ -1071,53 +1079,41 @@ private fun ImagesGrid(
         )
         return
     }
-    // PD20: 고정 height(600dp) → 3열 행 수 기반 heightIn(max). 적은 이미지의 빈 공간/클리핑 해소.
-    val imageRows = (imageIds.size + 2) / 3
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+    // 부모 verticalScroll 안에서 LazyVerticalGrid + heightIn(추정치) 은 잘림을 유발 → 일반 3열 그리드
+    // (Column of Rows) 로 자연 높이 렌더. 각 이미지를 탭하면 그 인덱스부터 이미지뷰어를 연다.
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = boundedGridHeight(imageRows)),
-        contentPadding = PaddingValues(Dimens.Padding),
+            .padding(Dimens.Padding),
         verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
-        horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
-        items(imageIds, key = { it }) { id ->
-            BTNImage(
-                path = id,
-                modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
-                cornerRadius = 8.dp,
-            )
-        }
-        if (isLoading) {
-            item {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+        imageIds.chunked(3).forEachIndexed { rowIdx, rowIds ->
+            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.Padding)) {
+                rowIds.forEachIndexed { col, id ->
+                    val index = rowIdx * 3 + col
+                    BTNImage(
+                        path = id,
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onTapImage(index) },
+                        cornerRadius = 12.dp,
+                    )
+                }
+                // 마지막 행이 3칸 미만이면 빈 칸으로 채워 좌측 정렬 유지.
+                repeat(3 - rowIds.size) { Spacer(modifier = Modifier.weight(1f)) }
             }
         }
-        // 무한 스크롤 트리거 (마지막 항목 onAppear)
-        item {
-            LaunchedEffect(imageIds.size) { onLastReached() }
-            Spacer(modifier = Modifier.size(1.dp))
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(Dimens.Padding),
+                contentAlignment = Alignment.Center,
+            ) { CircularProgressIndicator(modifier = Modifier.size(24.dp)) }
         }
+        // 무한 스크롤 트리거.
+        LaunchedEffect(imageIds.size) { onLastReached() }
     }
-}
-
-/**
- * PD20: 노트 리스트(LazyColumn)의 항목 수 기반 상한 높이.
- * 행 추정치 ~132dp × 개수, 1~800dp 로 캡. verticalScroll 부모 안에서 유한 상한을 보장.
- */
-private fun boundedListHeight(itemCount: Int): androidx.compose.ui.unit.Dp {
-    val estimated = (itemCount.coerceAtLeast(1) * 132).dp
-    return if (estimated < 800.dp) estimated else 800.dp
-}
-
-/**
- * PD20: 이미지 그리드(3열)의 행 수 기반 상한 높이.
- * 행 추정치 ~128dp × 행수, 1~600dp 로 캡.
- */
-private fun boundedGridHeight(rowCount: Int): androidx.compose.ui.unit.Dp {
-    val estimated = (rowCount.coerceAtLeast(1) * 128).dp
-    return if (estimated < 600.dp) estimated else 600.dp
 }
 
 // endregion
@@ -1134,8 +1130,10 @@ private fun BottomCtaBar(
     val surfaceSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.surface_secondary)
     val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
 
+    // iOS .overlay(alignment: .bottom) { HStack {...} } — 풀폭이 아니라 텍스트 폭에 맞는 compact 캡슐을
+    // 하단 중앙에 띄운다. fillMaxWidth/weight 를 빼 wrap-content 로, 호출부의 align(BottomCenter) 가 중앙 배치.
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
         // Primary: 마셔본 등록 (비마셔본) / 노트 작성하기 (마셔본)
@@ -1143,7 +1141,6 @@ private fun BottomCtaBar(
         // iOS 와 동일하게 마셔본 여부와 무관하게 부착 (최초 1회 표시 후 dismiss 영속).
         com.oq.barnote.ui.tip.BarNoteTip(
             tip = com.oq.barnote.ui.tip.BarnoteTip.TastedProduct,
-            modifier = Modifier.weight(1f),
         ) {
             CapsuleButton(
                 text = if (state.isTastedProduct) {
@@ -1155,7 +1152,6 @@ private fun BottomCtaBar(
                 isAccent = true,
                 background = accent,
                 foreground = Color.White,
-                modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     if (state.isTastedProduct) onEvent(ProductDetailUiEvent.TappedAddNote)
                     else onEvent(ProductDetailUiEvent.TappedAddTasted)
@@ -1269,54 +1265,6 @@ private fun UnratedAlertDialog(
     )
 }
 
-@Composable
-private fun FullscreenImageViewer(
-    imageIds: List<String>,
-    onDismiss: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        val pagerState = rememberPagerState(pageCount = { imageIds.size })
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black),
-        ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-            ) { page ->
-                BTNImage(
-                    path = imageIds[page],
-                    modifier = Modifier.fillMaxSize(),
-                    cornerRadius = 0.dp,
-                )
-            }
-            // Close button
-            Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(Dimens.BtnPadding)
-                    .size(Dimens.IconSize)
-                    .clickable(onClick = onDismiss),
-            )
-            // Page counter (monospaced)
-            if (imageIds.size > 1) {
-                Text(
-                    text = "${pagerState.currentPage + 1} / ${imageIds.size}",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(Dimens.SectionSpacing),
-                )
-            }
-        }
-    }
-}
+// 풀스크린 이미지 뷰어는 공용 [ZoomableImageViewer] (ui/component) 로 이전 — 핀치줌(≤3x)·드래그-투-디스미스 포함.
 
 // endregion

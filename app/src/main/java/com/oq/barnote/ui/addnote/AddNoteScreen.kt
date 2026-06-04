@@ -1,5 +1,6 @@
 package com.oq.barnote.ui.addnote
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -105,6 +108,10 @@ internal fun AddNoteScreen(
     val palette = barNotePalette()
     val isEditMode = state.isEditMode
 
+    // iOS navigationBarBackButtonHidden() 대응 — 스와이프/시스템 뒤로가기를 가로채 X(닫기)와 동일한
+    // 닫기 흐름(입력 있으면 discard 확인)으로 보낸다. 제스처로 작성 내용이 사라지는 것 방지.
+    BackHandler(enabled = true) { onEvent(AddNoteUiEvent.RequestClose) }
+
     Box(modifier = Modifier.fillMaxSize().background(background)) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
@@ -145,14 +152,7 @@ internal fun AddNoteScreen(
                 return@Column
             }
 
-            // 상단 step indicator
-            StepIndicator(
-                current = state.step,
-                total = state.totalSteps,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.Padding),
-            )
+            // iOS: 진행 표시는 상단 막대 대신 하단 버튼 옆 "1/3" 캡슐 (아래 Row).
 
             Column(
                 modifier = Modifier
@@ -213,66 +213,96 @@ internal fun AddNoteScreen(
                 )
             }
 
-            // 하단 이전/다음/저장 버튼
+            // 하단 컨트롤 바 — iOS controlBar 대응: [이전(고정폭, 첫 step 비활성)] +
+            // [다음/등록(우측에 "현재/전체" 진행 캡슐, 마지막 step 엔 숨김)]. surfacePrimary 카드 + 그림자.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(Dimens.BtnPadding),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
+                    .padding(horizontal = Dimens.Padding)
+                    .padding(bottom = Dimens.SectionSpacing)
+                    .shadow(8.dp, androidx.compose.foundation.shape.RoundedCornerShape(Dimens.Radius), clip = false)
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(Dimens.Radius))
+                    .background(palette.surfacePrimary)
+                    .padding(Dimens.Spacing),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (!state.isFirstStep) {
-                    com.oq.barnote.core.oqcore.views.OQRoundedButton(
-                        text = stringResource(R.string.ijeon),
-                        onClick = { onEvent(AddNoteUiEvent.PrevStep) },
-                        style = com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType.TextSecondary,
-                        palette = palette,
-                        radius = Dimens.Radius.value,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                if (state.isLastStep) {
-                    OQFillButton(
-                        text = stringResource(R.string.jeojang),
-                        onClick = { onEvent(AddNoteUiEvent.Submit) },
-                        palette = palette,
-                        radius = Dimens.Radius.value,
-                        enabled = state.rating > 0 && !state.isSubmitting,
-                        modifier = Modifier.weight(1f),
-                    )
-                } else {
-                    OQFillButton(
-                        text = stringResource(R.string.daeum),
-                        onClick = { onEvent(AddNoteUiEvent.NextStep) },
-                        palette = palette,
-                        radius = Dimens.Radius.value,
-                        enabled = isStepValid(state),
-                        modifier = Modifier.weight(1f),
-                    )
+                // 이전 — 항상 표시, 첫 step 에선 비활성 (iOS .disabled(step == .product)).
+                com.oq.barnote.core.oqcore.views.OQRoundedButton(
+                    text = stringResource(R.string.ijeon),
+                    onClick = { onEvent(AddNoteUiEvent.PrevStep) },
+                    style = com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType.TextSecondary,
+                    palette = palette,
+                    radius = Dimens.Radius.value,
+                    enabled = !state.isFirstStep && !state.isSubmitting,
+                    modifier = Modifier.width(96.dp),
+                )
+                // 다음/등록 — 우측에 진행 캡슐 오버레이 (iOS .overlay(alignment: .trailing), 마지막 step 엔 숨김).
+                Box(modifier = Modifier.weight(1f)) {
+                    if (state.isLastStep) {
+                        OQFillButton(
+                            text = stringResource(R.string.noteu_deungrog),
+                            onClick = { onEvent(AddNoteUiEvent.Submit) },
+                            palette = palette,
+                            radius = Dimens.Radius.value,
+                            enabled = state.rating > 0 && !state.isSubmitting,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        OQFillButton(
+                            text = stringResource(R.string.daeum),
+                            onClick = { onEvent(AddNoteUiEvent.NextStep) },
+                            palette = palette,
+                            radius = Dimens.Radius.value,
+                            enabled = isStepValid(state),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        // iOS stepIndicatorText 캡슐 — 다음 버튼 우측에 오버레이.
+                        Text(
+                            text = "${state.step}/${state.totalSteps}",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = Dimens.Padding + 4.dp)
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50))
+                                .background(Color.White.copy(alpha = 0.2f))
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-/** 상단 step indicator: 채워진 막대 / 빈 막대. iOS 의 step dot 에 대응. */
+/** iOS AddNote 각 step 상단 제목+부제 카드. */
 @Composable
-private fun StepIndicator(current: Int, total: Int, modifier: Modifier = Modifier) {
-    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
-    val divider = colorResource(com.oq.barnote.core.designsystem.R.color.divider)
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
+private fun StepHeader(title: String, subtitle: String) {
+    val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val textSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+    val surfaceSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.surface_secondary)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(Dimens.Radius))
+            .background(surfaceSecondary)
+            .padding(Dimens.BtnPadding),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        repeat(total) { idx ->
-            val active = idx < current
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(if (active) accent else divider.copy(alpha = 0.4f)),
-            )
-        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = textPrimary,
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyMedium.copy(color = textSecondary),
+        )
     }
 }
 
@@ -281,16 +311,14 @@ private fun Step1ProductInfo(state: AddNoteUiState) {
     val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
     val textSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.Spacing)) {
-        Text(
-            text = stringResource(R.string.seontaeghan_jepum_jeongboreul_hwaginhaseyo),
-            style = MaterialTheme.typography.titleMedium.copy(
-                color = textPrimary,
-                fontWeight = FontWeight.Bold,
-            ),
+        StepHeader(
+            title = stringResource(R.string.jepum_jeongbo),
+            subtitle = stringResource(R.string.seontaeghan_jepum_jeongboreul_hwaginhaseyo),
         )
         NoteProductInfoSection(
             productName = state.productName,
-            description = state.productDescription,
+            // iOS 와 동일하게 제품 desc 는 표시하지 않는다 (아래 안내 문구만 표시).
+            description = null,
         )
         Text(
             text = stringResource(R.string.i_jepume_daehan_sieum_noteureul_jagseonghabnida),
@@ -307,20 +335,14 @@ private fun Step2Tasting(
 ) {
     val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing)) {
+        StepHeader(
+            title = stringResource(R.string.teiseuting),
+            subtitle = stringResource(R.string.pungmiwa_sieum_noteureul_giroghaseyo),
+        )
         NoteRatingSelectorSection(
             rating = state.rating,
             isRequired = true,
             onRatingChange = { onEvent(AddNoteUiEvent.RatingChanged(it)) },
-        )
-        // iOS OQTE — title/카운터/multi-line 풀 텍스트 에디터.
-        OQTE(
-            value = state.body,
-            onValueChange = { onEvent(AddNoteUiEvent.BodyChanged(it)) },
-            title = stringResource(R.string.noteu),
-            isOption = true,
-            maxLength = 500,
-            palette = palette,
-            radius = Dimens.Radius.value,
         )
         NoteFlavorSelector(
             selectedFlavors = state.selectedFlavors,
@@ -343,6 +365,16 @@ private fun Step2Tasting(
             onAdd = { onEvent(AddNoteUiEvent.RequestPickAttachment) },
             onRemove = { onEvent(AddNoteUiEvent.RemoveAttachment(it)) },
         )
+        // iOS: 시음노트 본문(OQTE)은 tasting step 의 맨 끝.
+        OQTE(
+            value = state.body,
+            onValueChange = { onEvent(AddNoteUiEvent.BodyChanged(it)) },
+            title = stringResource(R.string.noteu),
+            isOption = true,
+            maxLength = 500,
+            palette = palette,
+            radius = Dimens.Radius.value,
+        )
     }
 }
 
@@ -353,6 +385,10 @@ private fun Step2Tasting(
 @Composable
 private fun Step3Review(state: AddNoteUiState, onEvent: (AddNoteUiEvent) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing)) {
+        StepHeader(
+            title = stringResource(R.string.coejong_hwagin),
+            subtitle = stringResource(R.string.deungrog_jeon_naeyongeul_hwaginhaseyo),
+        )
         // iOS sharingStep: NotePublicToggleView 가 summaryCard 보다 먼저.
         NotePublicToggleSection(
             isPublic = state.publicScope == com.oq.barnote.core.domain.PublicScope.Public,
@@ -432,8 +468,8 @@ private fun SummaryCard(state: AddNoteUiState) {
                         path = att.id,
                         modifier = Modifier
                             .size(60.dp)
-                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
-                        cornerRadius = 8.dp,
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp)),
+                        cornerRadius = 12.dp,
                     )
                 }
             }

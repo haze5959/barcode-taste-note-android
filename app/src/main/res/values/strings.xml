@@ -26,6 +26,7 @@ to write tasting notes quickly and accurately.</string>
     <string name="bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar">If the product has a barcode, you can scan it to register faster.</string>
     <string name="bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar_44a131">If the product has a barcode, you can find it faster by scanning the barcode.</string>
     <string name="bakodeureul_cajeul_su_eobsnayo">Can\'t find the barcode?</string>
+    <string name="bakodeureul_gaideu_yeongyeog_ane_majcwojuseyo">Align barcode within the guide area</string>
     <string name="balhyo_jung_jeungryujureul_ceomgahae_dosureul_nopin_wain_pot">Wine fortified with spirits added during fermentation; Port and Sherry are classic examples.</string>
     <string name="banana_painaepeul_manggo_deung">Banana, pineapple, mango, etc.</string>
     <string name="banhaebeorin">Fallen for It</string>
@@ -466,7 +467,7 @@ Your drafts are securely saved!</string>
     <string name="seoljeong">Settings</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">Please allow notifications in settings.</string>
     <string name="alrim_gwonhani_pilyohabnida">Notification permission required.</string>
-    <string name="kamera_gwonhani_pilyohabnida">Camera permission required.</string>
+    <string name="kamera_gwonhani_pilyohabnida">Permission required</string>
     <string name="seoljeongeseo_kamerareul_heoyonghaejuseyo">Please allow camera access in settings.</string>
     <string name="seontaeghan_jepum">Selected Product</string>
     <string name="seontaeghan_jepum_jeongboreul_hwaginhaseyo">Check the selected product\'s information</string>
@@ -558,7 +559,6 @@ Are you sure you want to close?</string>
     <string name="beonyeog">Translate</string>
     <string name="cadan_haeje">Unblock</string>
     <string name="beonyeog_gyeolgwa">Translation</string>
-    <string name="seontaeghan_yeyageul_sagjehasigessseubnigga">Block this user? All notes by this user will be hidden.</string>
     <string name="sieum_noteu_yeyag_alrim_caeneol">Tasting Note Reservation</string>
     <string name="url_bogsa">Copy URL</string>
     <string name="i_jepumui_jalmosdoen_jeongbo_singo_hwagin">Report incorrect information about this product?</string>
@@ -571,7 +571,6 @@ Are you sure you want to close?</string>
     <string name="jagseong_jung_naeyongi_modu_sarajibnida">All current input will be discarded.</string>
     <string name="geoeui_da_wasseoyo">Almost there!</string>
     <string name="rogeuinhago_coejong_dangyereul_wanryohaseyo">Log in to complete the final step. Your input is preserved.</string>
-    <string name="gateun_ireumui_jepumi_imi_isseoyo_geomsaeghagireo_gaboseyo">A product with the same name already exists. Try searching.</string>
     <string name="jepum_seolmyeongina_imijireul_biwoduasimyeon_aiga_jadong">If you leave the description or image blank, AI will auto-fill the information.</string>
     <string name="dayanghan_juryureul_pog_seontaeghal_su_isseoyo">Select from a wide variety of alcohol types</string>
     <string name="ibu_annae">IBU Guide</string>

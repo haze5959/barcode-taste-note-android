@@ -11,7 +11,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * iOS `Data/Stores/*` 의 Store 들을 Hilt 로 바인딩합니다.
+ * iOS `Data/Stores` 의 Store 들을 Hilt 로 바인딩합니다.
  *
  * - [ReservationStore] → [ReservationStoreImpl] (DataStore Preferences)
  * - [UserStore] → [UserStoreImpl] (in-memory cache + Repository)

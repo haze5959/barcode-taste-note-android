@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Verified
@@ -22,12 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import com.oq.barnote.core.designsystem.R
 import com.oq.barnote.core.designsystem.component.InfoPopOver
 import com.oq.barnote.core.domain.Flavor
@@ -67,9 +70,14 @@ fun NoteFlavorSelector(
                 text = stringResource(com.oq.barnote.R.string.pungmi_seontaeg),
                 // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = textPrimary,
             )
             Spacer(modifier = Modifier.padding(start = 6.dp))
-            InfoTagView(text = stringResource(com.oq.barnote.R.string.obsyeon), style = InfoTagStyle.Normal)
+            InfoTagView(
+                text = stringResource(com.oq.barnote.R.string.obsyeon),
+                style = InfoTagStyle.Normal,
+                palette = barNotePalette(),
+            )
             Spacer(modifier = Modifier.weight(1f))
             InfoPopOver(title = stringResource(com.oq.barnote.R.string.pungmi_sangse_seolmyeong), items = flavorItems)
         }
@@ -78,57 +86,57 @@ fun NoteFlavorSelector(
             style = MaterialTheme.typography.bodyMedium,
             color = secondary,
         )
-        // iOS: GridItem(.adaptive(minimum: smallRowWSize)), 버튼 frame(maxWidth: .infinity).
-        // verticalScroll 부모(AddNote/EditNote/ProductDetail) 안이라 LazyVerticalGrid 는 중첩 스크롤
-        // 크래시 위험이 있어 사용하지 않고, FlowRow + maxItemsInEachRow + weight(1f) 로 한 행을
-        // 균등 폭(고정 140dp 대신)으로 채운다 (B5).
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
-            verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
-            maxItemsInEachRow = 2,
-        ) {
-            Flavor.values().forEach { flavor ->
-                val isSelected = flavor in selectedFlavors
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(Dimens.Radius))
-                        .background(
-                            if (isSelected) accent.copy(alpha = 0.18f) else surfaceSecondary,
+        // iOS: GridItem(.adaptive(minimum: smallRowWSize)) — 2열 동일 폭 셀 + 왼쪽 정렬.
+        // verticalScroll 부모(AddNote/EditNote/ProductDetail) 안이라 LazyVerticalGrid(중첩 스크롤 크래시)
+        // 대신 BoxWithConstraints 로 폭을 재서 고정폭 셀을 만든다. weight(1f) 는 마지막 행 셀이 부족하면
+        // 늘어나 iOS 와 달라지므로, 고정 width 로 왼쪽 정렬·동일 폭을 유지한다 (B5).
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val cellWidth = (maxWidth - Dimens.Padding * 2) / 2
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
+                verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+                maxItemsInEachRow = 2,
+            ) {
+                Flavor.values().forEach { flavor ->
+                    val isSelected = flavor in selectedFlavors
+                    Row(
+                        modifier = Modifier
+                            .width(cellWidth)
+                            .clip(RoundedCornerShape(Dimens.Radius))
+                            .background(
+                                if (isSelected) accent.copy(alpha = 0.18f) else surfaceSecondary,
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = if (isSelected) accent else divider,
+                                shape = RoundedCornerShape(Dimens.Radius),
+                            )
+                            .clickable {
+                                // iOS NoteFlavorSelectorView 와 동일: chip toggle 시 lightImpact.
+                                haptic.lightImpact()
+                                onToggle(flavor)
+                            }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AutoResizeText(
+                            text = flavor.title(),
+                            // iOS NoteFlavorSelectorView: lineLimit(1) + minimumScaleFactor(0.5) (B7)
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium,
+                                color = if (isSelected) accent else textPrimary,
+                            ),
+                            minScaleFactor = 0.5f,
+                            modifier = Modifier.weight(1f),
                         )
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) accent else divider,
-                            shape = RoundedCornerShape(Dimens.Radius),
-                        )
-                        .clickable {
-                            // iOS NoteFlavorSelectorView 와 동일: chip toggle 시 lightImpact.
-                            haptic.lightImpact()
-                            onToggle(flavor)
+                        if (isSelected) {
+                            Icon(
+                                // iOS: checkmark.seal.fill 에 가장 가까운 Material 아이콘 (B6).
+                                imageVector = Icons.Filled.Verified,
+                                contentDescription = null,
+                                tint = accent,
+                            )
                         }
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = flavor.title(),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Medium,
-                        ),
-                        color = if (isSelected) accent else textPrimary,
-                        // iOS: lineLimit(1) + minimumScaleFactor(0.5). Compose 1.7 엔 autosize 가 없어
-                        // ellipsis 로 대체한다 (B7).
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
-                    if (isSelected) {
-                        Icon(
-                            // iOS: checkmark.seal.fill 에 가장 가까운 Material 아이콘 (B6).
-                            imageVector = Icons.Filled.Verified,
-                            contentDescription = null,
-                            tint = accent,
-                        )
                     }
                 }
             }

@@ -3,6 +3,8 @@ package com.oq.barnote.core.domain
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -28,6 +30,7 @@ data class Product(
     val id: String,
     val name: String,
     val desc: String? = null,
+    @Serializable(with = LenientIntSerializer::class)
     val rating: Int,
     @SerialName("flavor_infos")
     val flavorInfos: Map<String, Int>? = null,
@@ -40,6 +43,25 @@ data class Product(
     /** "와인🍷" 같은 형태. iOS `nameWithEmoji` 와 동일. */
     val nameWithEmoji: String
         get() = "$name${type.emoji}"
+}
+
+/**
+ * 서버가 정수 평점을 `5.0` 같은 Double JSON 으로 보내도 허용하는 Int 시리얼라이저.
+ * iOS `JSONDecoder` 가 `5.0` → Int `5` 로 너그럽게 디코딩하는 것과 동일하게 동작합니다.
+ * (kotlinx 는 기본적으로 Int 필드의 `5.0` 을 거부하므로 product.rating 평균값 디코딩에 필요)
+ */
+internal object LenientIntSerializer : KSerializer<Int> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("LenientInt", PrimitiveKind.INT)
+
+    override fun deserialize(decoder: Decoder): Int =
+        if (decoder is JsonDecoder) {
+            decoder.decodeJsonElement().jsonPrimitive.content.toDouble().toInt()
+        } else {
+            decoder.decodeInt()
+        }
+
+    override fun serialize(encoder: Encoder, value: Int) = encoder.encodeInt(value)
 }
 
 /**

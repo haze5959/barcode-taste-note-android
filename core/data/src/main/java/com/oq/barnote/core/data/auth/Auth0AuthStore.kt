@@ -26,6 +26,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import com.auth0.android.result.Credentials as Auth0Credentials
@@ -56,6 +57,9 @@ class Auth0AuthStore @Inject constructor(
     @ApplicationContext private val context: Context,
     private val auth0: Auth0,
     @ApplicationScope private val appScope: CoroutineScope,
+    // 로그인(WebAuthProvider.login.withScheme)과 동일한 스킴으로 로그아웃 returnTo 도 맞춰야
+    // Allowed Logout URLs 가 일치한다. iOS Auth0.plist 의 커스텀 스킴에 대응.
+    @Named("auth0Scheme") private val auth0Scheme: String,
 ) : AuthStore {
 
     private val credentialsManager: SecureCredentialsManager by lazy {
@@ -93,6 +97,12 @@ class Auth0AuthStore @Inject constructor(
     override suspend fun currentCredentials(): Credentials? {
         // 1. 메모리 캐시가 마진 안이면 즉시 반환 (lock 불필요 — @Volatile 로 가시성 보장).
         cachedCredentials?.let { if (it.isFresh()) return it }
+
+        // 1-1. 저장된 (유효하거나 refresh 가능한) credentials 가 없으면 = 미로그인.
+        //      SecureCredentialsManager.getCredentials() 는 이 경우 "No Credentials were previously set"
+        //      예외를 던지므로, 미리 분기해 익명(null)으로 반환한다. iOS 가 미로그인 시 nil 을 돌려주는 것과
+        //      동일 — 공개 엔드포인트(제품 상세 등)는 토큰 없이 조회되어야 하고, 불필요한 예외/로그/clear 도 막는다.
+        if (!credentialsManager.hasValidCredentials()) return null
 
         // 2. lock 진입 — pendingFetch 가 있으면 await, 없으면 새 Deferred 생성.
         val deferred = mutex.withLock {
@@ -184,8 +194,9 @@ class Auth0AuthStore @Inject constructor(
         credentialsManager.clearCredentials()
         mutex.withLock {
             cachedCredentials = null
-            pendingFetch?.cancel()
-            pendingForceRefresh?.cancel()
+            // 진행 중인 fetch 는 cancel 하지 않는다 (iOS clear 와 동일). handleFetchError 안에서 clear 가
+            // 호출될 때 자신의 Deferred 를 cancel 하면, 그 Deferred 가 JobCancellationException 으로 끝나
+            // 호출자가 null 대신 예외를 받는다 (미로그인 시 제품 상세 요청이 깨지던 원인). 참조만 분리한다.
             pendingFetch = null
             pendingForceRefresh = null
         }
@@ -239,12 +250,16 @@ class Auth0AuthStore @Inject constructor(
             OQLog.w("Auth0 credentials fetch network error: $e")
             return
         }
-        OQLog.e("Auth0 credentials invalid", e)
+        // 네트워크가 아닌 실패(refresh token 무효 등) = 세션 만료로 간주 → 자동 로그아웃 후 null 반환.
+        // crash 가 아닌 정상적 세션 종료이므로 warn (iOS 는 무로그). 미로그인 케이스는 currentCredentials 의
+        // hasValidCredentials 사전 분기에서 이미 걸러져 여기로 오지 않는다.
+        OQLog.w("Auth0 credentials invalid, clearing session: $e")
         clear(clearWebSession = false)
     }
 
     private suspend fun clearWebAuthSession() = suspendCancellableCoroutine<Unit> { cont ->
         WebAuthProvider.logout(auth0)
+            .withScheme(auth0Scheme)
             .start(context, object : Callback<Void?, AuthenticationException> {
                 override fun onSuccess(result: Void?) {
                     if (cont.isActive) cont.resume(Unit)

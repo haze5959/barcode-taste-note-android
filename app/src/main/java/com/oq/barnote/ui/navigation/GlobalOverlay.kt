@@ -1,6 +1,10 @@
 package com.oq.barnote.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,26 +43,54 @@ import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.oqcore.models.Palette
 import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.util.toDisplayMessage
 import com.oq.barnote.core.oqcore.views.OQToastConfig
 import com.oq.barnote.core.oqcore.views.OQToastHost
+
+/**
+ * 풀스크린 스크림이 뒤 레이어로 터치를 통과시키지 않도록 모든 포인터 이벤트를 Initial 패스에서 소비한다.
+ * (Compose 풀스크린 Box 는 pointerInput 이 없으면 터치가 그대로 뒤 UI 로 전달되어 막히지 않는다.)
+ */
+private fun Modifier.blockTouches(): Modifier = pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+        }
+    }
+}
 
 /**
  * 글로벌 로딩 오버레이. iOS `OQLoadingOverlay(isLoading = appController.globalLoading)` 에 대응.
  *
  * [AppController.globalLoading] 이 true 인 동안 반투명 black + 가운데 spinner.
- * 사용자 인터랙션은 캡처하지 않음 (clickable 없음) — 단순 visual indicator.
+ * 로딩 동안에는 [blockTouches] 로 뒤 UI 로의 터치를 막는다 (스피너 중 오작동 방지).
  */
 @Composable
 fun GlobalLoadingOverlay(appController: AppController) {
     val isLoading by appController.globalLoading.collectAsState()
-    if (!isLoading) return
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.35f)),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator(color = Color.White)
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    val surface = colorResource(com.oq.barnote.core.designsystem.R.color.surface_primary)
+    // iOS OQLoadingOverlay: dim 0.2 + .ultraThinMaterial 둥근 카드(radius 20) + shadow + .transition(.opacity).
+    // backdrop blur 는 Compose 미지원이라 surfacePrimary 반투명으로 frosted 근사 (BottomBar 와 동일 트레이드오프).
+    AnimatedVisibility(visible = isLoading, enter = fadeIn(), exit = fadeOut()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .blockTouches()
+                .background(Color.Black.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .shadow(16.dp, RoundedCornerShape(20.dp), clip = false)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(surface.copy(alpha = 0.92f))
+                    .padding(horizontal = 32.dp, vertical = 24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = accent)
+            }
+        }
     }
 }
 
@@ -72,6 +109,7 @@ fun GlobalAiScanLoadingOverlay(appController: AppController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .blockTouches()
             .background(Color.Black.copy(alpha = 0.55f)),
         contentAlignment = Alignment.Center,
     ) {
@@ -146,7 +184,8 @@ fun GlobalErrorDialogHost(appController: AppController) {
         }
     }
     currentError?.let { throwable ->
-        val message = throwable.message ?: throwable::class.simpleName ?: ""
+        val context = LocalContext.current
+        val message = throwable.toDisplayMessage(context)
         AlertDialog(
             onDismissRequest = { currentError = null },
             title = { Text(text = stringResource(R.string.oryu)) },

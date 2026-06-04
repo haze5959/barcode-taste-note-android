@@ -108,6 +108,15 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:data"))
 
+    // Kakao SDK 초기화(KakaoSdk.init)를 app(BarNoteApp)에서 직접 호출 → v2-common 직접 의존.
+    // (카카오톡 공유 ShareClient 는 oqcore 가 v2-share 로 implementation)
+    implementation(libs.kakao.common)
+
+    // Auth0(로그인 webAuth/Credentials)·Billing(구독)은 app 화면/VM 이 직접 사용 → 직접 의존.
+    // (core:data 도 동일 SDK 를 implementation 으로 쓰지만 transitive 는 app 에 비노출)
+    implementation(libs.auth0.android)
+    implementation(libs.billing.ktx)
+
     // Navigation / Lifecycle Compose
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -120,8 +129,9 @@ dependencies {
     // DataStore (Onboarding flag)
     implementation(libs.androidx.datastore.preferences)
 
-    // ML Kit Translate (on-device 번역)
+    // ML Kit Translate (on-device 번역) + Language ID (원문 언어 자동 감지)
     implementation(libs.mlkit.translate)
+    implementation(libs.mlkit.language.id)
 
     // ML Kit Barcode + CameraX (바코드 스캐너)
     implementation(libs.mlkit.barcode)

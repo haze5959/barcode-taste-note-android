@@ -45,6 +45,7 @@ import com.oq.barnote.core.oqcore.views.OQTE
 import com.oq.barnote.ui.component.NoteAttachmentSection
 import com.oq.barnote.ui.component.NoteDetailExpandable
 import com.oq.barnote.ui.component.NoteFlavorSelector
+import com.oq.barnote.ui.component.NoteProductInfoSection
 import com.oq.barnote.ui.component.NotePublicToggleSection
 import com.oq.barnote.ui.component.NoteRatingSelectorSection
 import com.oq.barnote.ui.picker.rememberComposeMediaAttachmentPicker
@@ -140,6 +141,11 @@ internal fun EditNoteScreen(
                     .padding(horizontal = Dimens.BtnPadding),
                 verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
             ) {
+                // iOS EditNoteView 최상단 NoteProductInfoView — "선택한 제품" 카드.
+                NoteProductInfoSection(
+                    productName = state.productName,
+                    description = null,
+                )
                 NoteRatingSelectorSection(
                     rating = state.rating,
                     isRequired = false,
@@ -168,7 +174,8 @@ internal fun EditNoteScreen(
                         onDetailChange = { detail, v ->
                             onEvent(EditNoteUiEvent.DetailChanged(detail, v))
                         },
-                        isOption = true,
+                        // iOS EditNoteView 는 NoteDetailExpandableView 에 isOption 미전달 (기본 false).
+                        isOption = false,
                     )
                 }
                 NoteAttachmentSection(

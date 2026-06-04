@@ -13,6 +13,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.flow.Flow
@@ -23,16 +24,17 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 /**
- * iOS `OQParticleEmitter.burstAtBottom()` 대응의 Compose 포팅.
+ * iOS `OQParticleEmitter.burstAtBottom()` (CAEmitterLayer) 대응의 Compose 포팅.
  *
- * - CAEmitterLayer 대신 Canvas + frame loop 으로 파티클 위치/투명도 직접 계산
- * - 별/하트/원형 등 SF Symbol 대신 단순 원형 파티클로 그림 (성능 + 의존성 0)
- * - [trigger] Flow 가 emit 될 때마다 한 번씩 파티클 버스트 실행
+ * CAEmitterLayer 대신 Canvas + frame loop 으로 파티클을 직접 시뮬레이션합니다.
+ * iOS 셀 파라미터에 맞춰:
+ * - 모양: 별(5각)/스파클(4각) Path — iOS SF Symbol(star/sparkle 등) 근사 (단색 원형 대비 입체감)
+ * - 회전: [Particle.angularVelocity] (iOS `cell.spin`)
+ * - 소멸하며 축소: alpha 와 함께 크기 축소 (iOS `cell.scaleSpeed = -0.15`)
+ * - 물리: yAcceleration 500 (iOS `cell.yAcceleration = 500`), 위쪽 ±60° fan (iOS `emissionRange = .pi/1.5`)
+ * - [trigger] Flow 가 emit 될 때마다 한 번씩 버스트
  *
- * 사용 예 (앱 글로벌 오버레이):
- * ```
- * OQParticleEmitterHost(trigger = appController.particleBurstEvent)
- * ```
+ * 사용 예: `OQParticleEmitterHost(trigger = appController.particleBurstEvent)`
  */
 @Composable
 fun OQParticleEmitterHost(
@@ -68,8 +70,8 @@ fun OQParticleEmitterHost(
         }
     }
 
-    // 입력 modifier 가 없는 Box / Canvas 는 Compose 의 hit-test 에 등록되지 않아 자동으로 pass-through.
-    // 따라서 파티클이 떠 있어도 그 아래 UI 의 터치/스크롤 이벤트는 그대로 전달됩니다.
+    // 입력 modifier 가 없는 Box / Canvas 는 hit-test 에 등록되지 않아 자동 pass-through —
+    // 파티클이 떠 있어도 아래 UI 의 터치/스크롤 이벤트는 그대로 전달됩니다.
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -78,10 +80,18 @@ fun OQParticleEmitterHost(
         if (particles.isNotEmpty()) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 particles.forEach { p ->
-                    drawCircle(
+                    // 소멸하며 축소 (iOS scaleSpeed -0.15 근사): alpha 가 줄면 크기도 함께 축소.
+                    val outer = p.radius * (0.55f + 0.45f * p.alpha)
+                    drawPath(
+                        path = starPath(
+                            cx = p.x,
+                            cy = p.y,
+                            outerRadius = outer,
+                            innerRadius = outer * 0.45f,
+                            points = p.points,
+                            rotationRad = p.rotation,
+                        ),
                         color = p.color.copy(alpha = p.alpha),
-                        radius = p.radius,
-                        center = Offset(p.x, p.y),
                     )
                 }
             }
@@ -97,7 +107,10 @@ private data class Particle(
     val vy: Float,
     val radius: Float,
     val color: Color,
-    val lifetime: Float, // 남은 생명 (초)
+    val points: Int,            // 별 꼭짓점 수 (4=스파클 / 5=별)
+    val rotation: Float,        // 현재 회전각 (rad)
+    val angularVelocity: Float, // 회전 속도 (rad/s) — iOS cell.spin
+    val lifetime: Float,        // 남은 생명 (초)
     val initialLifetime: Float,
 ) {
     val alpha: Float get() = (lifetime / initialLifetime).coerceIn(0f, 1f)
@@ -105,12 +118,12 @@ private data class Particle(
     fun advance(dt: Float): Particle? {
         val nextLifetime = lifetime - dt
         if (nextLifetime <= 0f) return null
-        // y 가속도 (중력).
-        val gravity = 1400f
+        val gravity = 500f // iOS cell.yAcceleration = 500
         return copy(
             x = x + vx * dt,
             y = y + vy * dt,
             vy = vy + gravity * dt,
+            rotation = rotation + angularVelocity * dt,
             lifetime = nextLifetime,
         )
     }
@@ -132,19 +145,49 @@ private fun spawnBurst(
 ): List<Particle> {
     val rng = Random(System.nanoTime())
     return List(count) {
-        // 위쪽 방향 (-PI/2) ± 60도 fan.
+        // 위쪽 방향 (-PI/2) ± 60도 fan (iOS emissionRange = .pi / 1.5).
         val angle = -PI.toFloat() / 2f + (rng.nextFloat() - 0.5f) * (PI.toFloat() / 1.5f)
-        val speed = 700f + rng.nextFloat() * 300f
-        val lifetime = 1.0f + rng.nextFloat() * 0.7f
+        val speed = 650f + rng.nextFloat() * 500f // iOS velocity 900 ± 250
+        val lifetime = 0.9f + rng.nextFloat() * 0.8f
         Particle(
             x = origin.x,
             y = origin.y,
             vx = cos(angle) * speed,
             vy = sin(angle) * speed,
-            radius = 6f + rng.nextFloat() * 4f,
+            radius = 10f + rng.nextFloat() * 7f, // iOS pointSize 32 * scale ~0.5 근사
             color = colors[rng.nextInt(colors.size)],
+            points = if (rng.nextBoolean()) 4 else 5,
+            rotation = rng.nextFloat() * (2f * PI.toFloat()),
+            angularVelocity = (rng.nextFloat() - 0.5f) * 12f, // iOS spin 5 ± spinRange
             lifetime = lifetime,
             initialLifetime = lifetime,
         )
     }
+}
+
+/**
+ * 중심 (cx,cy) 기준 [points] 꼭짓점 별 모양 Path. 외곽/내곽 반지름을 교대로 잇고 [rotationRad] 만큼 회전.
+ * points=5 → 별, points=4 → 스파클.
+ */
+private fun starPath(
+    cx: Float,
+    cy: Float,
+    outerRadius: Float,
+    innerRadius: Float,
+    points: Int,
+    rotationRad: Float,
+): Path {
+    val path = Path()
+    val total = points * 2
+    val step = PI.toFloat() / points
+    for (i in 0 until total) {
+        val r = if (i % 2 == 0) outerRadius else innerRadius
+        // 시작점은 위(-PI/2) 방향, rotation 적용.
+        val a = rotationRad - PI.toFloat() / 2f + i * step
+        val px = cx + cos(a) * r
+        val py = cy + sin(a) * r
+        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+    }
+    path.close()
+    return path
 }

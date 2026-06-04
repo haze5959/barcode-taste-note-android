@@ -37,11 +37,12 @@ fun InfoTagView(
     leadingIcon: ImageVector? = null,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(percent = 50) // iOS InfoTagView 는 Capsule (pill)
     val (bg, fg) = when (style) {
         InfoTagStyle.Normal -> palette.surfaceSecondary to palette.textSecondary
         InfoTagStyle.Material -> Color.White.copy(alpha = 0.25f) to Color.White
-        InfoTagStyle.Accent -> palette.accent to Color.White
+        // iOS InfoTagView .accent 와 동일: accentSecondary 배경 + accent 텍스트.
+        InfoTagStyle.Accent -> palette.accentSecondary to palette.accent
     }
 
     // Material 스타일은 frosted glass 효과 (Android 12+ backdrop blur, 이하는 alpha fallback).

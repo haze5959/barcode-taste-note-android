@@ -88,7 +88,7 @@ private fun ThumbnailCell(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(12.dp)),
         )
         // X 버튼 (우상단)
         Box(
@@ -116,12 +116,12 @@ private fun AddCell(size: Dp, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(size)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(Color.Gray.copy(alpha = 0.15f))
             .border(
                 width = 1.dp,
                 color = Color.Gray.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(12.dp),
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,

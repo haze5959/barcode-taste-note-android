@@ -110,6 +110,7 @@ app
 - **Activity 컨텍스트 필요한 SDK 호출** (Auth0 WebAuth, BillingClient.launchBillingFlow): Composable 에서 `LocalContext.current.findActivity()` (ContextWrapper 체인 추출) → ViewModel 의 `fun launchX(activity)` 에 전달. SDK 의존성도 필요하면 Hilt `@EntryPoint` + `EntryPointAccessors.fromApplication(...)`.
 - **`enableEdgeToEdge()` + Scaffold inset**: Activity `onCreate` 에서 호출 → `Scaffold { innerPadding -> NavHost(contentPadding=innerPadding) }`.
 - **AppCompatDelegate 적용**: `setDefaultNightMode`/`setApplicationLocales` 는 Activity 재생성을 유발. DataStore 저장은 ViewModel, 실제 적용은 Application/Activity scope 의 `Applicator` 클래스 (`@Singleton` collect 루프 + `applyOnStartup()`).
+- **테마 전환 애니메이션(radial reveal) — 안드로이드 미지원 (의도적)**: iOS `ThemeTransitionManager` 의 원형 reveal 테마 전환은 안드로이드에서 **지원하지 않음**. 위 `setDefaultNightMode` 가 **Activity 재생성**을 유발해 in-place Compose 애니메이션이 성립하지 않기 때문 — 테마는 하드컷(재생성)으로 적용한다. 제대로 구현하려면 ① recomposition 기반 테마(`LocalConfiguration`/`LocalContext` override 로 재생성 제거) 또는 ② 재생성을 가로지르는 비트맵 스냅샷이 필요한데, 둘 다 앱 전역 색상 경로를 바꾸는 고위험 변경이라 ROI 대비 보류. `core/oqcore/.../util/ThemeTransitionManager.kt` 가 존재하나 **미연결이 정상 상태** — 위 제약을 먼저 해소하지 않고 wire-up 시도 금지.
 
 **ML Kit / CameraX / Tasks**
 - **ML Kit 번역**: `TranslatorOptions.Builder().setSource().setTarget()` + `Translation.getClient(...)`. 첫 호출 시 `downloadModelIfNeeded(DownloadConditions.Builder().build())` (~30MB/언어쌍).
@@ -196,6 +197,7 @@ app
 - **Receiver / Service**: `@AndroidEntryPoint` + `AndroidManifest.xml` 등록 둘 다 필요. 하나라도 빠지면 NPE.
 - **새 라이브러리**: `libs.versions.toml` `[versions]` + `[libraries]` 등록 → `libs.x.y` 참조. 직접 표기 금지.
 - **새 화면**: `BarNoteNavHost` + `Destinations.kt` 양쪽 등록. 미구현은 `PlaceholderScreen`.
+- **iOS 중앙 게이트 → Android 진입점별 적용**: iOS 는 child feature 의 `.delegate(.showAddNote)` 등을 부모 reducer(`requestAddNote`)가 가로채 구독/제한 게이트를 한 곳에 둔다. Android 는 화면마다 독립 `NavEffect`+`navController.navigate` 라 **각 진입점이 게이트를 우회**하기 쉽다 (예: 노트작성은 ProductDetail `TappedAddNote` / NoteList `WriteUnratedNote` / 알림예약 등 여러 곳). 구독/로그인/한도 등 "공통 관문" 로직은 새 진입점마다 직접 적용했는지 확인 — 노트작성 게이트는 `checkSubscriptionStatus()` + `noteCount >= Constants.N.FREE_NOTE_COUNT` → `GoSubscription`.
 - **ViewModel 에서 string resource**: `@Inject constructor(@ApplicationContext context: Context)` → `context.getString(R.string.xxx)`. Composable 의 `stringResource` 사용 불가.
 - **새 BTN domain-dependent 컴포넌트**: `app/ui/component/` 에 둡니다 (Constants/strings 의존). 도메인 의존 없는 atomic 컴포넌트만 `core:designsystem/component/` 에 둡니다.
 - **suspend IO/long-running**: `withContext(Dispatchers.IO)` 또는 `Mutex.withLock`. UI 스레드 차단 회피.
@@ -222,7 +224,6 @@ app
 - **R8/minify (release)**: `isMinifyEnabled = true` 활성. keep 규칙은 `app/proguard-rules.pro`. 리플렉션/직렬화 라이브러리(Auth0/kotlinx.serialization/Hilt/Retrofit/Kakao/ML Kit) 추가·변경 시 keep 규칙 점검. **release(minified) 빌드 스모크 테스트 필수** — 로그인/직렬화/API/결제/FCM/공유 경로.
 
 ### 7.4 미해결 TODO
-- ⏳ `google-services.json` 추가 (사용자 작업, Firebase Console 다운로드 → `app/google-services.json`). plugin 은 이미 활성화 상태이므로 파일만 배치하면 FCM/Crashlytics/Analytics 자동 활성.
 - ⏳ Play Console 실제 구독 productId/basePlanId 를 `Constants.S.SUBSCRIPTION_PRODUCT_ID` 에 반영 (현재 placeholder `"barnote_premium"`).
 - ⏳ `local.properties` 에 `kakao.nativeAppKey=...` 추가 (Kakao 개발자센터 → 앱 → 일반 → 네이티브 앱 키, iOS `06624a49189cbb69a20c013756fee51d` 와 동일 값). 누락 시 카카오톡 공유 자동 비활성 (앱 동작 자체에는 영향 없음).
 - ⏳ `assetlinks.json` 서버 호스팅 (사용자/서버 작업, `https://barnote.net/.well-known/assetlinks.json`). 템플릿 `app/src/main/assetlinks.template.json` 의 SHA256 지문 치환 후 배포 → https App Links 자동 검증. 호스팅 전엔 https 링크가 브라우저로 폴백 (barnote:// 스킴은 영향 없음).

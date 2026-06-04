@@ -3,21 +3,25 @@ package com.oq.barnote
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,9 +29,12 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.oq.barnote.core.data.notification.NotificationSchedulerImpl
 import com.oq.barnote.core.data.notification.NotificationTapDispatch
+import com.oq.barnote.core.designsystem.BarNoteTypography
+import com.oq.barnote.core.designsystem.barNoteColorScheme
 import com.oq.barnote.core.oqcore.util.AppController
 import com.oq.barnote.core.oqcore.views.OQParticleEmitterHost
 import kotlinx.serialization.json.Json
+import com.oq.barnote.ui.login.startAuth0Login
 import com.oq.barnote.ui.navigation.AppNavigationNavEffect
 import com.oq.barnote.ui.navigation.AppNavigationUiEvent
 import com.oq.barnote.ui.navigation.AppNavigationViewModel
@@ -55,7 +62,7 @@ import javax.inject.Inject
  * - Deep link 처리: Intent.ACTION_VIEW data URI → AppNavigationViewModel
  */
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var appThemeApplicator: AppThemeApplicator
@@ -70,22 +77,36 @@ class MainActivity : ComponentActivity() {
     lateinit var json: Json
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        appThemeApplicator.applyOnStartup()
-        appLanguageApplicator.applyOnStartup()
-
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // @AndroidEntryPoint 의 @Inject lateinit 필드는 super.onCreate() 시점에 주입됨.
+        // → 주입 대상(appThemeApplicator 등)은 반드시 super.onCreate() 이후에 사용.
+        appThemeApplicator.applyOnStartup()
+        appLanguageApplicator.applyOnStartup()
 
         // 알림 탭으로 launch 된 경우 NotificationEvent 를 emit (iOS `didReceive response` 등가).
         // setIntent 대신 onCreate 의 intent 를 직접 dispatch — savedInstance 가 있어도 같은 intent 가 들어옴.
         dispatchNotificationTap(intent)
 
         setContent {
-            MaterialTheme {
-                AppRoot(
-                    appController = appController,
-                    initialDeepLink = intent?.dataString,
-                )
+            // Material 컴포넌트(AlertDialog/DropdownMenu/CircularProgressIndicator 등)는 색 미지정 시
+            // ColorScheme 을 따른다. 기본값은 보라 primary + 라이트 surface 라 다크모드에서 다이얼로그/
+            // 메뉴/인디케이터가 깨지므로, 디자인 시스템 토큰 기반 [barNoteColorScheme] 으로 교체한다.
+            MaterialTheme(
+                colorScheme = barNoteColorScheme(),
+                typography = BarNoteTypography,
+            ) {
+                // 색을 명시하지 않은 Text/Icon 의 기본색을 onSurface(text_primary) 로 제공.
+                // Material 기본 LocalContentColor 는 검정이라 다크모드에서 안 보이는 문제 방지.
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurface,
+                ) {
+                    AppRoot(
+                        appController = appController,
+                        initialDeepLink = intent?.dataString,
+                    )
+                }
             }
         }
     }
@@ -134,8 +155,18 @@ private fun AppRoot(
     LaunchedEffect(Unit) {
         appNavViewModel.navEffect.collect { effect ->
             when (effect) {
-                AppNavigationNavEffect.GoLogin ->
-                    navController.navigate(Destinations.LOGIN)
+                AppNavigationNavEffect.StartWebLogin -> {
+                    // iOS: "로그인 필요" alert 확인 → 전용 화면 없이 곧장 Auth0 webAuth.
+                    (context as? Activity)?.let { activity ->
+                        startAuth0Login(
+                            activity = activity,
+                            onStart = { appNavViewModel.onLoginStarted() },
+                            onSuccess = { appNavViewModel.onLoginSuccess(it) },
+                            onError = { appNavViewModel.onLoginError(it) },
+                            onCancel = { appNavViewModel.onLoginCancelled() },
+                        )
+                    }
+                }
                 is AppNavigationNavEffect.GoAddNote ->
                     navController.navigate(Destinations.writeNote(effect.productId))
                 AppNavigationNavEffect.GoSubscription ->
@@ -207,7 +238,18 @@ private fun AppRoot(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = {
+        // 시스템 바(특히 하단 nav바) 영역에 비치는 배경 — 앱 배경과 일치시켜, 콘텐츠 inset 아래로
+        // 카메라/타 화면이 비치는 이질적 strip 을 없앤다. (기본값은 Material3 기본색이라 앱 배경과 달랐다.)
+        containerColor = colorResource(com.oq.barnote.core.designsystem.R.color.background_primary),
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            BarNoteNavHost(
+                navController = navController,
+                contentPadding = innerPadding,
+            )
+            // iOS 투명 탭바 방식 — Scaffold bottomBar 슬롯(콘텐츠를 바 위로 inset 해 뒤가 안 보임) 대신
+            // 콘텐츠 위에 오버레이. NavHost 가 바 높이만큼 잘리지 않아 콘텐츠가 바 뒤로 스크롤되어 비친다.
+            // 글로벌 로딩/토스트가 바까지 덮어 터치를 막도록, 바는 글로벌 오버레이보다 먼저(아래) 그린다.
             if (showBottomBar) {
                 MainBottomBar(
                     navController = navController,
@@ -223,15 +265,11 @@ private fun AppRoot(
                             false
                         }
                     },
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            BarNoteNavHost(
-                navController = navController,
-                contentPadding = innerPadding,
-            )
+
+            // 아래 글로벌 오버레이들은 바보다 위에 그려져, 활성 시 바를 포함한 전체 화면을 덮고 터치를 막는다.
             GlobalLoadingOverlay(appController = appController)
             // iOS AI 스캔용 별도 풀스크린 로딩 오버레이.
             GlobalAiScanLoadingOverlay(appController = appController)

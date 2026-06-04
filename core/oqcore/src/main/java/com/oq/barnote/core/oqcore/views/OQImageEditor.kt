@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.oq.barnote.core.oqcore.models.Palette
 import com.oq.barnote.core.oqcore.R
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
@@ -95,6 +96,7 @@ import kotlin.math.roundToInt
 @Composable
 fun OQImageEditor(
     imageBytes: ByteArray,
+    palette: Palette,
     onComplete: (ByteArray?) -> Unit,
 ) {
     Dialog(
@@ -107,6 +109,7 @@ fun OQImageEditor(
     ) {
         OQImageEditorContent(
             imageBytes = imageBytes,
+            palette = palette,
             onComplete = onComplete,
         )
     }
@@ -125,6 +128,7 @@ private enum class HandleCorner { TopLeft, TopRight, BottomLeft, BottomRight }
 @Composable
 private fun OQImageEditorContent(
     imageBytes: ByteArray,
+    palette: Palette,
     onComplete: (ByteArray?) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -393,7 +397,7 @@ private fun OQImageEditorContent(
             TextButton(onClick = { handleComplete() }) {
                 Text(
                     text = stringResource(R.string.common_done),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = palette.accent,
                     fontWeight = FontWeight.Bold,
                 )
             }

@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
  *
  * - 5 stops: base → mid → highlight (peak) → mid → base. 매끄럽게 빛이 휘 지나가는 듯한 효과.
  * - tilt: gradient 시작/끝의 x/y offset 비를 살짝 다르게 줘 비스듬한 sweep.
- * - period: 1400ms (iOS 의 자연스러운 반복 속도).
+ * - period: 2000ms (sweep 이동 폭이 커서 1400ms 는 빠르게 느껴져 적당히 늦춤).
  */
 fun Modifier.skeleton(
     isActive: Boolean = true,
@@ -41,7 +41,7 @@ fun Modifier.skeleton(
         initialValue = -1000f,
         targetValue = 1500f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1400, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Restart,
         ),
         label = "skeleton_anim",

@@ -7,6 +7,7 @@ import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.NoteInfo
 import com.oq.barnote.core.domain.NoteOrderByKey
 import com.oq.barnote.core.domain.Product
+import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.util.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -88,6 +89,8 @@ sealed interface NoteListNavEffect {
     data class NoteDetail(val id: String, val productName: String) : NoteListNavEffect
     /** iOS `.delegate(.showAddNote(product:))` 대응 — Unrated alert "작성하기" 액션. */
     data class AddNote(val productId: String) : NoteListNavEffect
+    /** iOS requestAddNote 게이트 — 무료 한도 초과 + 비구독 시 구독 화면. */
+    data object GoSubscription : NoteListNavEffect
 }
 
 @HiltViewModel
@@ -95,6 +98,7 @@ class NoteListViewModel @Inject constructor(
     private val repository: BarNoteRepository,
     private val appController: AppController,
     private val preferences: NoteListPreferences,
+    private val userStore: UserStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NoteListUiState())
@@ -174,7 +178,13 @@ class NoteListViewModel @Inject constructor(
                 val alert = _uiState.value.unratedAlert ?: return
                 _uiState.update { it.copy(unratedAlert = null) }
                 viewModelScope.launch {
-                    _navEffect.send(NoteListNavEffect.AddNote(alert.product.id))
+                    // iOS requestAddNote 게이트 — 무료 한도 초과 + 비구독이면 구독 화면으로.
+                    val isSubscribed = userStore.checkSubscriptionStatus()
+                    if (userStore.noteCount.value >= Constants.N.FREE_NOTE_COUNT && !isSubscribed) {
+                        _navEffect.send(NoteListNavEffect.GoSubscription)
+                    } else {
+                        _navEffect.send(NoteListNavEffect.AddNote(alert.product.id))
+                    }
                 }
             }
         }

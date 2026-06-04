@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.designsystem.R
 import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.oqcore.ui.component.InfoTagStyle
@@ -43,8 +44,11 @@ fun NoteAttachmentSection(
     onRemove: (String) -> Unit,
     modifier: Modifier = Modifier,
     maxCount: Int = 5,
+    title: String = stringResource(com.oq.barnote.R.string.imiji_ceombu),
+    guidance: String = stringResource(com.oq.barnote.R.string.ceombuhal_sajineul_5jangggaji_seontaeghal_su_isseoyo),
 ) {
     val secondary = colorResource(R.color.text_secondary)
+    val textPrimary = colorResource(R.color.text_primary)
 
     Column(
         modifier = modifier,
@@ -52,12 +56,17 @@ fun NoteAttachmentSection(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(com.oq.barnote.R.string.imiji_ceombu),
+                text = title,
                 // iOS 섹션 헤더 .font(.headline) ≈ titleMedium (B2/B12).
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = textPrimary,
             )
             Spacer(modifier = Modifier.padding(start = 6.dp))
-            InfoTagView(text = stringResource(com.oq.barnote.R.string.obsyeon), style = InfoTagStyle.Normal)
+            InfoTagView(
+                text = stringResource(com.oq.barnote.R.string.obsyeon),
+                style = InfoTagStyle.Normal,
+                palette = barNotePalette(),
+            )
             Spacer(modifier = Modifier.weight(1f))
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -70,8 +79,8 @@ fun NoteAttachmentSection(
             }
         }
         Text(
-            // 기존 key 의 텍스트는 "5장" 하드코딩. maxCount 가 기본값(5)이 아닐 일이 거의 없어 그대로 사용.
-            text = stringResource(com.oq.barnote.R.string.ceombuhal_sajineul_5jangggaji_seontaeghal_su_isseoyo),
+            // 안내 문구는 [guidance] 로 주입 — 호출부가 maxCount 에 맞춰 전달 (기본은 "5장").
+            text = guidance,
             style = MaterialTheme.typography.bodyMedium,
             color = secondary,
         )

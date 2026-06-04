@@ -6,7 +6,6 @@ import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.util.AppController
 import com.oq.barnote.core.oqcore.utils.OQLog
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -46,7 +45,6 @@ class AuthSessionObserver @Inject constructor(
         // 1) UserStore clear + analytics bridge: 초기 값은 drop 해서 앱 시작 시 자동 clear 방지.
         appScope.launch {
             authStore.isLoggedIn
-                .distinctUntilChanged()
                 .drop(1)
                 .onEach { isLoggedIn ->
                     if (!isLoggedIn) {
@@ -63,7 +61,6 @@ class AuthSessionObserver @Inject constructor(
         // 2) AppController.isLogin 미러: 초기값 포함해서 그대로 push (iOS `appController.isLogin = ...` 와 동등).
         appScope.launch {
             authStore.isLoggedIn
-                .distinctUntilChanged()
                 .onStart { /* immediately emits current value */ }
                 .collect { isLoggedIn ->
                     appController.updateLoginState(isLoggedIn)

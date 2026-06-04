@@ -56,6 +56,7 @@ import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.oqcore.views.OQTopBar
+import com.oq.barnote.ui.navigation.MainBottomBarHeight
 import com.oq.barnote.core.oqcore.models.AppTheme
 import com.oq.barnote.ui.component.SettingsDivider
 import com.oq.barnote.ui.component.SettingsRow
@@ -118,7 +119,10 @@ internal fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                // MainBottomBar(오버레이) 뒤로 콘텐츠가 스크롤되므로, 마지막 항목이 바에 가리지 않도록
+                // 바 높이만큼 하단 스크롤 여백을 준다.
+                .padding(bottom = MainBottomBarHeight),
             verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
         ) {
             OQTopBar(

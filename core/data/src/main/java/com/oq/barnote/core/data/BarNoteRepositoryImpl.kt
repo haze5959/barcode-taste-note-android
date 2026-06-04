@@ -456,6 +456,7 @@ private inline fun <T> safeCall(block: () -> T): Result<T> = try {
     Result.failure(CommonError.Network(NetworkError.Transport(e)))
 }
 
-private inline fun safeCallBool(block: () -> Boolean): Result<Boolean> = safeCall(block)
+private inline fun safeCallBool(block: () -> APIResponseWithEmptyData): Result<Boolean> =
+    safeCall { block().unwrap() }
 
 // endregion

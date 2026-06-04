@@ -4,8 +4,8 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarHalf
@@ -60,7 +60,8 @@ fun RatingView(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.height(size),
+                // iOS `.font(.system(size: size))` 대응 — size×size 정사각 글리프.
+                modifier = Modifier.size(size),
             )
         }
     }
@@ -108,23 +109,27 @@ fun RatingInputView(
         spacing = spacing,
         color = color,
         modifier = modifier
-            .fillMaxWidth()
+            // iOS RatingInputView 와 동일하게 별 5개 content 크기로 둔다(가로로 펼치지 않음).
+            // fillMaxWidth 로 펼치면 별은 좌측에 몰리는데 값은 전체 폭 기준으로 계산되어
+            // 손가락 위치(별)와 어긋난다. content 크기여야 size.width(별들의 폭)와 제스처가 일치.
             .height(size + 12.dp)
             .scale(scale)
             .pointerInput(isEnabled) {
                 if (!isEnabled) return@pointerInput
+                val widthPx = this.size.width.toFloat()
                 detectTapGestures(
-                    onTap = { offset: Offset -> update(offset.x, size.width.toFloat()) },
+                    onTap = { offset: Offset -> update(offset.x, widthPx) },
                 )
             }
             .pointerInput(isEnabled) {
                 if (!isEnabled) return@pointerInput
+                val widthPx = this.size.width.toFloat()
                 detectDragGestures(
                     onDragStart = { isInteracting = true },
                     onDragEnd = { isInteracting = false },
                     onDragCancel = { isInteracting = false },
                     onDrag = { change, _ ->
-                        update(change.position.x, size.width.toFloat())
+                        update(change.position.x, widthPx)
                     },
                 )
             },

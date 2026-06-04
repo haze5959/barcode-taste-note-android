@@ -26,6 +26,7 @@
     <string name="bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar">如果產品有條碼，您可以掃描它以更快地註冊。</string>
     <string name="bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar_44a131">如果產品有條形碼，您可以透過掃描條形碼更快地找到它。</string>
     <string name="bakodeureul_cajeul_su_eobsnayo">找不到條碼嗎？</string>
+    <string name="bakodeureul_gaideu_yeongyeog_ane_majcwojuseyo">請將條形碼對準引導區域</string>
     <string name="balhyo_jung_jeungryujureul_ceomgahae_dosureul_nopin_wain_pot">發酵中加入蒸餾酒以提高酒精度的葡萄酒，波特酒、雪莉酒為代表。</string>
     <string name="banana_painaepeul_manggo_deung">香蕉、菠蘿、芒果等</string>
     <string name="banhaebeorin">愛上了</string>
@@ -464,7 +465,7 @@ AI 將分析標籤並提取資訊。</string>
     <string name="seoljeong">設定</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">請在設定中允許通知。</string>
     <string name="alrim_gwonhani_pilyohabnida">需要通知權限。</string>
-    <string name="kamera_gwonhani_pilyohabnida">需要相機權限。</string>
+    <string name="kamera_gwonhani_pilyohabnida">需要相機訪問權限。</string>
     <string name="seoljeongeseo_kamerareul_heoyonghaejuseyo">請在設定中允許相機。</string>
     <string name="seontaeghan_jepum">選定的產品</string>
     <string name="seontaeghan_jepum_jeongboreul_hwaginhaseyo">請確認所選產品的資訊</string>
@@ -556,25 +557,23 @@ AI 將分析標籤並提取資訊。</string>
     <string name="beonyeog">翻譯</string>
     <string name="cadan_haeje">解除封鎖</string>
     <string name="beonyeog_gyeolgwa">翻譯結果</string>
-    <string name="seontaeghan_yeyageul_sagjehasigessseubnigga">封鎖此使用者？此使用者撰寫的所有筆記將被隱藏。</string>
     <string name="sieum_noteu_yeyag_alrim_caeneol">品鑒筆記預約</string>
     <string name="url_bogsa">複製網址</string>
     <string name="i_jepumui_jalmosdoen_jeongbo_singo_hwagin">舉報該產品的錯誤資訊？</string>
     <string name="masyeobon_mogrogeseo_jegeohagi_btn">從品鑒清單中移除</string>
     <string name="giroghdoen_sangse_noteuga_eobseubnida">沒有記錄詳細筆記。</string>
     <string name="jagseong_il">撰寫日期</string>
-    <string name="haedang_jepum_sangse_bogi">查看產品詳情</string>
     <string name="weonbon_bogi">顯示原文</string>
     <string name="palrowo">關注者</string>
-    <string name="ai_seukaenhagi">AI 掃描</string>
-    <string name="jepum_jigjeob_deungroghagi">直接註冊產品</string>
-    <string name="jepum_geomsaeghagi">搜尋產品</string>
     <string name="jagseong_jung_noteureul_dadeulggayo">關閉撰寫中的筆記？</string>
     <string name="jagseong_jung_naeyongi_modu_sarajibnida">撰寫中的內容將全部消失。</string>
     <string name="geoeui_da_wasseoyo">就快完成了！</string>
     <string name="rogeuinhago_coejong_dangyereul_wanryohaseyo">登入後完成最後一步。您輸入的內容將被保留。</string>
-    <string name="imi_deungrogdoen_jepumieyo">已註冊的產品！</string>
-    <string name="gateun_ireumui_jepumi_imi_isseoyo_geomsaeghagireo_gaboseyo">已存在同名產品。請嘗試搜尋。</string>
     <string name="jepum_seolmyeongina_imijireul_biwoduasimyeon_aiga_jadong">如果您將產品說明或圖片留空，AI將自動填入資訊。</string>
     <string name="dayanghan_juryureul_pog_seontaeghal_su_isseoyo">可廣泛選擇多種酒類</string>
+    <string name="gaelreori">相簿</string>
+    <string name="kamera">相機</string>
+    <string name="gumae_bogwon">還原購買</string>
+    <string name="ibu_annae">IBU 說明</string>
+    <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">若要取消預約，請點選刪除按鈕。</string>
 </resources>

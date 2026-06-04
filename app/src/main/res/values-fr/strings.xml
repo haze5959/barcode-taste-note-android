@@ -26,6 +26,7 @@ pour rédiger des notes de dégustation rapidement et précisément.</string>
     <string name="bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar">Si le produit a un code-barres, scannez-le pour un enregistrement plus rapide.</string>
     <string name="bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar_44a131">Si le produit a un code-barres, vous pouvez le trouver plus rapidement en scannant le code.</string>
     <string name="bakodeureul_cajeul_su_eobsnayo">Vous ne trouvez pas le code-barres ?</string>
+    <string name="bakodeureul_gaideu_yeongyeog_ane_majcwojuseyo">Alignez le code-barres dans la zone de guidage</string>
     <string name="balhyo_jung_jeungryujureul_ceomgahae_dosureul_nopin_wain_pot">Vin fortifié par ajout d\'eau-de-vie pendant la fermentation ; le Porto et le Xérès en sont des exemples.</string>
     <string name="banana_painaepeul_manggo_deung">Banane, ananas, mangue, etc.</string>
     <string name="banhaebeorin">Tombé amoureux</string>
@@ -464,7 +465,7 @@ Vos brouillons sont sauvegardés en toute sécurité !</string>
     <string name="seoljeong">Paramètres</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">Veuillez autoriser les notifications dans les paramètres.</string>
     <string name="alrim_gwonhani_pilyohabnida">Autorisation de notification requise.</string>
-    <string name="kamera_gwonhani_pilyohabnida">Autorisation caméra requise.</string>
+    <string name="kamera_gwonhani_pilyohabnida">Autorisation d\'accès à l\'appareil photo requise.</string>
     <string name="seoljeongeseo_kamerareul_heoyonghaejuseyo">Veuillez autoriser l\'accès à la caméra dans les paramètres.</string>
     <string name="seontaeghan_jepum">Produit sélectionné</string>
     <string name="seontaeghan_jepum_jeongboreul_hwaginhaseyo">Vérifiez les informations du produit sélectionné</string>
@@ -556,25 +557,23 @@ rédigez vos propres notes de dégustation</string>
     <string name="beonyeog">Traduire</string>
     <string name="cadan_haeje">Débloquer</string>
     <string name="beonyeog_gyeolgwa">Traduction</string>
-    <string name="seontaeghan_yeyageul_sagjehasigessseubnigga">Bloquer cet utilisateur ? Toutes les notes de cet utilisateur seront masquées.</string>
     <string name="sieum_noteu_yeyag_alrim_caeneol">Rappel de note de dégustation</string>
     <string name="url_bogsa">Copier l\'URL</string>
     <string name="i_jepumui_jalmosdoen_jeongbo_singo_hwagin">Signaler des informations incorrectes sur ce produit ?</string>
     <string name="masyeobon_mogrogeseo_jegeohagi_btn">Retirer de la liste dégustée</string>
     <string name="giroghdoen_sangse_noteuga_eobseubnida">Aucune note détaillée enregistrée.</string>
     <string name="jagseong_il">Date d\'écriture</string>
-    <string name="haedang_jepum_sangse_bogi">Voir les détails du produit</string>
     <string name="weonbon_bogi">Afficher l\'original</string>
     <string name="palrowo">Abonnés</string>
-    <string name="ai_seukaenhagi">Scan IA</string>
-    <string name="jepum_jigjeob_deungroghagi">Enregistrer le produit directement</string>
-    <string name="jepum_geomsaeghagi">Rechercher des produits</string>
     <string name="jagseong_jung_noteureul_dadeulggayo">Fermer la note en cours ?</string>
     <string name="jagseong_jung_naeyongi_modu_sarajibnida">Tout le contenu en cours sera supprimé.</string>
     <string name="geoeui_da_wasseoyo">On y est presque !</string>
     <string name="rogeuinhago_coejong_dangyereul_wanryohaseyo">Connectez-vous pour terminer la dernière étape. Vos saisies sont conservées.</string>
-    <string name="imi_deungrogdoen_jepumieyo">Produit déjà enregistré !</string>
-    <string name="gateun_ireumui_jepumi_imi_isseoyo_geomsaeghagireo_gaboseyo">Un produit du même nom existe déjà. Essayez la recherche.</string>
     <string name="jepum_seolmyeongina_imijireul_biwoduasimyeon_aiga_jadong">Si vous laissez la description ou l\'image vide, l\'IA remplira automatiquement les informations.</string>
     <string name="dayanghan_juryureul_pog_seontaeghal_su_isseoyo">Choisissez parmi une grande variété de boissons</string>
+    <string name="gaelreori">Galerie</string>
+    <string name="kamera">Appareil photo</string>
+    <string name="gumae_bogwon">Restaurer les achats</string>
+    <string name="ibu_annae">À propos de l\'IBU</string>
+    <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Pour annuler une réservation, appuyez sur le bouton de suppression.</string>
 </resources>

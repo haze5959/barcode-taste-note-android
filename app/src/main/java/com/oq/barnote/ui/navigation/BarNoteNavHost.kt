@@ -27,7 +27,6 @@ import com.oq.barnote.ui.aicamera.AICameraRoute
 import com.oq.barnote.ui.customercenter.CustomerCenterRoute
 import com.oq.barnote.ui.editnote.EditNoteRoute
 import com.oq.barnote.ui.home.HomeRoute
-import com.oq.barnote.ui.login.LoginRoute
 import com.oq.barnote.ui.mypage.MyPageRoute
 import com.oq.barnote.ui.mypage.ProductListType
 import com.oq.barnote.ui.mypage.UserListType
@@ -187,7 +186,8 @@ fun BarNoteNavHost(
                 // iOS `addNote.delegate(.showLogin)` 은 글로벌 `.neededLogin` alert 가 아니라 곧장 로그인으로 보냄.
                 // AddNote 는 submit 직전 로그아웃 감지 시 자체 `showLoginAlert` 를 먼저 띄우고, 사용자가 확인하면
                 // 이 콜백이 호출되는 구조이므로 여기서 글로벌 alert 를 또 띄우면 이중 안내가 됨 → 직접 LOGIN 으로 push.
-                onShowLogin = { navController.navigate(Destinations.LOGIN) },
+                // iOS: 모든 로그인 진입은 전역 "로그인 필요" alert → webAuth 직행 (전용 화면 없음).
+                onShowLogin = onNeededLogin,
             )
         }
 
@@ -233,14 +233,23 @@ fun BarNoteNavHost(
         }
 
         // iOS `.fullScreenCover(isPresented: showAICamera)` — AI 라벨 스캔 모달.
-        modalComposable(Destinations.AI_CAMERA) {
+        modalComposable(
+            Destinations.AI_CAMERA_ROUTE,
+            arguments = listOf(
+                navArgument(Destinations.AI_CAMERA_ARG_BARCODE) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) {
             AICameraRoute(
                 onBack = { navController.popBackStack() },
                 onProductCreated = { id, productName ->
                     // pop + navigate 를 한 트랜잭션으로 묶어 중간 백스택 상태(AI_CAMERA 잔존) 방지.
                     navController.replaceTop(
                         route = Destinations.productDetail(id, productName),
-                        popUpToRoute = Destinations.AI_CAMERA,
+                        popUpToRoute = Destinations.AI_CAMERA_ROUTE,
                     )
                 },
             )
@@ -251,7 +260,8 @@ fun BarNoteNavHost(
             MyPageRoute(
                 // iOS `myPage.delegate(.showLogin)` 은 글로벌 `.neededLogin` alert 가 아니라 곧장 로그인으로 보냄
                 // (명시적 "로그인" 버튼 탭이라 "로그인 필요" 안내 alert 를 거치는 것이 오히려 부자연스러움) → 직접 LOGIN 으로 push.
-                onShowLogin = { navController.navigate(Destinations.LOGIN) },
+                // iOS: 모든 로그인 진입은 전역 "로그인 필요" alert → webAuth 직행 (전용 화면 없음).
+                onShowLogin = onNeededLogin,
                 onShowUserDetail = { navController.navigate(Destinations.USER_DETAIL) },
                 onShowNoteList = { isMine -> navController.navigate(Destinations.noteList(isMine)) },
                 onShowProductList = { type ->
@@ -267,7 +277,6 @@ fun BarNoteNavHost(
                 onShowUserList = { type ->
                     navController.navigate(Destinations.userList(type.name.lowercase()))
                 },
-                onShowSettings = { navController.navigate(Destinations.SETTINGS) },
             )
         }
 
@@ -296,13 +305,6 @@ fun BarNoteNavHost(
             SubscriptionRoute(onBack = { navController.popBackStack() })
         }
 
-        composable(Destinations.LOGIN) {
-            LoginRoute(
-                onBack = { navController.popBackStack() },
-                onLoggedIn = { navController.popBackStack() },
-            )
-        }
-
         composable(Destinations.NEEDED_REVIEW_NOTE_LIST) {
             NoteListRoute(
                 type = NoteListListType.NeededReview,
@@ -313,6 +315,7 @@ fun BarNoteNavHost(
                 onShowAddNote = { productId ->
                     navController.navigate(Destinations.writeNote(productId))
                 },
+                onGoSubscription = { navController.navigate(Destinations.SUBSCRIBE) },
             )
         }
 
@@ -404,12 +407,15 @@ fun BarNoteNavHost(
                     )
                 },
                 // iOS `delegate.requestAICamera` (NotFound alert / bottom sheet 의 "AI 스캔하기")
-                onGoAICamera = {
+                // NotFound 바코드를 AI 생성에 연계 (iOS pendingBarcodeForProductRegistration).
+                onGoAICamera = { barcode ->
                     navController.replaceTop(
-                        route = Destinations.AI_CAMERA,
+                        route = Destinations.aiCamera(barcode),
                         popUpToRoute = Destinations.BARCODE_SCANNER,
                     )
                 },
+                // iOS `checkCameraPermission(.ai)` 미로그인 → 글로벌 "로그인 필요" alert.
+                onNeedLogin = onNeededLogin,
                 // iOS `tabSelected(.search)` (bottom sheet 의 "제품 검색하기")
                 onGoSearch = {
                     navController.replaceTop(
@@ -449,6 +455,7 @@ fun BarNoteNavHost(
                 onShowAddNote = { productId ->
                     navController.navigate(Destinations.writeNote(productId))
                 },
+                onGoSubscription = { navController.navigate(Destinations.SUBSCRIBE) },
             )
         }
 

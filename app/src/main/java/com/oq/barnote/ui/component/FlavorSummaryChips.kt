@@ -31,6 +31,8 @@ fun FlavorSummaryChips(
     modifier: Modifier = Modifier,
 ) {
     val accent = colorResource(R.color.accent_color)
+    // iOS 칩 텍스트는 기본 .primary(라벨색). color 미지정 시 Color.Black → 다크모드 안 보임 → text_primary(DayNight).
+    val textPrimary = colorResource(R.color.text_primary)
 
     FlowRow(
         modifier = modifier,
@@ -42,7 +44,7 @@ fun FlavorSummaryChips(
                 text = if (isMini) flavor.emoji else flavor.title(),
                 style = (if (isMini) MaterialTheme.typography.labelSmall
                 else MaterialTheme.typography.labelMedium)
-                    .copy(fontWeight = FontWeight.Bold),
+                    .copy(color = textPrimary, fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(accent.copy(alpha = 0.15f))
@@ -65,6 +67,8 @@ fun FlavorCountChips(
     modifier: Modifier = Modifier,
 ) {
     val accent = colorResource(R.color.accent_color)
+    // iOS FlavorView 칩 텍스트는 기본 .primary(라벨색). color 미지정 시 Color.Black → 다크모드 안 보임 → text_primary(DayNight).
+    val textPrimary = colorResource(R.color.text_primary)
 
     FlowRow(
         modifier = modifier,
@@ -74,7 +78,10 @@ fun FlavorCountChips(
         flavorCounts.forEach { (flavor, count) ->
             Text(
                 text = "${flavor.title()} ($count)",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = textPrimary,
+                    fontWeight = FontWeight.Bold,
+                ),
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(accent.copy(alpha = 0.15f))

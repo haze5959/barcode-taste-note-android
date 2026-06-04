@@ -1,6 +1,7 @@
 package com.oq.barnote.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -123,7 +124,7 @@ private fun DialogButton(
             .let {
                 if (borderColor != null) {
                     it.then(
-                        androidx.compose.foundation.border(
+                        Modifier.border(
                             width = 1.dp,
                             color = borderColor,
                             shape = RoundedCornerShape(Dimens.Radius),

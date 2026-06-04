@@ -67,14 +67,14 @@ fun NoteDetailExpandable(
 
     // NoteDetail.detailsFor 에서 feeling 제외한 항목들 (Composable 외부에서 평가 가능)
     val slidersForType = remember(productType) {
-        NoteDetail.detailsFor(productType).filter { it != NoteDetail.Feeling }
+        NoteDetail.detailsFor(productType).filter { it != NoteDetail.feeling }
     }
     // InfoPopOver items
     val popoverItems: List<Pair<String, String>> = slidersForType.map { detail ->
         detail.title() to (detail.detail())
     }
 
-    val feelingValue = details[NoteDetail.Feeling]
+    val feelingValue = details[NoteDetail.feeling]
         ?.let { NoteDetail.Feeling.fromRaw(it) }
 
     Column(modifier = modifier) {
@@ -160,6 +160,8 @@ fun NoteDetailExpandable(
                             title = detail.title(),
                             value = details[detail] ?: 0,
                             onValueChanged = { value -> onDetailChange(detail, value) },
+                            // 값 입력된 항목만 ✕ 노출 — 0 으로 보내면 ViewModel 이 해당 항목 키를 제거.
+                            onReset = { onDetailChange(detail, 0) },
                         )
                     }
                 }
@@ -167,7 +169,7 @@ fun NoteDetailExpandable(
                 NoteFeelingGrid(
                     selectedFeeling = feelingValue,
                     onFeelingSelected = { feeling ->
-                        onDetailChange(NoteDetail.Feeling, feeling.rawValue)
+                        onDetailChange(NoteDetail.feeling, feeling.rawValue)
                     },
                 )
             }

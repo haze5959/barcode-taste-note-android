@@ -50,8 +50,10 @@ sealed interface BarcodeScannerNavEffect {
     data class ProductFound(val id: String, val productName: String) : BarcodeScannerNavEffect
     /** 사용자가 "직접 등록" 선택 시 AddProduct(barcode) 화면으로 이동. barcode 가 빈 문자열이면 바코드 없이 등록. */
     data class GoAddProduct(val barcode: String) : BarcodeScannerNavEffect
-    /** AI 카메라 진입. iOS `delegate.requestAICamera` 대응. */
-    data object GoAICamera : BarcodeScannerNavEffect
+    /** AI 카메라 진입. iOS `delegate.requestAICamera` 대응. NotFound [barcode] 를 AI 생성에 연계. */
+    data class GoAICamera(val barcode: String?) : BarcodeScannerNavEffect
+    /** AI 등록은 로그인 필수 — 미로그인 시 글로벌 "로그인 필요" alert. iOS `checkCameraPermission(.ai)` 대응. */
+    data object NeedLogin : BarcodeScannerNavEffect
     /** 검색 화면 진입 (탭 전환). iOS `tabSelected(.search)` 대응. */
     data object GoSearch : BarcodeScannerNavEffect
     data object Cancelled : BarcodeScannerNavEffect

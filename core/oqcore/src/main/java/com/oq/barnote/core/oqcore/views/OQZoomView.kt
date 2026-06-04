@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -76,7 +77,7 @@ fun OQZoomView(
             .pointerInput(scale == 1f) {
                 // 1x 일 때만 vertical drag 를 부모에게 위임 (pager dismiss 등).
                 if (scale != 1f) return@pointerInput
-                androidx.compose.foundation.gestures.detectVerticalDragGestures(
+                detectVerticalDragGestures(
                     onDragEnd = { onDragEnd?.invoke() },
                     onDragCancel = { onDragEnd?.invoke() },
                 ) { _, delta -> onDragWhenUnzoomed?.invoke(delta) }

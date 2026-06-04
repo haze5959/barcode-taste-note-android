@@ -2,6 +2,7 @@ package com.oq.barnote.ui.notedetail
 
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.common.model.DownloadConditions
+import com.google.mlkit.nl.languageid.LanguageIdentification
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
@@ -16,7 +17,7 @@ import kotlin.coroutines.resumeWithException
  * Google ML Kit Translate (on-device) 기반 번역 헬퍼.
  *
  * - 모델은 최초 호출 시 자동 다운로드 (~30MB / 언어 쌍).
- * - source 언어가 명시되지 않으면 영어로 가정 (ML Kit Language ID 도입은 별도 TODO).
+ * - source 언어가 명시되지 않으면 ML Kit Language ID 로 원문 언어를 자동 감지 (감지 실패 시 영어 폴백).
  * - 다운로드 조건: 모든 네트워크 허용 (`DownloadConditions.Builder().build()`).
  *   사용자가 셀룰러 데이터로도 즉시 사용 가능. WiFi 강제는 첫 번역 지연을 야기.
  */
@@ -25,14 +26,16 @@ class NoteTranslator @Inject constructor() {
 
     /**
      * [text] 를 [targetLanguage] 로 번역. 실패 시 throw.
-     * @param sourceLanguage `null` 이면 영어로 가정.
+     * @param sourceLanguage `null` 이면 ML Kit Language ID 로 원문 언어를 자동 감지 (실패 시 영어 폴백).
      */
     suspend fun translate(
         text: String,
         targetLanguage: String = Locale.getDefault().language,
         sourceLanguage: String? = null,
     ): String {
-        val src = TranslateLanguage.fromLanguageTag(sourceLanguage ?: "en")
+        // iOS Apple Translation 의 언어 자동 감지 대응 — source 미지정 시 본문에서 감지.
+        val resolvedSource = sourceLanguage ?: detectLanguage(text)
+        val src = TranslateLanguage.fromLanguageTag(resolvedSource ?: "en")
             ?: TranslateLanguage.ENGLISH
         val dst = TranslateLanguage.fromLanguageTag(targetLanguage)
             ?: return text  // 지원하지 않는 target 언어면 원문 반환.
@@ -50,6 +53,21 @@ class NoteTranslator @Inject constructor() {
             return translator.translate(text).awaitTask()
         } finally {
             translator.close()
+        }
+    }
+
+    /**
+     * ML Kit Language Identification 으로 [text] 의 BCP-47 언어 태그를 감지.
+     * 감지 불가("und")/실패 시 `null` 반환 (호출부에서 영어 폴백).
+     */
+    private suspend fun detectLanguage(text: String): String? {
+        val identifier = LanguageIdentification.getClient()
+        return try {
+            identifier.identifyLanguage(text).awaitTask().takeUnless { it == "und" }
+        } catch (e: Exception) {
+            null
+        } finally {
+            identifier.close()
         }
     }
 }

@@ -82,8 +82,12 @@ object Destinations {
     // UserSearch
     const val USER_SEARCH = "user_search"
 
-    // AI 라벨 스캐너 (제품 자동 등록)
+    // AI 라벨 스캐너 (제품 자동 등록). NotFound 바코드를 AI 생성에 연계 (선택 인자).
     const val AI_CAMERA = "ai_camera"
+    const val AI_CAMERA_ARG_BARCODE = "barcode"
+    const val AI_CAMERA_ROUTE = "$AI_CAMERA?$AI_CAMERA_ARG_BARCODE={$AI_CAMERA_ARG_BARCODE}"
+    fun aiCamera(barcode: String? = null): String =
+        if (!barcode.isNullOrBlank()) "$AI_CAMERA?$AI_CAMERA_ARG_BARCODE=$barcode" else AI_CAMERA
 
     // Followers / Following 빠른 헬퍼
     fun followersList(): String = userList("followers")
@@ -99,7 +103,6 @@ object Destinations {
     const val MY_PAGE = "my_page"
     const val USER_DETAIL = "user_detail"
     const val SUBSCRIBE = "subscribe"
-    const val LOGIN = "login"
     const val NEEDED_REVIEW_NOTE_LIST = "needed_review_note_list"
 
     // ProductList: ?type={type}  (favorites / tasted)
@@ -120,6 +123,8 @@ object Destinations {
     fun userNoteList(userId: String): String = "$USER_NOTE_LIST/$userId"
     const val USER_NOTE_LIST_ROUTE = "$USER_NOTE_LIST/{$USER_NOTE_LIST_ARG_USER_ID}"
 
-    private fun encode(raw: String): String =
-        java.net.URLEncoder.encode(raw, Charsets.UTF_8.name())
+    // Compose Navigation 은 인자를 읽을 때 Uri.decode() 로 디코딩한다. URLEncoder 는 공백을 '+' 로
+    // 인코딩하지만 Uri.decode 는 '+' 를 공백으로 되돌리지 않아(폼 인코딩 전용) 제목 등에 '+' 가 남는다.
+    // Uri.encode 는 공백을 %20 으로 인코딩 → Uri.decode 와 짝이 맞아 원문이 그대로 복원된다.
+    private fun encode(raw: String): String = android.net.Uri.encode(raw)
 }

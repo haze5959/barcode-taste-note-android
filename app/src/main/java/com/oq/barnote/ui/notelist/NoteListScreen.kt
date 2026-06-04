@@ -53,6 +53,8 @@ import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.domain.NoteOrderByKey
 import com.oq.barnote.core.oqcore.views.OQFAB
+import com.oq.barnote.ui.tip.BarNoteTip
+import com.oq.barnote.ui.tip.BarnoteTip
 import com.oq.barnote.ui.component.EmptyStateView
 import com.oq.barnote.ui.component.MonthCalendar
 import com.oq.barnote.ui.component.MonthYearPickerBottomSheet
@@ -68,6 +70,7 @@ fun NoteListRoute(
     onBack: () -> Unit,
     onShowNoteDetail: (id: String, productName: String) -> Unit,
     onShowAddNote: (productId: String) -> Unit,
+    onGoSubscription: () -> Unit,
     viewModel: NoteListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -80,6 +83,7 @@ fun NoteListRoute(
             when (effect) {
                 is NoteListNavEffect.NoteDetail -> onShowNoteDetail(effect.id, effect.productName)
                 is NoteListNavEffect.AddNote -> onShowAddNote(effect.productId)
+                NoteListNavEffect.GoSubscription -> onGoSubscription()
             }
         }
     }
@@ -125,6 +129,8 @@ internal fun NoteListScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 // View mode toggle (List ↔ Calendar) — `Mine` 만 캘린더 지원
                 if (state.type == NoteListListType.Mine) {
+                    // 보기 모드(List ↔ Calendar) 토글 아이콘.
+                    // (NoteListViewToggle 코치마크는 iOS 와 동일하게 하단 viewToggleFAB 에 붙는다 — 아래 OQFAB 참고.)
                     Icon(
                         imageVector = if (state.viewMode == NoteListViewMode.List)
                             Icons.Filled.CalendarMonth
@@ -145,9 +151,14 @@ internal fun NoteListScreen(
                             }
                             .padding(4.dp),
                     )
-                    Spacer(modifier = Modifier.size(4.dp))
                 }
-                Box {
+
+                // iOS toolbar: 정렬 메뉴(arrow.up.arrow.down)는 !type.isListOnly(=Mine) 이고
+                // viewMode == .list 일 때만 표시. 캘린더 모드나 All/NeededReview 에선 숨긴다.
+                val showSortMenu = !state.type.isListOnly &&
+                    state.viewMode == NoteListViewMode.List
+                if (showSortMenu) Spacer(modifier = Modifier.size(4.dp))
+                if (showSortMenu) Box {
                     Icon(
                         imageVector = Icons.Filled.Sort,
                         contentDescription = null,
@@ -206,16 +217,22 @@ internal fun NoteListScreen(
 
         // iOS `viewToggleFAB` 대응 — "내 노트" 리스트 모드에서 detail row ↔ compact list row 토글.
         if (state.type == NoteListListType.Mine && state.viewMode == NoteListViewMode.List) {
-            OQFAB(
-                icon = if (state.isListView) Icons.Filled.GridView
-                else Icons.AutoMirrored.Filled.ListIcon,
-                onClick = { onEvent(NoteListUiEvent.ToggleListView) },
-                isAccent = false,
-                palette = barNotePalette(),
+            // iOS viewToggleFAB.popoverTip(viewToggleTip, arrowEdge: .bottom) 대응 —
+            // NoteListViewToggle 코치마크를 FAB 에 붙인다. 위치(우하단)는 BarNoteTip 의 modifier 가 담당.
+            BarNoteTip(
+                tip = BarnoteTip.NoteListViewToggle,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(Dimens.BtnPadding),
-            )
+            ) {
+                OQFAB(
+                    icon = if (state.isListView) Icons.Filled.GridView
+                    else Icons.AutoMirrored.Filled.ListIcon,
+                    onClick = { onEvent(NoteListUiEvent.ToggleListView) },
+                    isAccent = false,
+                    palette = barNotePalette(),
+                )
+            }
         }
     }
 

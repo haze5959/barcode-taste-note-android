@@ -28,6 +28,7 @@ billing = "7.1.1"
 accompanistPermissions = "0.36.0"
 appcompat = "1.7.0"
 mlkitTranslate = "17.0.3"
+mlkitLanguageId = "17.0.6"
 mlkitBarcode = "17.3.0"
 cameraX = "1.4.1"
 browser = "1.8.0"
@@ -76,11 +77,13 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 kakao-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakao" }
+kakao-common = { group = "com.kakao.sdk", name = "v2-common", version.ref = "kakao" }
 
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 mlkit-translate = { group = "com.google.mlkit", name = "translate", version.ref = "mlkitTranslate" }
+mlkit-language-id = { group = "com.google.mlkit", name = "language-id", version.ref = "mlkitLanguageId" }
 mlkit-barcode = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }

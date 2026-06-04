@@ -105,10 +105,9 @@ class UserNoteListViewModel @Inject constructor(
         when (event) {
             is UserNoteListUiEvent.OnAppear -> onAppear(event.userId)
             UserNoteListUiEvent.OnResume -> {
-                if (appController.neededToRefresh) {
-                    appController.neededToRefresh = false
-                    refreshAll()
-                }
+                // iOS UserNoteListFeature.onAppear 는 매 재진입마다 리셋 후 재조회 (neededToRefresh 무관).
+                if (appController.neededToRefresh) appController.neededToRefresh = false
+                refreshAll()
             }
             is UserNoteListUiEvent.SetTab -> setTab(event.tab)
             is UserNoteListUiEvent.TappedNote ->

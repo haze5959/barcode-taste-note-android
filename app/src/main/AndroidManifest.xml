@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- 햅틱 피드백 (OQHapticService). iOS 의 UIImpactFeedbackGenerator 등가 — VIBRATE 없으면 SecurityException. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- 시음 노트 예약 로컬 알림 (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- AlarmManager 정확 시간 알림 (Android 12+) -->
@@ -25,10 +27,12 @@
     <application
         android:name=".BarNoteApp"
         android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+        android:theme="@style/Theme.BarNote">
 
         <!-- ML Kit Barcode 모델 사전 다운로드 (앱 설치 직후) -->
         <meta-data
@@ -49,16 +53,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Auth0 Web Auth 콜백. manifestPlaceholders 의 auth0Domain/auth0Scheme 가 주입됨. -->
-            <intent-filter android:autoVerify="false">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:host="${auth0Domain}"
-                    android:pathPrefix="/android/${applicationId}/callback"
-                    android:scheme="${auth0Scheme}" />
-            </intent-filter>
+            <!-- Auth0 Web Auth 콜백 intent-filter 는 여기 선언하지 않는다 (의도적).
+                 Auth0 SDK 가 com.auth0.android.provider.RedirectActivity 를 manifestPlaceholders
+                 (auth0Domain/auth0Scheme)로 자동 구성해 동일 콜백 URI 를 처리하고 WebAuth 흐름을 resume 한다.
+                 MainActivity 에 같은 URI(scheme=${auth0Scheme}, host=${auth0Domain},
+                 pathPrefix=/android/${applicationId}/callback)를 또 선언하면 RedirectActivity 와 충돌해,
+                 로그인 후 콜백이 RedirectActivity 로 가지 못하고 앱이 백그라운드에 머무른다. -->
 
             <!-- App deep link (barnote://note/{uuid}, barnote://user/{uuid}) -->
             <intent-filter android:autoVerify="false">

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      앱 액티비티 테마.
+
+      AppCompatActivity 는 반드시 Theme.AppCompat 계열 테마를 요구한다(아니면 onCreate 에서
+      "You need to use a Theme.AppCompat theme (or descendant)" 예외).
+
+      - DayNight: AppThemeApplicator 의 AppCompatDelegate.setDefaultNightMode(...) 가
+        이 테마의 light/dark 리소스 해석(values vs values-night, 즉 colorResource 결과)을 즉시
+        전환하도록 한다. 이전엔 @android:Theme.DeviceDefault + ComponentActivity 라 night mode
+        오버라이드가 무시되어 테마/언어 변경이 즉시 반영되지 않았다.
+      - NoActionBar: 모든 UI 를 Compose 가 그리므로 액션바 불필요.
+      - 시스템 바 투명: enableEdgeToEdge() 가 런타임에 처리하지만, 콜드스타트 깜빡임을 줄이려
+        테마에서도 투명 지정.
+    -->
+    <style name="Theme.BarNote" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+</resources>

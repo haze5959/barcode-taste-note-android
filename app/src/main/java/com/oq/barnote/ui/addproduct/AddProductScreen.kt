@@ -138,31 +138,21 @@ internal fun AddProductScreen(
                     .padding(horizontal = Dimens.BtnPadding),
                 verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
             ) {
-                // iOS AddProductView 의 AI 안내 박스 (sparkles + 안내 텍스트).
-                AiHintBox(palette = palette)
+                // iOS AddProductView body 순서와 일치:
+                //   제품 이름(OQTF) → 주류 타입(typeSelector) → AI 안내 박스 → 제품 설명(OQTE) → 제품 이미지.
 
-                // iOS OQTF — 필수 제품명 (최대 50자).
+                // 1. iOS OQTF — 필수 제품명 (최대 50자).
                 OQTF(
                     value = state.name,
                     onValueChange = { onEvent(AddProductUiEvent.NameChanged(it)) },
                     title = stringResource(R.string.jepum_ireum),
                     maxLength = 50,
-                    minLength = 1,
+                    minLength = 2, // iOS AddProductView minLength: 2
                     palette = palette,
                     radius = Dimens.Radius.value,
                 )
 
-                // iOS OQTE — 옵션 제품 설명 (최대 200자).
-                OQTE(
-                    value = state.description,
-                    onValueChange = { onEvent(AddProductUiEvent.DescriptionChanged(it)) },
-                    title = stringResource(R.string.jepum_seolmyeong),
-                    isOption = true,
-                    maxLength = 200,
-                    palette = palette,
-                    radius = Dimens.Radius.value,
-                )
-
+                // 2. iOS typeSelector — 주류 타입 (제목 + 안내 + 2-column 그리드).
                 Column(verticalArrangement = Arrangement.spacedBy(Dimens.Padding)) {
                     Text(
                         text = stringResource(R.string.juryu_taib),
@@ -184,22 +174,30 @@ internal fun AddProductScreen(
                     )
                 }
 
-                Column(verticalArrangement = Arrangement.spacedBy(Dimens.Padding)) {
-                    Text(
-                        text = stringResource(R.string.jepum_imiji),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            color = textPrimary,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                    )
-                    NoteAttachmentSection(
-                        attachments = listOfNotNull(state.attachment),
-                        isLoading = state.isUploadingImage,
-                        onAdd = { onEvent(AddProductUiEvent.RequestPickAttachment) },
-                        onRemove = { onEvent(AddProductUiEvent.RemoveAttachment) },
-                        maxCount = 1,
-                    )
-                }
+                // 3. iOS AddProductView 의 AI 안내 박스 (sparkles + 안내 텍스트).
+                AiHintBox(palette = palette)
+
+                // 4. iOS OQTE — 옵션 제품 설명 (최대 200자).
+                OQTE(
+                    value = state.description,
+                    onValueChange = { onEvent(AddProductUiEvent.DescriptionChanged(it)) },
+                    title = stringResource(R.string.jepum_seolmyeong),
+                    isOption = true,
+                    maxLength = 200,
+                    palette = palette,
+                    radius = Dimens.Radius.value,
+                )
+
+                // 5. iOS AddProductView 의 "제품 이미지" 단일 헤더 + "1장까지" 안내 (헤더 2중 표기/"5장" 오문구 정정).
+                NoteAttachmentSection(
+                    attachments = listOfNotNull(state.attachment),
+                    isLoading = state.isUploadingImage,
+                    onAdd = { onEvent(AddProductUiEvent.RequestPickAttachment) },
+                    onRemove = { onEvent(AddProductUiEvent.RemoveAttachment) },
+                    maxCount = 1,
+                    title = stringResource(R.string.jepum_imiji),
+                    guidance = stringResource(R.string.jepum_sajineun_1jangggaji_ceombuhal_su_isseoyo),
+                )
 
                 Spacer(modifier = Modifier.height(Dimens.SectionSpacing))
             }
@@ -222,7 +220,7 @@ internal fun AddProductScreen(
                 onDismissRequest = { onEvent(AddProductUiEvent.DismissDuplicatedAlert) },
                 title = { Text(text = stringResource(R.string.imi_deungrogdoen_jepumieyo)) },
                 text = {
-                    Text(text = stringResource(R.string.gateun_ireumui_jepumi_imi_isseoyo_geomsaeghagireo_gaboseyo))
+                    Text(text = stringResource(R.string.ibryeoghasin_ireumgwa_yusahan_jepumi_imi_jonjaehabnida_geoms))
                 },
                 confirmButton = {
                     TextButton(onClick = { onEvent(AddProductUiEvent.SearchExistingProduct) }) {

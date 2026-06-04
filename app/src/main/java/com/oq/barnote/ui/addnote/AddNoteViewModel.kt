@@ -150,7 +150,13 @@ class AddNoteViewModel @Inject constructor(
             }
             is AddNoteUiEvent.DetailChanged -> {
                 _uiState.update { state ->
-                    state.copy(detailScores = state.detailScores + (event.detail to event.value))
+                    // 0(미입력/초기화)은 키 자체를 제거 — "N개 평가 완료" 카운트 정확 + 슬라이더 완전 해제.
+                    val updated = if (event.value <= 0) {
+                        state.detailScores - event.detail
+                    } else {
+                        state.detailScores + (event.detail to event.value)
+                    }
+                    state.copy(detailScores = updated)
                 }
             }
             AddNoteUiEvent.ToggleDetailsExpanded ->
@@ -336,6 +342,10 @@ class AddNoteViewModel @Inject constructor(
 
     private fun encodeDetails(scores: Map<NoteDetail, Int>): String? {
         if (scores.isEmpty()) return null
-        return scores.entries.joinToString(",") { "${it.key.id}:${it.value}" }
+        // iOS 와 동일하게 {"<rawValue>":score,...} JSON 문자열로 인코딩한다.
+        // (콜론-콤마 "id:score" 포맷은 서버가 파싱하지 못해 상세 평가가 저장되지 않음)
+        return org.json.JSONObject(
+            scores.entries.associate { (detail, score) -> detail.id.toString() to score },
+        ).toString()
     }
 }

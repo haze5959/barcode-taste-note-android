@@ -3,6 +3,7 @@ package com.oq.barnote.ui.scanner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oq.barnote.core.domain.BarNoteRepository
+import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.models.CommonError
 import com.oq.barnote.core.oqcore.util.AppController
 import com.oq.barnote.core.oqcore.utils.OQHapticService
@@ -29,6 +30,7 @@ class BarcodeScannerViewModel @Inject constructor(
     private val repository: BarNoteRepository,
     private val appController: AppController,
     private val haptic: OQHapticService,
+    private val userStore: UserStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BarcodeScannerUiState())
@@ -55,9 +57,16 @@ class BarcodeScannerViewModel @Inject constructor(
             }
             BarcodeScannerUiEvent.RequestAIScan -> {
                 // notFound alert / bottom sheet 둘 다 동일하게 AI 카메라 진입.
+                // iOS `checkCameraPermission(.ai)`: AI 등록은 로그인 필수 → 미로그인 시 글로벌 alert.
+                // NotFound 바코드가 있으면 AI 생성에 연계 (iOS `pendingBarcodeForProductRegistration`).
+                val barcode = _uiState.value.notFoundBarcode
                 _uiState.update { it.copy(notFoundBarcode = null) }
                 viewModelScope.launch {
-                    _navEffect.send(BarcodeScannerNavEffect.GoAICamera)
+                    if (!userStore.isLoggedIn()) {
+                        _navEffect.send(BarcodeScannerNavEffect.NeedLogin)
+                    } else {
+                        _navEffect.send(BarcodeScannerNavEffect.GoAICamera(barcode))
+                    }
                 }
             }
             BarcodeScannerUiEvent.RequestSearch ->
@@ -91,7 +100,10 @@ class BarcodeScannerViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
+            // iOS `barcodeScanned` → `appController.isAiScanLoading = true`: 조회 중 글로벌 오버레이.
+            appController.setAiScanLoading(true)
             val result = repository.findProduct(barcode = raw)
+            appController.setAiScanLoading(false)
             result.fold(
                 onSuccess = { info ->
                     // iOS `barcodeLookupResponse(.success)` 와 동등 — 성공 알림 햅틱.

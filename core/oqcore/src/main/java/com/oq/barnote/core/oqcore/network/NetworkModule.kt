@@ -5,6 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.contextual
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -31,6 +33,12 @@ object NetworkModule {
         ignoreUnknownKeys = true
         coerceInputValues = true
         encodeDefaults = true
+        // `@Body Map<String, Any?>` (iOS `[String: Any]` 딕셔너리 바디) 직렬화를 위해 Any serializer 등록.
+        // 미등록 시 해당 엔드포인트(favoriteProduct/createProduct/submitNote 등) 호출 시점에
+        // Retrofit 이 "Serializer for class 'Any' is not found" 로 크래시한다.
+        serializersModule = SerializersModule {
+            contextual(Any::class, AnySerializer)
+        }
     }
 
     @Provides

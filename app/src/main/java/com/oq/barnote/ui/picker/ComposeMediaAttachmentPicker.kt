@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import com.oq.barnote.R
+import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.domain.MediaAttachmentPicker
 import com.oq.barnote.core.oqcore.util.OQImageOptimize
@@ -197,6 +198,7 @@ fun rememberComposeMediaAttachmentPicker(): MediaAttachmentPicker {
         key(head.id) {
             OQImageEditor(
                 imageBytes = head.data,
+                palette = barNotePalette(),
                 onComplete = { editedBytes ->
                     val edited = editedBytes?.let {
                         head.copy(id = UUID.randomUUID().toString(), data = it)

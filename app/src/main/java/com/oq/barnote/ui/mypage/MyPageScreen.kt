@@ -47,6 +47,7 @@ import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.oqcore.views.OQFillButton
+import com.oq.barnote.ui.navigation.MainBottomBarHeight
 import com.oq.barnote.core.oqcore.views.OQRoundedButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType
 import com.oq.barnote.core.oqcore.views.SkeletonView
@@ -68,7 +69,6 @@ fun MyPageRoute(
     onShowSubscribe: () -> Unit,
     onShowUserNoteList: (userId: String) -> Unit,
     onShowUserList: (UserListType) -> Unit,
-    onShowSettings: () -> Unit,
     viewModel: MyPageViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -95,7 +95,6 @@ fun MyPageRoute(
     MyPageScreen(
         state = uiState,
         onEvent = viewModel::onEvent,
-        onShowSettings = onShowSettings,
     )
 }
 
@@ -103,11 +102,8 @@ fun MyPageRoute(
 internal fun MyPageScreen(
     state: MyPageUiState,
     onEvent: (MyPageUiEvent) -> Unit,
-    onShowSettings: () -> Unit = {},
 ) {
     val background = colorResource(com.oq.barnote.core.designsystem.R.color.background_primary)
-    val textPrimary =
-        colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
 
     Box(
         modifier = Modifier
@@ -119,7 +115,9 @@ internal fun MyPageScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Dimens.BtnPadding)
-                .padding(top = Dimens.SectionSpacing),
+                .padding(top = Dimens.SectionSpacing)
+                // MainBottomBar(오버레이) 뒤로 콘텐츠가 스크롤되므로 바 높이만큼 하단 여백 추가.
+                .padding(bottom = MainBottomBarHeight),
             verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
         ) {
             when {
@@ -129,18 +127,6 @@ internal fun MyPageScreen(
             }
         }
 
-        // Settings 진입 아이콘은 BottomNavBar 도입 후에도 MyPage 우상단 유지
-        // (iOS MyPage 와 동일하게 Settings 는 MyPage 의 일부 액션).
-        androidx.compose.material3.Icon(
-            imageVector = androidx.compose.material.icons.Icons.Filled.Settings,
-            contentDescription = null,
-            tint = textPrimary,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(Dimens.BtnPadding)
-                .size(Dimens.IconSize)
-                .clickable(onClick = onShowSettings),
-        )
     }
 }
 
@@ -250,17 +236,19 @@ private fun LoggedInContent(
             )
         }
 
-        // iOS NeededNoteProductTip 대응: "마셔본 제품" Row 위에 안내 풍선 표시.
-        // 사용자가 close 누르면 영구 dismiss.
-        com.oq.barnote.ui.tip.BarNoteTip(
+        // 마셔본 제품 Row (tip 오버레이 제거 — iOS 처럼 Row 는 그대로 두고 tip 을 아래에 인라인 삽입).
+        DashboardRow(
+            icon = Icons.Filled.WineBar,
+            title = stringResource(R.string.masyeobon_jepum),
+            onClick = { onEvent(MyPageUiEvent.TappedTastedProducts) },
+        )
+
+        // iOS `TipView(neededNoteProductTip, arrowEdge: .bottom)` 대응 — 오버레이/풍선이 아니라
+        // "마셔본 제품"과 "노트 작성이 필요한 제품" Row 사이에 끼워지는 인라인 안내(아래 Row 설명).
+        // close 시 영구 dismiss 되며 빠진다.
+        com.oq.barnote.ui.tip.BarNoteInlineTip(
             tip = com.oq.barnote.ui.tip.BarnoteTip.NeededNoteProduct,
-        ) {
-            DashboardRow(
-                icon = Icons.Filled.WineBar,
-                title = stringResource(R.string.masyeobon_jepum),
-                onClick = { onEvent(MyPageUiEvent.TappedTastedProducts) },
-            )
-        }
+        )
 
         DashboardRow(
             icon = Icons.Filled.Edit,

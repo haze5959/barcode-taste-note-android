@@ -23,6 +23,8 @@ import javax.inject.Inject
 data class EditNoteUiState(
     val noteId: String = "",
     val productId: String = "",
+    /** iOS NoteProductInfoView 표시용 제품명. */
+    val productName: String = "",
     /** 노트 제품 타입 — 상세평가 항목 필터링(`NoteDetail.detailsFor`)에 사용. */
     val productType: com.oq.barnote.core.domain.ProductType? = null,
     val rating: Int = 0,
@@ -111,7 +113,13 @@ class EditNoteViewModel @Inject constructor(
                 }
             is EditNoteUiEvent.DetailChanged ->
                 _uiState.update {
-                    it.copy(detailScores = it.detailScores + (event.detail to event.value))
+                    // 0(미입력/초기화)은 키 제거 — 카운트 정확 + 슬라이더 완전 해제.
+                    val updated = if (event.value <= 0) {
+                        it.detailScores - event.detail
+                    } else {
+                        it.detailScores + (event.detail to event.value)
+                    }
+                    it.copy(detailScores = updated)
                 }
             EditNoteUiEvent.ToggleDetailsExpanded ->
                 _uiState.update { it.copy(isDetailsExpanded = !it.isDetailsExpanded) }
@@ -145,6 +153,7 @@ class EditNoteViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             productId = info.product.id,
+                            productName = info.product.name,
                             productType = info.product.type,
                             rating = info.note.rating,
                             body = info.note.body,
@@ -246,7 +255,11 @@ class EditNoteViewModel @Inject constructor(
             appController.setGlobalLoading(false)
             _uiState.update { it.copy(isSubmitting = false) }
             result.fold(
-                onSuccess = { _navEffect.send(EditNoteNavEffect.Finished) },
+                onSuccess = {
+                    // iOS EditNoteFeature: 저장 성공 시 목록 갱신 트리거 (`appController.neededToRefresh = true`).
+                    appController.neededToRefresh = true
+                    _navEffect.send(EditNoteNavEffect.Finished)
+                },
                 onFailure = { appController.showError(it) },
             )
         }
@@ -254,14 +267,18 @@ class EditNoteViewModel @Inject constructor(
 
     private fun encodeDetails(scores: Map<NoteDetail, Int>): String? {
         if (scores.isEmpty()) return null
-        return scores.entries.joinToString(",") { "${it.key.id}:${it.value}" }
+        // iOS 와 동일하게 {"<rawValue>":score,...} JSON 문자열로 인코딩한다.
+        // (콜론-콤마 "id:score" 포맷은 서버가 파싱하지 못해 상세 평가 수정이 반영되지 않음)
+        return org.json.JSONObject(
+            scores.entries.associate { (detail, score) -> detail.id.toString() to score },
+        ).toString()
     }
 
     /** 서버 `note.details` (id→score) 를 [NoteDetail] 키 맵으로 복원. iOS `toNoteDetailDict()` 대응. */
     private fun decodeDetails(details: Map<String, Int>?): Map<NoteDetail, Int> {
         if (details.isNullOrEmpty()) return emptyMap()
         return details.mapNotNull { (key, value) ->
-            NoteDetail.values().firstOrNull { it.id == key }?.let { it to value }
+            NoteDetail.values().firstOrNull { it.id.toString() == key }?.let { it to value }
         }.toMap()
     }
 }

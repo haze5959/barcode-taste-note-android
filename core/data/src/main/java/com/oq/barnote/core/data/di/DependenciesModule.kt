@@ -13,7 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * iOS `Dependencies/*` 의 클라이언트들을 Hilt 로 바인딩합니다.
+ * iOS `Dependencies` 의 클라이언트들을 Hilt 로 바인딩합니다.
  *
  * - [BlockedUsersStore] → [BlockedUsersStoreImpl] (DataStore)
  * - [FcmTokenProvider] → [FcmTokenProviderImpl] (Firebase Messaging)

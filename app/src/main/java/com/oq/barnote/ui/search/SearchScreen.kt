@@ -56,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.ui.navigation.MainBottomBarHeight
 import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.domain.ProductOrderByKey
 import com.oq.barnote.core.oqcore.views.OQFAB
@@ -149,15 +150,7 @@ internal fun SearchScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                        tint = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary),
-                        modifier = Modifier
-                            .size(Dimens.IconSize)
-                            .clickable(onClick = onBack)
-                            .padding(4.dp),
-                    )
+                    // iOS SearchView 검색바엔 뒤로가기 화살표가 없음(탭). 푸시 진입 시엔 시스템 back 으로 복귀.
                     SearchBar(
                         value = state.searchText,
                         placeholder = stringResource(R.string.jepummyeong_geomsaeg),
@@ -211,7 +204,8 @@ internal fun SearchScreen(
                     onAddProduct = { showAddDialog = true },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(end = Dimens.BtnPadding, bottom = Dimens.BtnPadding),
+                        // FAB 도 MainBottomBar 위로 올려 바에 가리지 않게 함.
+                        .padding(end = Dimens.BtnPadding, bottom = Dimens.BtnPadding + MainBottomBarHeight),
                 )
             }
         }
@@ -367,7 +361,8 @@ private fun SearchResultGrid(
             start = Dimens.Padding,
             end = Dimens.Padding,
             top = Dimens.Padding,
-            bottom = Dimens.FabHSize + Dimens.SectionSpacing,
+            // FAB + MainBottomBar(오버레이) 둘 다 하단을 덮으므로, 둘을 합친 만큼 스크롤 하단 여백 확보.
+            bottom = Dimens.FabHSize + Dimens.SectionSpacing + MainBottomBarHeight,
         ),
         modifier = Modifier.fillMaxSize(),
     ) {

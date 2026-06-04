@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -38,8 +39,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +63,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oq.barnote.Constants
 import com.oq.barnote.extension.shareUrl
 import com.oq.barnote.R
+import com.oq.barnote.ui.tip.BarNoteTip
+import com.oq.barnote.ui.tip.BarnoteTip
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.oqcore.views.OQTopBar
@@ -131,26 +132,8 @@ internal fun UserNoteListScreen(
                 palette = barNotePalette(),
             )
 
-            ProfileHeader(state = state, onEvent = onEvent)
-            HorizontalDivider(
-                color = colorResource(com.oq.barnote.core.designsystem.R.color.divider).copy(alpha = 0.5f),
-            )
-
-            TabRow(selectedTabIndex = if (state.selectedTab == UserNoteListUiState.Tab.Notes) 0 else 1) {
-                Tab(
-                    selected = state.selectedTab == UserNoteListUiState.Tab.Notes,
-                    onClick = { onEvent(UserNoteListUiEvent.SetTab(UserNoteListUiState.Tab.Notes)) },
-                    text = { Text(text = stringResource(R.string.jagseong_noteu)) },
-                )
-                Tab(
-                    selected = state.selectedTab == UserNoteListUiState.Tab.Favorites,
-                    onClick = {
-                        onEvent(UserNoteListUiEvent.SetTab(UserNoteListUiState.Tab.Favorites))
-                    },
-                    text = { Text(text = stringResource(R.string.jeulgyeocajneun_jepum)) },
-                )
-            }
-
+            // iOS ScrollView { VStack { profileHeader → Divider → tabPicker → 콘텐츠 } } 와 동일하게,
+            // ProfileHeader·탭·콘텐츠를 패널 내부의 단일 스크롤로 묶어 전체가 함께 스크롤되게 한다(TopBar 만 고정).
             when (state.selectedTab) {
                 UserNoteListUiState.Tab.Notes -> NotesPanel(state = state, onEvent = onEvent)
                 UserNoteListUiState.Tab.Favorites -> FavoritesPanel(state = state, onEvent = onEvent)
@@ -159,12 +142,15 @@ internal fun UserNoteListScreen(
 
         // 공유 FAB (isMine 일 때만)
         if (state.isMine && state.userInfo != null) {
-            ShareFab(
-                onClick = { onEvent(UserNoteListUiEvent.TappedShare) },
+            // iOS UserNoteListShareTip — 공유 FAB 코치마크.
+            BarNoteTip(
+                tip = BarnoteTip.UserNoteListShare,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(Dimens.BtnPadding),
-            )
+            ) {
+                ShareFab(onClick = { onEvent(UserNoteListUiEvent.TappedShare) })
+            }
         }
     }
 
@@ -173,7 +159,7 @@ internal fun UserNoteListScreen(
         OQSNSShareBottomSheet(
             data = state.toShareData(),
             manager = shareManager,
-            palette = com.oq.barnote.core.oqcore.models.Palette(),
+            palette = barNotePalette(),
             onDismiss = { onEvent(UserNoteListUiEvent.DismissShareSheet) },
         )
     }
@@ -345,54 +331,64 @@ private fun NotesPanel(
     state: UserNoteListUiState,
     onEvent: (UserNoteListUiEvent) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        // 정렬 메뉴 헤더 (iOS notesSectionView 의 HStack + Menu)
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(Dimens.BtnPadding),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.jagseong_noteu),
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary),
-                    fontWeight = FontWeight.Bold,
-                ),
-                modifier = Modifier.weight(1f),
-            )
-            OrderByMenu(
-                selected = state.selectedOrderBy,
-                onSelect = { onEvent(UserNoteListUiEvent.SetOrderBy(it)) },
+    val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val divider = colorResource(com.oq.barnote.core.designsystem.R.color.divider)
+
+    // ProfileHeader·Divider·탭·정렬헤더를 모두 LazyColumn 의 선두 item 으로 둬, 노트 목록과 함께
+    // 전체가 스크롤되게 한다 (iOS ScrollView { VStack { ... } } 와 동일). TopBar 만 화면에 고정.
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = Dimens.Padding,
+            end = Dimens.Padding,
+            top = 0.dp,
+            bottom = Dimens.FabHSize + Dimens.SectionSpacing,
+        ),
+        verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+    ) {
+        item { ProfileHeader(state = state, onEvent = onEvent) }
+        item { HorizontalDivider(color = divider.copy(alpha = 0.5f)) }
+        item {
+            TabSelector(
+                selected = state.selectedTab,
+                onSelect = { onEvent(UserNoteListUiEvent.SetTab(it)) },
             )
         }
-
+        // 정렬 메뉴 헤더 (iOS notesSectionView 의 HStack + Menu)
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = Dimens.Padding),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.jagseong_noteu),
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = textPrimary,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    modifier = Modifier.weight(1f),
+                )
+                OrderByMenu(
+                    selected = state.selectedOrderBy,
+                    onSelect = { onEvent(UserNoteListUiEvent.SetOrderBy(it)) },
+                )
+            }
+        }
         when {
             // iOS: `else if store.isLoading { ForEach(0..<4) { NoteDetailRowView(info: nil) } }`
-            state.notes.isEmpty() && state.isNotesLoading -> Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = Dimens.Padding),
-                verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
-            ) {
-                repeat(4) { NoteDetailRow(info = null) }
-            }
-            // iOS: ContentUnavailableView("작성한 노트가 없습니다", systemImage: "doc.text.image",
-            //       description: "이 유저는 아직 테이스팅 노트를 작성하지 않았습니다.")
-            state.notes.isEmpty() -> EmptyStateView(
-                title = stringResource(R.string.jagseonghan_noteuga_eobsseubnida),
-                description = stringResource(R.string.i_yujeoneun_ajig_teiseuting_noteureul_jagseonghaji_anhassseu),
-                icon = Icons.AutoMirrored.Filled.Article,
-                modifier = Modifier.padding(top = Dimens.SectionSpacing),
-            )
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = Dimens.Padding,
-                    end = Dimens.Padding,
-                    top = 0.dp,
-                    bottom = Dimens.FabHSize + Dimens.SectionSpacing,
-                ),
-                verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
-            ) {
+            state.notes.isEmpty() && state.isNotesLoading ->
+                items(4) { NoteDetailRow(info = null) }
+            // iOS: ContentUnavailableView("작성한 노트가 없습니다", ...)
+            state.notes.isEmpty() ->
+                item {
+                    EmptyStateView(
+                        title = stringResource(R.string.jagseonghan_noteuga_eobsseubnida),
+                        description = stringResource(R.string.i_yujeoneun_ajig_teiseuting_noteureul_jagseonghaji_anhassseu),
+                        icon = Icons.AutoMirrored.Filled.Article,
+                        modifier = Modifier.padding(top = Dimens.SectionSpacing),
+                    )
+                }
+            else -> {
                 itemsIndexed(state.notes, key = { _, it -> it.id }) { index, info ->
                     Box(
                         modifier = Modifier.clickable {
@@ -414,6 +410,51 @@ private fun NotesPanel(
                         ) { CircularProgressIndicator(modifier = Modifier.size(24.dp)) }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * iOS tabPickerView 등가 — Material TabRow(보라 primary) 대신 iOS 색/스타일.
+ * 선택 탭: textPrimary + Bold + 하단 accent 언더라인(2dp). 미선택: textSecondary.
+ */
+@Composable
+private fun TabSelector(
+    selected: UserNoteListUiState.Tab,
+    onSelect: (UserNoteListUiState.Tab) -> Unit,
+) {
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val textSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+
+    val tabs = listOf(
+        UserNoteListUiState.Tab.Notes to stringResource(R.string.jagseong_noteu),
+        UserNoteListUiState.Tab.Favorites to stringResource(R.string.jeulgyeocajneun_jepum),
+    )
+    Row(modifier = Modifier.fillMaxWidth()) {
+        tabs.forEach { (tab, label) ->
+            val isSelected = tab == selected
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onSelect(tab) },
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = if (isSelected) textPrimary else textSecondary,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    ),
+                    modifier = Modifier.padding(vertical = Dimens.Padding),
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(if (isSelected) accent else Color.Transparent),
+                )
             }
         }
     }
@@ -495,47 +536,57 @@ private fun FavoritesPanel(
     state: UserNoteListUiState,
     onEvent: (UserNoteListUiEvent) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        // ProductTypeFilter (가로 스크롤 칩)
-        ProductTypeFilter(
-            selectedType = state.selectedProductType,
-            onSelect = { onEvent(UserNoteListUiEvent.SetProductTypeFilter(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Dimens.Spacing),
-        )
+    val divider = colorResource(com.oq.barnote.core.designsystem.R.color.divider)
 
-        when {
-            // iOS: favoriteProducts == nil → `LazyVGrid { ForEach(0..<4) { ProductRowView(info: nil) } }`
-            state.favoriteProducts.isEmpty() && state.isFavoritesLoading -> LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = Dimens.RowWSize),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = Dimens.Padding),
-                verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
-            ) {
-                items(4) { ProductRow(info = null) }
-            }
-            // iOS: ContentUnavailableView("즐겨찾는 제품이 없습니다", systemImage: "heart.slash",
-            //       description: "이 유저가 즐겨찾기한 제품이 없습니다.")
-            state.favoriteProducts.isEmpty() -> EmptyStateView(
-                title = stringResource(R.string.jeulgyeocajneun_jepumi_eobsseubnida),
-                description = stringResource(R.string.i_yujeoga_jeulgyeocajgihan_jepumi_eobsseubnida),
-                icon = Icons.Filled.HeartBroken,
-                modifier = Modifier.padding(top = Dimens.SectionSpacing),
+    // ProfileHeader·Divider·탭·타입필터를 그리드의 선두 full-span item 으로 둬, 제품 그리드와 함께
+    // 전체가 스크롤되게 한다 (iOS ScrollView { VStack { ... } } 와 동일).
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = Dimens.RowWSize),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = Dimens.Padding,
+            end = Dimens.Padding,
+            top = 0.dp,
+            bottom = Dimens.FabHSize + Dimens.SectionSpacing,
+        ),
+        verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+    ) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            ProfileHeader(state = state, onEvent = onEvent)
+        }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            HorizontalDivider(color = divider.copy(alpha = 0.5f))
+        }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            TabSelector(
+                selected = state.selectedTab,
+                onSelect = { onEvent(UserNoteListUiEvent.SetTab(it)) },
             )
-            else -> LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = Dimens.RowWSize),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = Dimens.Padding,
-                    end = Dimens.Padding,
-                    top = 0.dp,
-                    bottom = Dimens.FabHSize + Dimens.SectionSpacing,
-                ),
-                verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
-            ) {
+        }
+        // ProductTypeFilter (가로 스크롤 칩)
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            ProductTypeFilter(
+                selectedType = state.selectedProductType,
+                onSelect = { onEvent(UserNoteListUiEvent.SetProductTypeFilter(it)) },
+                modifier = Modifier.fillMaxWidth().padding(vertical = Dimens.Spacing),
+            )
+        }
+        when {
+            // iOS: favoriteProducts == nil → ForEach(0..<4) { ProductRowView(info: nil) }
+            state.favoriteProducts.isEmpty() && state.isFavoritesLoading ->
+                items(4) { ProductRow(info = null) }
+            // iOS: ContentUnavailableView("즐겨찾는 제품이 없습니다", ...)
+            state.favoriteProducts.isEmpty() ->
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    EmptyStateView(
+                        title = stringResource(R.string.jeulgyeocajneun_jepumi_eobsseubnida),
+                        description = stringResource(R.string.i_yujeoga_jeulgyeocajgihan_jepumi_eobsseubnida),
+                        icon = Icons.Filled.HeartBroken,
+                        modifier = Modifier.padding(top = Dimens.SectionSpacing),
+                    )
+                }
+            else -> {
                 items(state.favoriteProducts, key = { it.id }) { info ->
                     Box(
                         modifier = Modifier.clickable {
@@ -543,9 +594,9 @@ private fun FavoritesPanel(
                         },
                     ) { ProductRow(info = info) }
                 }
-                // 무한 스크롤 트리거 — 마지막 줄에 sentinel item.
+                // 무한 스크롤 트리거 — 마지막 줄 full-span sentinel.
                 if (state.hasMoreFavorites) {
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         LaunchedEffect(state.favoriteProducts.size) {
                             onEvent(UserNoteListUiEvent.FetchFavoritesNextPage)
                         }
@@ -632,7 +683,7 @@ private fun UserNoteListUiState.toShareData(): OQSNSShareData {
         profileImgUrl = info.user.profileImageId?.let { "${Constants.S.IMAGE_BASE_URL}/$it" },
         imageURLs = imageUrls,
         shareUrl = info.shareUrl,
-        appIconResId = null,
+        appIconResId = R.drawable.launch_icon, // iOS UserNoteListView 의 `appIcon: launchIcon` 대응.
     )
 }
 

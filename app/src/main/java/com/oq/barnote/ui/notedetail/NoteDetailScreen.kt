@@ -74,6 +74,7 @@ import com.oq.barnote.Constants
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import com.oq.barnote.core.designsystem.component.InfoPopOver
 import com.oq.barnote.core.designsystem.component.RatingView
 import com.oq.barnote.core.domain.Flavor
@@ -89,6 +90,9 @@ import com.oq.barnote.extension.shareUrl
 import com.oq.barnote.extension.title
 import com.oq.barnote.ui.component.BTNImage
 import com.oq.barnote.ui.component.EmptyStateView
+import com.oq.barnote.ui.component.ZoomableImageViewer
+import com.oq.barnote.ui.tip.BarNoteTip
+import com.oq.barnote.ui.tip.BarnoteTip
 import com.oq.barnote.ui.component.FlavorSummaryChips
 import com.oq.barnote.ui.component.NoteDetailSummary
 
@@ -173,12 +177,15 @@ internal fun NoteDetailScreen(
 
         // 공유 FAB — iOS `if store.isEditable, store.info != nil` 조건과 동일.
         if (state.isEditable && state.info != null) {
-            ShareFab(
-                onClick = { onEvent(NoteDetailUiEvent.TappedShare) },
+            // iOS NoteDetailShareTip — 공유 FAB 코치마크.
+            BarNoteTip(
+                tip = BarnoteTip.NoteDetailShare,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(Dimens.BtnPadding),
-            )
+            ) {
+                ShareFab(onClick = { onEvent(NoteDetailUiEvent.TappedShare) })
+            }
         }
     }
 
@@ -208,7 +215,7 @@ internal fun NoteDetailScreen(
         AlertDialog(
             onDismissRequest = { onEvent(NoteDetailUiEvent.DismissBlockAlert) },
             title = { Text(text = stringResource(R.string.sayongja_cadan)) },
-            text = { Text(text = stringResource(R.string.seontaeghan_yeyageul_sagjehasigessseubnigga)) },
+            text = { Text(text = stringResource(R.string.i_sayongjareul_cadanhasigessseubnigga_cadanhamyeon_haedang_s)) },
             confirmButton = {
                 TextButton(onClick = { onEvent(NoteDetailUiEvent.ConfirmBlock) }) {
                     Text(text = stringResource(R.string.cadanhagi))
@@ -235,14 +242,14 @@ internal fun NoteDetailScreen(
         OQSNSShareBottomSheet(
             data = state.info.toShareData(),
             manager = shareManager,
-            palette = com.oq.barnote.core.oqcore.models.Palette(),
+            palette = barNotePalette(),
             onDismiss = { onEvent(NoteDetailUiEvent.DismissShareSheet) },
         )
     }
 
     // 풀스크린 이미지 뷰어 — ProductDetail 의 패턴과 동일.
     if (state.isImageViewerPresented && state.info != null) {
-        FullscreenImageViewer(
+        ZoomableImageViewer(
             imageIds = state.info.displayImageIds,
             onDismiss = { onEvent(NoteDetailUiEvent.DismissImageViewer) },
         )
@@ -300,7 +307,8 @@ private fun TopBar(
             tint = textPrimary,
             modifier = Modifier.size(Dimens.IconSize).clickable(onClick = onBack).padding(4.dp),
         )
-        Spacer(modifier = Modifier.weight(1f))
+        // 제목은 back·우측 아이콘 사이 남는 공간만 차지(weight) + 길면 … 처리.
+        // weight/ellipsis 가 없으면 긴 제목이 우측 버튼을 화면 밖으로 밀어낸다.
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium.copy(
@@ -308,8 +316,12 @@ private fun TopBar(
                 fontWeight = FontWeight.Bold,
             ),
             maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = Dimens.Padding),
         )
-        Spacer(modifier = Modifier.weight(1f))
         if (isEditable) {
             Icon(
                 imageVector = Icons.Filled.Edit,
@@ -478,13 +490,14 @@ private fun HeroSection(
                 .padding(Dimens.BtnPadding),
             verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
         ) {
-            Text(
+            AutoResizeText(
                 text = info.product.name,
                 style = MaterialTheme.typography.titleMedium.copy(
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                 ),
                 maxLines = 2,
+                minScaleFactor = 0.7f, // iOS `.title3.bold()` + `.minimumScaleFactor(0.7)`
             )
             RatingView(
                 value = info.note.rating,
@@ -624,7 +637,7 @@ private fun TastingSection(
                     // 문자열이라 제외.
                     val notePopoverItems: List<Pair<String, String>> =
                         NoteDetail.values()
-                            .filter { it != NoteDetail.Feeling }
+                            .filter { it != NoteDetail.feeling }
                             .map { it.title() to it.detail() }
                     InfoPopOver(
                         title = stringResource(R.string.sangse_pyeongga_hangmog_seolmyeong),
@@ -675,9 +688,10 @@ private fun MetaSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
         ) {
-            if (info.user?.profileImageId != null) {
+            val profileImageId = info.user?.profileImageId
+            if (profileImageId != null) {
                 BTNImage(
-                    path = info.user.profileImageId,
+                    path = profileImageId,
                     modifier = Modifier.size(Dimens.IconSize).clip(CircleShape),
                     cornerRadius = 999.dp,
                     fallbackIcon = Icons.Filled.AccountCircle,
@@ -771,32 +785,15 @@ private fun MetaRow(
 
 @Composable
 private fun ProductDetailButton(onClick: () -> Unit) {
-    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Dimens.Radius))
-            .background(accent)
-            .clickable(onClick = onClick)
-            .padding(Dimens.BtnPadding),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.haedang_jepum_sangse_bogi),
-            style = MaterialTheme.typography.titleSmall.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-            ),
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp),
-        )
-    }
+    // iOS NoteDetailView 의 OQRoundedButtonStyle(style: .accent) 대응 —
+    // 외곽선만 accent, 내부 투명, accent 텍스트의 outlined 버튼.
+    com.oq.barnote.core.oqcore.views.OQRoundedButton(
+        text = stringResource(R.string.haedang_jepum_sangse_bogi),
+        onClick = onClick,
+        style = com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType.Accent,
+        palette = barNotePalette(),
+        radius = Dimens.Radius.value,
+    )
 }
 
 @Composable
@@ -838,48 +835,7 @@ private fun ShareFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-private fun FullscreenImageViewer(
-    imageIds: List<String>,
-    onDismiss: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        val pagerState = rememberPagerState(pageCount = { imageIds.size })
-        Box(
-            modifier = Modifier.fillMaxSize().background(Color.Black),
-        ) {
-            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-                BTNImage(
-                    path = imageIds[page],
-                    modifier = Modifier.fillMaxSize(),
-                    cornerRadius = 0.dp,
-                )
-            }
-            Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(Dimens.BtnPadding)
-                    .size(Dimens.IconSize)
-                    .clickable(onClick = onDismiss),
-            )
-            if (imageIds.size > 1) {
-                Text(
-                    text = "${pagerState.currentPage + 1} / ${imageIds.size}",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(Dimens.SectionSpacing),
-                )
-            }
-        }
-    }
-}
+// 풀스크린 이미지 뷰어는 공용 [ZoomableImageViewer] (ui/component) 로 이전 — 핀치줌(≤3x)·드래그-투-디스미스 포함.
 
 // endregion
 
@@ -898,7 +854,7 @@ private fun NoteInfo.toShareData(): OQSNSShareData {
         profileImgUrl = user?.profileImageId?.let { "${Constants.S.IMAGE_BASE_URL}/$it" },
         imageURLs = displayImageIds.map { "${Constants.S.IMAGE_BASE_URL}/$it" },
         shareUrl = shareUrl,
-        appIconResId = null,
+        appIconResId = R.drawable.launch_icon, // 공유 카드 앱 아이콘 (UserNoteList 와 동일 — iOS launchIcon 대응).
     )
 }
 

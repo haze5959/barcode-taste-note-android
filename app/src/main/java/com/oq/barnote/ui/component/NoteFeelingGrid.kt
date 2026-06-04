@@ -4,11 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,46 +53,49 @@ fun NoteFeelingGrid(
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = textPrimary,
         )
-        // iOS: GridItem(.adaptive(minimum: largeCardSize, maximum: 120)), 각 버튼 frame(maxWidth: .infinity).
-        // verticalScroll 부모(AddNote/EditNote/ProductDetail) 안이라 LazyVerticalGrid 는 중첩 스크롤
-        // 크래시 위험이 있어 사용하지 않고, FlowRow + maxItemsInEachRow + weight(1f) 로 한 행을
-        // 균등 폭 셀로 채운다.
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
-            verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
-            maxItemsInEachRow = 4,
-        ) {
-            NoteDetail.Feeling.values().forEach { feeling ->
-                val isSelected = feeling == selectedFeeling
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(Dimens.Radius))
-                        .background(
-                            if (isSelected) accent.copy(alpha = 0.1f) else surfaceSecondary,
+        // iOS: GridItem(.adaptive(minimum: largeCardSize, maximum: 120)) — 동일 폭 셀 + 왼쪽 정렬.
+        // verticalScroll 부모(AddNote/EditNote/ProductDetail) 안이라 LazyVerticalGrid(중첩 스크롤 크래시)
+        // 대신 BoxWithConstraints 로 폭을 재서 고정폭 4열 셀을 만든다. weight(1f) 는 마지막 행 셀이 부족하면
+        // 늘어나 iOS 와 달라지므로, 고정 width 로 왼쪽 정렬·동일 폭을 유지한다.
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val columns = 4
+            val cellWidth = (maxWidth - Dimens.Padding * columns) / columns
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
+                verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+                maxItemsInEachRow = columns,
+            ) {
+                NoteDetail.Feeling.values().forEach { feeling ->
+                    val isSelected = feeling == selectedFeeling
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+                        modifier = Modifier
+                            .width(cellWidth)
+                            .clip(RoundedCornerShape(Dimens.Radius))
+                            .background(
+                                if (isSelected) accent.copy(alpha = 0.1f) else surfaceSecondary,
+                            )
+                            .border(
+                                width = if (isSelected) 1.5.dp else 0.dp,
+                                color = if (isSelected) accent else Color.Transparent,
+                                shape = RoundedCornerShape(Dimens.Radius),
+                            )
+                            .clickable { onFeelingSelected(feeling) }
+                            .padding(vertical = Dimens.Spacing),
+                    ) {
+                        Text(
+                            text = feeling.emoji,
+                            // iOS: .font(.system(size: iconSize)) — titleLarge 가 아닌 아이콘 크기에 맞춤 (B4).
+                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
                         )
-                        .border(
-                            width = if (isSelected) 1.5.dp else 0.dp,
-                            color = if (isSelected) accent else Color.Transparent,
-                            shape = RoundedCornerShape(Dimens.Radius),
+                        Text(
+                            text = feeling.desc(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isSelected) accent else secondary,
+                            maxLines = 1,
                         )
-                        .clickable { onFeelingSelected(feeling) }
-                        .padding(vertical = Dimens.Spacing),
-                ) {
-                    Text(
-                        text = feeling.emoji,
-                        // iOS: .font(.system(size: iconSize)) — titleLarge 가 아닌 아이콘 크기에 맞춤 (B4).
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
-                    )
-                    Text(
-                        text = feeling.desc(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (isSelected) accent else secondary,
-                        maxLines = 1,
-                    )
+                    }
                 }
             }
         }

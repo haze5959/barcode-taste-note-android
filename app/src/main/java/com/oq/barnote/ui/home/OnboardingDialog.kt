@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
@@ -35,7 +35,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +55,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -64,8 +68,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import com.oq.barnote.core.oqcore.util.formatThousands
 import kotlinx.coroutines.launch
 
@@ -124,6 +133,15 @@ fun OnboardingDialog(
             dismissOnClickOutside = false,
         ),
     ) {
+        // Compose Dialog 은 기본적으로 시스템바 inset 을 콘텐츠에 전달하지 않아 systemBarsPadding() 이
+        // 0 을 반환 → 하단 버튼이 네비게이션 바에 붙습니다. 다이얼로그 창을 edge-to-edge 로 만들어
+        // inset 을 살립니다(= iOS safe area 와 동등). 배경은 바 밑까지 채워지고 콘텐츠만 inset 됨.
+        val view = LocalView.current
+        SideEffect {
+            (view.parent as? DialogWindowProvider)?.window?.let { window ->
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+            }
+        }
         OnboardingContent(
             productCount = productCount,
             onDismiss = onDismiss,
@@ -167,6 +185,33 @@ private fun OnboardingContent(
 
     val accentGradient = listOf(accent, lerp(accent, accentSecondary, 0.5f))
 
+    // Compose 의 systemBarsPadding() 및 Dialog view 의 rootWindowInsets 는 Dialog 내부에서 0 을 반환하는
+    // 경우가 있어, edge-to-edge 로 설정된 Activity(decorView)의 실제 시스템바 inset 을 읽어 safe area 패딩으로 적용.
+    val view = LocalView.current
+    val density = LocalDensity.current
+    var topInset by remember { mutableStateOf(0.dp) }
+    var bottomInset by remember { mutableStateOf(0.dp) }
+    DisposableEffect(view) {
+        var ctx: android.content.Context? = view.context
+        while (ctx is android.content.ContextWrapper && ctx !is android.app.Activity) {
+            ctx = ctx.baseContext
+        }
+        val decor = (ctx as? android.app.Activity)?.window?.decorView
+        fun update() {
+            decor?.let { ViewCompat.getRootWindowInsets(it) }
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+                ?.let { bars ->
+                    topInset = with(density) { bars.top.toDp() }
+                    bottomInset = with(density) { bars.bottom.toDp() }
+                }
+        }
+        update()
+        val vto = decor?.viewTreeObserver
+        val listener = android.view.ViewTreeObserver.OnGlobalLayoutListener { update() }
+        vto?.addOnGlobalLayoutListener(listener)
+        onDispose { if (vto?.isAlive == true) vto.removeOnGlobalLayoutListener(listener) }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -191,7 +236,7 @@ private fun OnboardingContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .systemBarsPadding(),
+                .padding(top = topInset, bottom = bottomInset),
         ) {
             TopBar(
                 currentPage = pagerState.currentPage,
@@ -393,7 +438,10 @@ private fun OnboardingPageContent(
             Image(
                 painter = painterResource(page.image),
                 contentDescription = null,
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.Crop,
+                // 카드(가로 꽉 · 높이 420)를 빈틈없이 채움. Fit 은 portrait 이미지가 가로 패딩 한계에 걸리는
+                // 화면에서 위/아래 레터박스(여백)가 생겨, Crop 으로 채우고 넘치는 위/아래만 잘라낸다.
+                // clip(32) 이 채워진 이미지의 모서리를 둥글게 처리.
                 modifier = Modifier
                     .align(Alignment.Center)
                     .fillMaxWidth()
@@ -403,7 +451,20 @@ private fun OnboardingPageContent(
                         shape = RoundedCornerShape(32.dp),
                         spotColor = accentGradient.first().copy(alpha = 0.35f),
                     )
-                    .clip(RoundedCornerShape(32.dp)),
+                    .clip(RoundedCornerShape(32.dp))
+                    // iOS overlay(RoundedRectangle(32).stroke(흰색 그라데이션, 1.5)) 대응.
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.linearGradient(
+                            listOf(
+                                Color.White.copy(alpha = 0.85f),
+                                Color.White.copy(alpha = 0.15f),
+                                Color.White.copy(alpha = 0.05f),
+                                Color.White.copy(alpha = 0.45f),
+                            ),
+                        ),
+                        shape = RoundedCornerShape(32.dp),
+                    ),
             )
 
             if (page.id == 0) {
@@ -514,46 +575,6 @@ private fun BottomBar(
             )
         }
     }
-}
-
-/**
- * iOS `Text.lineLimit(1).minimumScaleFactor(minScaleFactor)` 의 Compose 등가물.
- *
- * Compose 1.8+ 의 `BasicText(autoSize = ...)` 가 현재 BOM(1.7.x)엔 없어 수동 구현:
- * [onTextLayout] 으로 한 줄에 넘치는지(`hasVisualOverflow`) 감지해 폰트를 단계적으로 줄이고,
- * 최소 [minScaleFactor] 배까지 축소합니다. 확정 크기를 찾기 전엔 [drawWithContent] 로 그리지 않아
- * 깜빡임을 방지합니다. [text] 가 바뀌면 다시 기본 크기에서 측정을 시작합니다.
- */
-@Composable
-private fun AutoResizeText(
-    text: String,
-    style: TextStyle,
-    modifier: Modifier = Modifier,
-    textAlign: TextAlign? = null,
-    minScaleFactor: Float = 0.5f,
-) {
-    val baseSizeSp = style.fontSize.value
-    val minSizeSp = baseSizeSp * minScaleFactor
-
-    var scaledSizeSp by remember(text, baseSizeSp) { mutableStateOf(baseSizeSp) }
-    var readyToDraw by remember(text, baseSizeSp) { mutableStateOf(false) }
-
-    Text(
-        text = text,
-        style = style.copy(fontSize = scaledSizeSp.sp),
-        textAlign = textAlign,
-        maxLines = 1,
-        softWrap = false,
-        modifier = modifier.drawWithContent { if (readyToDraw) drawContent() },
-        onTextLayout = { result ->
-            if (result.hasVisualOverflow && scaledSizeSp > minSizeSp) {
-                // 한 줄에 안 들어가면 10% 씩 축소 (최소 크기 하한).
-                scaledSizeSp = (scaledSizeSp * 0.9f).coerceAtLeast(minSizeSp)
-            } else {
-                readyToDraw = true
-            }
-        },
-    )
 }
 
 // region Spring 파라미터 (iOS spring(response:dampingFraction:) → Compose dampingRatio/stiffness)

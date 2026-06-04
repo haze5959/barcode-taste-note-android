@@ -245,12 +245,15 @@ private fun ProfileHeader(
                 imageVector = Icons.Filled.CameraAlt,
                 contentDescription = null,
                 tint = textPrimary,
+                // iOS camera.fill + .font(.caption2)(≈11pt) + padding 대응. Icon 기본 24dp 는 너무 커서
+                // 글리프를 12dp 로 줄임 → padding(8) 포함 약 28dp 원 (iOS 버튼 크기와 일치).
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .offset(x = Dimens.Padding, y = Dimens.Padding)
                     .clip(CircleShape)
                     .background(surfaceSecondary)
-                    .padding(Dimens.Padding),
+                    .padding(Dimens.Padding)
+                    .size(12.dp),
             )
         }
 

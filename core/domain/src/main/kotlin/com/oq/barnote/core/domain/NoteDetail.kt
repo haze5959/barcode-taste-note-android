@@ -24,7 +24,10 @@ enum class NoteDetail(val rawValue: Int) {
     Finish(6),
     Aromatic(7),
     Balance(8),
-    Feeling(9);
+    feeling(9);
+
+    /** 서버 details 맵의 키 (= rawValue). iOS `NoteDetail.id`(= rawValue) 에 대응. */
+    val id: Int get() = rawValue
 
     /** 감정. iOS `NoteDetail.Feeling` 에 대응. */
     @Serializable(with = FeelingSerializer::class)
@@ -73,7 +76,7 @@ enum class NoteDetail(val rawValue: Int) {
          * iOS `NoteDetail.details(for:)` 에 대응.
          */
         fun detailsFor(productType: ProductType): List<NoteDetail> {
-            val base = mutableSetOf(Sweetness, Body, Finish, Balance, Feeling)
+            val base = mutableSetOf(Sweetness, Body, Finish, Balance, feeling)
             when (productType) {
                 ProductType.Whisky -> base += listOf(Alcoholic, Aromatic)
                 ProductType.Wine -> base += listOf(Acidity, Tannin, Alcoholic, Aromatic)

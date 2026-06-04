@@ -352,7 +352,7 @@ fun NoteDetail.titleRes(): Int = when (this) {
     NoteDetail.Finish -> R.string.yeoun
     NoteDetail.Aromatic -> R.string.pungmi
     NoteDetail.Balance -> R.string.baelreonseu
-    NoteDetail.Feeling -> R.string.gamjeong
+    NoteDetail.feeling -> R.string.gamjeong
 }
 
 @StringRes
@@ -366,7 +366,7 @@ fun NoteDetail.detailRes(): Int? = when (this) {
     NoteDetail.Finish -> R.string.samkin_hu_ibane_namneun_masui_gili
     NoteDetail.Aromatic -> R.string.hyanggwa_masi_eolmana_gangryeolhanji
     NoteDetail.Balance -> R.string.masui_yosodeuli_eolmana_johwarounji
-    NoteDetail.Feeling -> null // iOS 도 빈 문자열
+    NoteDetail.feeling -> null // iOS 도 빈 문자열
 }
 
 @Composable

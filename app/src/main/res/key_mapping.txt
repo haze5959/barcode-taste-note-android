@@ -23,6 +23,7 @@ bakodeu_seukaenhagi ← 바코드 스캔하기
 bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar ← 바코드가 있는 제품이라면 바코드 스캔으로 더 빠르게 등록할 수 있습니다.
 bakodeuga_issneun_jepumiramyeon_bakodeu_seukaeneuro_deo_bbar_44a131 ← 바코드가 있는 제품이라면 바코드 스캔으로 더 빠르게 찾을 수 있습니다.
 bakodeureul_cajeul_su_eobsnayo ← 바코드를 찾을 수 없나요?
+bakodeureul_gaideu_yeongyeog_ane_majcwojuseyo ← 바코드를 가이드 영역 안에 맞춰주세요
 balhyo_jung_jeungryujureul_ceomgahae_dosureul_nopin_wain_pot ← 발효 중 증류주를 첨가해 도수를 높인 와인. 포트, 셰리가 대표적.
 banana_painaepeul_manggo_deung ← 바나나, 파인애플, 망고 등
 banhaebeorin ← 반해버린

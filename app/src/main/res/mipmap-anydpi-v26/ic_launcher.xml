@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- iOS AppIcon(Icon-1024, 어두운 그라데이션 + 골드 와인잔) 이식.
+     foreground 는 와인잔이 마스크 safe zone 에 안전하게 들어가도록 패딩한 합성 이미지.
+     background 는 아이콘 배경과 유사한 어두운색(아이콘이 불투명이라 대부분 가려지는 폴백). -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>
