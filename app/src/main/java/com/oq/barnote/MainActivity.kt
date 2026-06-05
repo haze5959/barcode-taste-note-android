@@ -36,6 +36,7 @@ import com.oq.barnote.core.oqcore.views.OQParticleEmitterHost
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import com.oq.barnote.ui.login.startAuth0Login
+import com.oq.barnote.ui.login.startAuth0Logout
 import com.oq.barnote.ui.navigation.AppNavigationNavEffect
 import com.oq.barnote.ui.navigation.AppNavigationUiEvent
 import com.oq.barnote.ui.navigation.AppNavigationViewModel
@@ -251,6 +252,14 @@ private fun AppRoot(
     LaunchedEffect(Unit) {
         appController.subscriptionRequestEvent.collect {
             navController.navigate(Destinations.SUBSCRIBE)
+        }
+    }
+
+    // iOS `Auth0.webAuth().clearSession()` — 로그아웃/탈퇴 시 Auth0 브라우저(SSO) 세션 종료.
+    // WebAuthProvider.logout 은 Activity 컨텍스트가 필요해 여기(Activity 보유)서 collect 해 실행.
+    LaunchedEffect(Unit) {
+        appController.logoutWebSessionEvent.collect {
+            (context as? Activity)?.let { activity -> startAuth0Logout(activity) }
         }
     }
 

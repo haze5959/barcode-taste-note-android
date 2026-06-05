@@ -6,6 +6,7 @@ import com.auth0.android.callback.Callback
 import com.auth0.android.provider.WebAuthProvider
 import com.auth0.android.result.Credentials
 import com.oq.barnote.Constants
+import com.oq.barnote.core.oqcore.utils.OQLog
 import dagger.hilt.android.EntryPointAccessors
 
 /**
@@ -43,6 +44,34 @@ internal fun startAuth0Login(
             override fun onFailure(error: AuthenticationException) {
                 if (error.isCanceled) onCancel()
                 else onError(error.message.orEmpty().ifBlank { error.getCode() })
+            }
+        })
+}
+
+/**
+ * Auth0 `WebAuthProvider.logout()` 호출 — 브라우저(SSO) 세션 종료. Activity 컨텍스트 필수.
+ *
+ * iOS `Auth0.webAuth().clearSession()` 대응. 로그아웃/탈퇴 시 `AppController.requestClearWebSession()` 이
+ * emit 한 이벤트를 `AppRoot` 가 collect 해 호출한다. (데이터 레이어는 Activity 가 없어 직접 호출 불가 —
+ * Application 컨텍스트로 호출하면 startActivity 가 실패해 세션이 정리되지 않았음.)
+ */
+internal fun startAuth0Logout(activity: Activity) {
+    val entryPoint = EntryPointAccessors.fromApplication(
+        activity.applicationContext,
+        LoginEntryPoint::class.java,
+    )
+    val auth0 = entryPoint.auth0()
+    val scheme = entryPoint.auth0Scheme()
+
+    WebAuthProvider.logout(auth0)
+        .withScheme(scheme)
+        .start(activity, object : Callback<Void?, AuthenticationException> {
+            override fun onSuccess(result: Void?) {
+                OQLog.i("Auth0 web session cleared")
+            }
+
+            override fun onFailure(error: AuthenticationException) {
+                OQLog.w("Auth0 web session clear failed: ${error.message}")
             }
         })
 }

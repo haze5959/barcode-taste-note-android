@@ -87,6 +87,16 @@ class AppController @Inject constructor() {
     val subscriptionRequestEvent: SharedFlow<Unit> = _subscriptionRequestEvent.asSharedFlow()
     // endregion
 
+    // region: Auth0 web session clear (iOS `Auth0.webAuth().clearSession()`)
+    private val _logoutWebSessionEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    /**
+     * iOS `Auth0.webAuth().clearSession()` 대응 — 로그아웃/탈퇴 시 Auth0 브라우저(SSO) 세션 종료 트리거.
+     * Android `WebAuthProvider.logout` 은 Activity 컨텍스트가 필요해 데이터 레이어가 직접 실행하지 못하므로,
+     * 이 이벤트를 emit → AppRoot(Activity 보유)가 collect 해 실행한다.
+     */
+    val logoutWebSessionEvent: SharedFlow<Unit> = _logoutWebSessionEvent.asSharedFlow()
+    // endregion
+
     /**
      * iOS `AppController.neededToRefresh` 와 동일. 외부 트리거(노트 등록/삭제 등)가
      * 홈 화면 등 캐시된 화면의 강제 새로고침이 필요할 때 true 로 설정.
@@ -158,5 +168,13 @@ class AppController @Inject constructor() {
      */
     fun requestSubscription() {
         _subscriptionRequestEvent.tryEmit(Unit)
+    }
+
+    /**
+     * Auth0 웹(브라우저) 세션 종료 요청. iOS `Auth0.webAuth().clearSession()` 대응.
+     * Activity 컨텍스트가 필요해 AppRoot 가 collect 해 `WebAuthProvider.logout` 을 실행한다.
+     */
+    fun requestClearWebSession() {
+        _logoutWebSessionEvent.tryEmit(Unit)
     }
 }

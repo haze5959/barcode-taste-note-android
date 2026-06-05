@@ -3,15 +3,14 @@ package com.oq.barnote.core.data.auth
 import android.content.Context
 import com.auth0.android.Auth0
 import com.auth0.android.authentication.AuthenticationAPIClient
-import com.auth0.android.authentication.AuthenticationException
 import com.auth0.android.authentication.storage.CredentialsManagerException
 import com.auth0.android.authentication.storage.SecureCredentialsManager
 import com.auth0.android.authentication.storage.SharedPreferencesStorage
 import com.auth0.android.callback.Callback
-import com.auth0.android.provider.WebAuthProvider
 import com.oq.barnote.core.data.di.ApplicationScope
 import com.oq.barnote.core.domain.AuthStore
 import com.oq.barnote.core.domain.Credentials
+import com.oq.barnote.core.oqcore.util.AppController
 import com.oq.barnote.core.oqcore.utils.OQLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
@@ -26,7 +25,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import com.auth0.android.result.Credentials as Auth0Credentials
@@ -57,9 +55,7 @@ class Auth0AuthStore @Inject constructor(
     @ApplicationContext private val context: Context,
     private val auth0: Auth0,
     @ApplicationScope private val appScope: CoroutineScope,
-    // 로그인(WebAuthProvider.login.withScheme)과 동일한 스킴으로 로그아웃 returnTo 도 맞춰야
-    // Allowed Logout URLs 가 일치한다. iOS Auth0.plist 의 커스텀 스킴에 대응.
-    @Named("auth0Scheme") private val auth0Scheme: String,
+    private val appController: AppController,
 ) : AuthStore {
 
     private val credentialsManager: SecureCredentialsManager by lazy {
@@ -202,8 +198,10 @@ class Auth0AuthStore @Inject constructor(
         }
         _isLoggedIn.value = false
         if (clearWebSession) {
-            runCatching { clearWebAuthSession() }
-                .onFailure { OQLog.w("Auth0 clearSession error: $it") }
+            // Auth0 웹(브라우저) 세션 종료는 Activity 컨텍스트가 필요 → AppRoot 가 collect 해 실행.
+            // (Application 컨텍스트로 WebAuthProvider.logout 을 호출하면 startActivity 가 실패해
+            //  세션이 실제로 정리되지 않았던 버그 — iOS clearSession 과 달리 Android 는 Activity 필수.)
+            appController.requestClearWebSession()
         }
     }
 
@@ -255,20 +253,6 @@ class Auth0AuthStore @Inject constructor(
         // hasValidCredentials 사전 분기에서 이미 걸러져 여기로 오지 않는다.
         OQLog.w("Auth0 credentials invalid, clearing session: $e")
         clear(clearWebSession = false)
-    }
-
-    private suspend fun clearWebAuthSession() = suspendCancellableCoroutine<Unit> { cont ->
-        WebAuthProvider.logout(auth0)
-            .withScheme(auth0Scheme)
-            .start(context, object : Callback<Void?, AuthenticationException> {
-                override fun onSuccess(result: Void?) {
-                    if (cont.isActive) cont.resume(Unit)
-                }
-
-                override fun onFailure(error: AuthenticationException) {
-                    if (cont.isActive) cont.resume(Unit)
-                }
-            })
     }
 
     // endregion
