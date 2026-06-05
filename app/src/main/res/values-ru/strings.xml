@@ -106,7 +106,7 @@
     <string name="eoneo_seoljeong">Настройки языка</string>
     <string name="eosi">Землистый</string>
     <string name="eseupeureso">Эспрессо</string>
-    <string name="gae">ХХХ</string>
+    <string name="gae">%s</string>
     <string name="gae_1f31b2">шт.</string>
     <string name="gae_jepum_deungrog">зарегистрировано %s продуктов</string>
     <string name="gaeinjeongbo_ceoribangcim">Политика конфиденциальности</string>
@@ -342,7 +342,7 @@
     <string name="mweol_dil_e_a_h_mm">d MMM (E) HH:mm</string>
     <string name="nae_jeongbo">Моя информация</string>
     <string name="nae_noteu">Мои заметки</string>
-    <string name="nae_noteu_lld">Мои заметки (ХХХ)</string>
+    <string name="nae_noteu_lld">Мои заметки (%d)</string>
     <string name="nae_noteuwa_jeulgyeocajneun_jepum_gongyu">Делитесь заметками и любимыми продуктами</string>
     <string name="nae_pideu">Моя лента</string>
     <string name="naebonaegi">Экспорт</string>
