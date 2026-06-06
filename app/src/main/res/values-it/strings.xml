@@ -576,4 +576,5 @@ Sei sicuro di voler chiudere?</string>
     <string name="gumae_bogwon">Ripristina acquisti</string>
     <string name="ibu_annae">Informazioni IBU</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Per annullare una prenotazione, tocca il pulsante di eliminazione.</string>
+    <string name="beonyeog_risoseu_daunrodeu_annae">Download delle risorse di traduzione. Potrebbe richiedere del tempo al primo avvio.</string>
 </resources>

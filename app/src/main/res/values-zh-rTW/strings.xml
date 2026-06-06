@@ -576,4 +576,5 @@ AI 將分析標籤並提取資訊。</string>
     <string name="gumae_bogwon">還原購買</string>
     <string name="ibu_annae">IBU 說明</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">若要取消預約，請點選刪除按鈕。</string>
+    <string name="beonyeog_risoseu_daunrodeu_annae">正在下載翻譯資源。首次運行時可能需要一些時間。</string>
 </resources>

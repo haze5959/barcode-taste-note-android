@@ -47,6 +47,38 @@ class MyPageViewModel @Inject constructor(
                     if (!_uiState.value.isLoading) checkLogin()
                 }
         }
+
+        // 즐겨찾는 제품 ID 변경 사항을 실시간 동기화
+        viewModelScope.launch {
+            userStore.favoriteProductIds.collect { favoriteIds ->
+                _uiState.update { it.copy(favoriteCount = favoriteIds.size) }
+            }
+        }
+
+        // 작성한 테이스팅 노트 개수 실시간 동기화
+        viewModelScope.launch {
+            userStore.noteCount.collect { count ->
+                _uiState.update { it.copy(noteCount = count) }
+            }
+        }
+
+        // 리뷰 작성 필요 상품 여부 실시간 동기화
+        viewModelScope.launch {
+            userStore.neededReviewProduct.collect { needed ->
+                if (needed != null) {
+                    _uiState.update { it.copy(neededReviewProduct = needed) }
+                }
+            }
+        }
+
+        // 팔로워 수 실시간 동기화
+        viewModelScope.launch {
+            userStore.followerCount.collect { count ->
+                if (count != null) {
+                    _uiState.update { it.copy(followerCount = count) }
+                }
+            }
+        }
     }
 
     fun onEvent(event: MyPageUiEvent) {

@@ -166,7 +166,7 @@ private fun Grid(state: ProductListUiState, onEvent: (ProductListUiEvent) -> Uni
     val columns = if (isSmall) {
         GridCells.Adaptive(minSize = Dimens.SmallRowWSize)
     } else {
-        GridCells.Adaptive(minSize = Dimens.RowWSize)
+        GridCells.Adaptive(minSize = Dimens.GridMinWSize)
     }
     val spacing = if (isSmall) 2.dp else Dimens.Spacing
     val surfacePrimary = colorResource(com.oq.barnote.core.designsystem.R.color.surface_primary)

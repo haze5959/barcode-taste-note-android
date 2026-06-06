@@ -231,9 +231,23 @@ internal fun NoteDetailScreen(
 
     if (state.isTranslating) {
         Box(
-            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)),
+            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)),
             contentAlignment = Alignment.Center,
-        ) { CircularProgressIndicator() }
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CircularProgressIndicator()
+                Text(
+                    text = stringResource(R.string.beonyeog_risoseu_daunrodeu_annae),
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
+        }
     }
 
     // 공유 시트 — oqcore 공통 rememberOQShareManager() 로 ShareManager 가져옴.
