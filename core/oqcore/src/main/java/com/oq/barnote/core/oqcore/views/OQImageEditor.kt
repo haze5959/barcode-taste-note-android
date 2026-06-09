@@ -6,6 +6,13 @@ import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
+import androidx.compose.foundation.gestures.calculateCentroidSize
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateRotation
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -57,7 +64,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -150,6 +159,7 @@ private fun OQImageEditorContent(
     var imageFrame by remember { mutableStateOf(Rect.Zero) }
     var cropRect by remember { mutableStateOf(Rect.Zero) }
     var isInitialized by remember { mutableStateOf(false) }
+    var resetTrigger by remember { mutableStateOf(0) }
 
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -412,8 +422,8 @@ private fun OQImageEditorContent(
             val widthPx = with(density) { maxWidth.toPx() }
             val heightPx = with(density) { maxHeight.toPx() }
 
-            // 컨테이너 사이즈 / 비트맵 변경시 imageFrame + cropRect 재계산.
-            LaunchedEffect(widthPx, heightPx, currentBitmap) {
+            // 컨테이너 사이즈 / 비트맵 / 리셋 트리거 변경시 imageFrame + cropRect 재계산.
+            LaunchedEffect(widthPx, heightPx, currentBitmap, resetTrigger) {
                 containerSize = Size(widthPx, heightPx)
                 updateInitialFrame()
             }
@@ -422,12 +432,18 @@ private fun OQImageEditorContent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .pointerInput(currentBitmap) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(0.5f, 8f)
-                            offsetX += pan.x
-                            offsetY += pan.y
-                        }
+                    .pointerInput(currentBitmap, cropRect) {
+                        val handleTapPx = 60.dp.toPx()
+                        detectTransformGesturesCustom(
+                            onGesture = { _, pan, zoom, _ ->
+                                scale = (scale * zoom).coerceIn(0.5f, 8f)
+                                offsetX += pan.x
+                                offsetY += pan.y
+                            },
+                            shouldStart = { downPosition ->
+                                !isTouchInCropOrHandles(downPosition, cropRect, handleTapPx)
+                            }
+                        )
                     }
                     .pointerInput(currentBitmap) {
                         detectTapGestures(
@@ -551,6 +567,7 @@ private fun OQImageEditorContent(
                     offsetY = 0f
                     aspectRatio = EditorAspectRatio.Free
                     isInitialized = false
+                    resetTrigger++
                 },
             )
         }
@@ -608,7 +625,7 @@ private fun CropBoxOverlay(
                 width = with(density) { cropRect.width.toDp() },
                 height = with(density) { cropRect.height.toDp() },
             )
-            .pointerInput(Unit) {
+            .pointerInput(cropRect) {
                 detectDragGestures(
                     onDragStart = {
                         moveInitial = cropRect
@@ -690,7 +707,7 @@ private fun CornerHandle(
                 )
             }
             .size(tapSizeDp)
-            .pointerInput(Unit) {
+            .pointerInput(corner, cropRect) {
                 detectDragGestures(
                     onDragStart = {
                         initial = cropRect
@@ -786,3 +803,83 @@ private fun renderCroppedBitmap(
 
     Bitmap.createBitmap(bitmap, x, y, safeW, safeH)
 }.getOrNull()
+
+private fun isTouchInCropOrHandles(downOffset: Offset, cropRect: Rect, handleTapPx: Float): Boolean {
+    if (cropRect.width <= 0f || cropRect.height <= 0f) return false
+
+    // 1. 코너 핸들 터치 영역 검사
+    val halfTap = handleTapPx / 2f
+    val corners = listOf(
+        Offset(cropRect.left, cropRect.top),
+        Offset(cropRect.right, cropRect.top),
+        Offset(cropRect.left, cropRect.bottom),
+        Offset(cropRect.right, cropRect.bottom)
+    )
+    for (corner in corners) {
+        val dist = (downOffset - corner).getDistance()
+        if (dist <= halfTap) return true
+    }
+
+    // 2. 크롭 박스 내부 영역 검사
+    return cropRect.contains(downOffset)
+}
+
+private suspend fun PointerInputScope.detectTransformGesturesCustom(
+    onGesture: (centroid: Offset, pan: Offset, zoom: Float, rotation: Float) -> Unit,
+    shouldStart: (Offset) -> Boolean,
+) {
+    awaitEachGesture {
+        var rotation = 0f
+        var zoom = 1f
+        var pan = Offset.Zero
+        var pastTouchSlop = false
+        val touchSlop = viewConfiguration.touchSlop
+
+        val down = awaitFirstDown(requireUnconsumed = false)
+        if (!shouldStart(down.position)) {
+            return@awaitEachGesture
+        }
+
+        do {
+            val event = awaitPointerEvent()
+            val canceled = event.changes.any { it.isConsumed }
+            if (!canceled) {
+                val zoomChange = event.calculateZoom()
+                val rotationChange = event.calculateRotation()
+                val panChange = event.calculatePan()
+
+                if (!pastTouchSlop) {
+                    zoom *= zoomChange
+                    rotation += rotationChange
+                    pan += panChange
+
+                    val centroidSize = event.calculateCentroidSize(useCurrent = false)
+                    val zoomMotion = kotlin.math.abs(1 - zoom) * centroidSize
+                    val rotationMotion = kotlin.math.abs(rotation * min(size.width, size.height))
+                    val panMotion = pan.getDistance()
+
+                    if (zoomMotion > touchSlop ||
+                        rotationMotion > touchSlop ||
+                        panMotion > touchSlop
+                    ) {
+                        pastTouchSlop = true
+                    }
+                }
+
+                if (pastTouchSlop) {
+                    val centroid = event.calculateCentroid(useCurrent = false)
+                    if (zoomChange != 1f ||
+                        panChange != Offset.Zero
+                    ) {
+                        onGesture(centroid, panChange, zoomChange, 0f)
+                    }
+                    event.changes.forEach {
+                        if (it.positionChanged()) {
+                            it.consume()
+                        }
+                    }
+                }
+            }
+        } while (!canceled && event.changes.any { it.pressed })
+    }
+}

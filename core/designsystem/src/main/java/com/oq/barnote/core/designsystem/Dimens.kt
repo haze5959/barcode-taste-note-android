@@ -32,7 +32,8 @@ object Dimens {
     val FabHSize = 48.dp
 
     // Row sizes
-    val SmallRowWSize = 120.dp
+    val SmallRowWSize = 100.dp
     val RowWSize = 180.dp
     val RowHSize = 210.dp
+    val GridMinWSize = 150.dp
 }

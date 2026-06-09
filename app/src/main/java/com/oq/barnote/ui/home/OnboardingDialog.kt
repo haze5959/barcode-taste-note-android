@@ -352,7 +352,7 @@ private fun TopBar(
             .padding(
                 start = Dimens.BtnPadding,
                 end = Dimens.BtnPadding,
-                top = Dimens.Spacing,
+                top = 8.dp,
                 bottom = Dimens.Padding,
             ),
         verticalAlignment = Alignment.CenterVertically,
@@ -568,7 +568,7 @@ private fun BottomBar(
             .padding(
                 start = Dimens.BtnPadding,
                 end = Dimens.BtnPadding,
-                bottom = Dimens.BtnPadding,
+                bottom = 8.dp,
             ),
     ) {
         Row(

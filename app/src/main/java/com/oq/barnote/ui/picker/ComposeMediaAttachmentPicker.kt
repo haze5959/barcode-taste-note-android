@@ -200,16 +200,18 @@ fun rememberComposeMediaAttachmentPicker(): MediaAttachmentPicker {
                 imageBytes = head.data,
                 palette = barNotePalette(),
                 onComplete = { editedBytes ->
-                    val edited = editedBytes?.let {
-                        head.copy(id = UUID.randomUUID().toString(), data = it)
-                    } ?: head // 사용자가 취소한 경우 원본 유지.
-                    val nextSoFar = editedSoFar + edited
-                    val rest = editingQueue.drop(1)
-                    if (rest.isEmpty()) {
-                        completeWith(nextSoFar)
+                    if (editedBytes == null) {
+                        completeWith(emptyList())
                     } else {
-                        editedSoFar = nextSoFar
-                        editingQueue = rest
+                        val edited = head.copy(id = UUID.randomUUID().toString(), data = editedBytes)
+                        val nextSoFar = editedSoFar + edited
+                        val rest = editingQueue.drop(1)
+                        if (rest.isEmpty()) {
+                            completeWith(nextSoFar)
+                        } else {
+                            editedSoFar = nextSoFar
+                            editingQueue = rest
+                        }
                     }
                 },
             )

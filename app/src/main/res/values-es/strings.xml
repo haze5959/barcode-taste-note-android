@@ -576,4 +576,5 @@ escribe tus propias notas de cata</string>
     <string name="gumae_bogwon">Restaurar compras</string>
     <string name="ibu_annae">Información de IBU</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Para cancelar una reserva, pulsa el botón de eliminar.</string>
+    <string name="beonyeog_risoseu_daunrodeu_annae">Descargando recursos de traducción. Puede llevar algún tiempo en la primera ejecución.</string>
 </resources>

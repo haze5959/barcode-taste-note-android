@@ -574,6 +574,7 @@ Möchten Sie wirklich schließen?</string>
     <string name="gaelreori">Galerie</string>
     <string name="kamera">Kamera</string>
     <string name="gumae_bogwon">Käufe wiederherstellen</string>
+    <string name="beonyeog_risoseu_daunrodeu_annae">Übersetzungsressourcen werden heruntergeladen. Der erste Start kann einige Zeit dauern.</string>
     <string name="ibu_annae">IBU-Info</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Um eine Reservierung abzubrechen, tippen Sie auf die Löschen-Schaltfläche.</string>
 </resources>

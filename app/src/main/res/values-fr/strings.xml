@@ -576,4 +576,5 @@ rédigez vos propres notes de dégustation</string>
     <string name="gumae_bogwon">Restaurer les achats</string>
     <string name="ibu_annae">À propos de l\'IBU</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Pour annuler une réservation, appuyez sur le bouton de suppression.</string>
+    <string name="beonyeog_risoseu_daunrodeu_annae">Téléchargement des ressources de traduction. Cela peut prendre un certain temps lors de la première exécution.</string>
 </resources>

@@ -354,7 +354,7 @@ private fun SearchResultGrid(
     LazyVerticalGrid(
         state = listState,
         columns = if (state.isListView) GridCells.Fixed(1)
-        else GridCells.Adaptive(minSize = Dimens.RowWSize),
+        else GridCells.Adaptive(minSize = Dimens.GridMinWSize),
         verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
         horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
         contentPadding = PaddingValues(

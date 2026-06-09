@@ -541,7 +541,7 @@ private fun FavoritesPanel(
     // ProfileHeader·Divider·탭·타입필터를 그리드의 선두 full-span item 으로 둬, 제품 그리드와 함께
     // 전체가 스크롤되게 한다 (iOS ScrollView { VStack { ... } } 와 동일).
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = Dimens.RowWSize),
+        columns = GridCells.Adaptive(minSize = Dimens.GridMinWSize),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = Dimens.Padding,

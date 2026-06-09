@@ -576,4 +576,5 @@ AIがラベルを分析して情報を抽出します。</string>
     <string name="gumae_bogwon">購入を復元</string>
     <string name="ibu_annae">IBU について</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">予約をキャンセルするには削除ボタンを押してください。</string>
+    <string name="beonyeog_risoseu_daunrodeu_annae">翻訳リソースをダウンロードしています。初回起動時は少し時間がかかる場合があります。</string>
 </resources>

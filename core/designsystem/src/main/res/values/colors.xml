@@ -10,8 +10,8 @@
     <color name="surface_primary">#FFFFFF</color>
     <color name="surface_secondary">#F0EEEA</color>
     <!-- iOS 탭바 `.ultraThinMaterial`(프로스티드 글래스) 근사 — 반투명 흰 틴트.
-         Android엔 블러 머티리얼이 없어 알파 fill로 근사(콘텐츠가 비치는 유리 느낌). 알파 0.70. -->
-    <color name="tabbar_background">#B3FFFFFF</color>
+         Android엔 블러 머티리얼이 없어 알파 fill로 근사(콘텐츠가 비치는 유리 느낌). 알파 0.90. -->
+    <color name="tabbar_background">#E6FFFFFF</color>
     <color name="text_primary">#18181C</color>
     <color name="text_secondary">#6F6F78</color>
 </resources>

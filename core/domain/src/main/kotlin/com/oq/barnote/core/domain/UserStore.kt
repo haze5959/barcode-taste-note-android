@@ -50,6 +50,8 @@ interface UserStore {
 
     // region 즐겨찾기 ------------------------------------------------------
 
+    val favoriteProductIds: StateFlow<Set<String>>
+
     suspend fun getFavoriteProductIds(): Set<String>
 
     suspend fun renewFavoriteProductIds(): Set<String>

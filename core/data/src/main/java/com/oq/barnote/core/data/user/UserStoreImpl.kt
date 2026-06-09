@@ -72,6 +72,9 @@ class UserStoreImpl @Inject constructor(
     private val _followerCount = MutableStateFlow<Int?>(null)
     override val followerCount: StateFlow<Int?> = _followerCount.asStateFlow()
 
+    private val _favoriteProductIds = MutableStateFlow<Set<String>>(emptySet())
+    override val favoriteProductIds: StateFlow<Set<String>> = _favoriteProductIds.asStateFlow()
+
     // endregion
 
     // region User ---------------------------------------------------------
@@ -112,14 +115,16 @@ class UserStoreImpl @Inject constructor(
             result.fold(
                 onSuccess = { myPage ->
                     val info = myPage.myInfo
+                    val productIdsSet = myPage.productIds.toSet()
                     // 캐시 갱신은 mutex 안에서.
                     mutex.withLock {
                         cachedUser = info.user
-                        cachedFavoriteProductIds = myPage.productIds.toSet()
+                        cachedFavoriteProductIds = productIdsSet
                     }
                     _noteCount.value = info.noteCount
                     _neededReviewProduct.value = info.neededReviewProduct
                     _followerCount.value = info.followerCount
+                    _favoriteProductIds.value = productIdsSet
                     info.user
                 },
                 onFailure = {
@@ -153,6 +158,7 @@ class UserStoreImpl @Inject constructor(
         _noteCount.value = 0
         _neededReviewProduct.value = null
         _followerCount.value = null
+        _favoriteProductIds.value = emptySet()
     }
 
     // endregion
@@ -215,6 +221,7 @@ class UserStoreImpl @Inject constructor(
                 onSuccess = { ids ->
                     val set = ids.toSet()
                     mutex.withLock { cachedFavoriteProductIds = set }
+                    _favoriteProductIds.value = set
                     set
                 },
                 onFailure = {
@@ -236,13 +243,17 @@ class UserStoreImpl @Inject constructor(
 
     override suspend fun addFavoriteProductId(productId: String) {
         mutex.withLock {
-            cachedFavoriteProductIds = (cachedFavoriteProductIds ?: emptySet()) + productId
+            val updated = (cachedFavoriteProductIds ?: emptySet()) + productId
+            cachedFavoriteProductIds = updated
+            _favoriteProductIds.value = updated
         }
     }
 
     override suspend fun removeFavoriteProductId(productId: String) {
         mutex.withLock {
-            cachedFavoriteProductIds = cachedFavoriteProductIds?.minus(productId)
+            val updated = cachedFavoriteProductIds?.minus(productId) ?: emptySet()
+            cachedFavoriteProductIds = updated
+            _favoriteProductIds.value = updated
         }
     }
 
