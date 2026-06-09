@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,10 +83,9 @@ fun UserRow(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
         ) {
-            Text(
+            AutoResizeText(
                 text = userInfo.user.nickName,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = textPrimary,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, color = textPrimary),
                 maxLines = 1,
             )
             userInfo.user.intro?.takeIf { it.isNotEmpty() }?.let { intro ->

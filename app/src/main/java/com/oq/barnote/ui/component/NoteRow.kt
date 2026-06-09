@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -114,7 +115,7 @@ fun NoteRow(
                             .align(Alignment.BottomStart)
                             .padding(Dimens.Padding),
                     ) {
-                        Text(
+                        AutoResizeText(
                             text = info.product.name,
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Bold,

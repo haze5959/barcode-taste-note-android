@@ -121,12 +121,13 @@ fun NoteFlavorSelector(
                     ) {
                         AutoResizeText(
                             text = flavor.title(),
-                            // iOS NoteFlavorSelectorView: lineLimit(1) + minimumScaleFactor(0.5) (B7)
+                            // iOS NoteFlavorSelectorView: lineLimit(1) + minimumScaleFactor(0.3) — 러시아어 등
+                            // 긴 향미명이 잘리지 않도록 더 작게(0.3)까지 축소 허용 (iOS 커밋과 동일).
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Medium,
                                 color = if (isSelected) accent else textPrimary,
                             ),
-                            minScaleFactor = 0.5f,
+                            minScaleFactor = 0.3f,
                             modifier = Modifier.weight(1f),
                         )
                         if (isSelected) {

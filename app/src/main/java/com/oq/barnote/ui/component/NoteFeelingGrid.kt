@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,11 +90,13 @@ fun NoteFeelingGrid(
                             // iOS: .font(.system(size: iconSize)) — titleLarge 가 아닌 아이콘 크기에 맞춤 (B4).
                             style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
                         )
-                        Text(
+                        AutoResizeText(
                             text = feeling.desc(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (isSelected) accent else secondary,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = if (isSelected) accent else secondary,
+                            ),
                             maxLines = 1,
+                            minScaleFactor = 0.3f,
                         )
                     }
                 }

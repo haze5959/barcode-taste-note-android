@@ -1,6 +1,7 @@
 package com.oq.barnote.ui.home
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -11,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -75,16 +77,22 @@ import androidx.core.view.WindowInsetsCompat
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.component.AutoResizeText
+import com.oq.barnote.core.oqcore.ui.component.OQLoopingVideoView
 import com.oq.barnote.core.oqcore.util.formatThousands
 import kotlinx.coroutines.launch
 
 private data class OnboardingPage(
     val id: Int,
     val accentEmoji: String,
-    @DrawableRes val image: Int,
     @StringRes val titleRes: Int,
     @StringRes val subtitleRes: Int,
     @StringRes val descriptionRes: Int,
+    /** 정지 이미지 페이지 (video 와 둘 중 하나만 설정). */
+    @DrawableRes val image: Int? = null,
+    /** 루프 영상 페이지 (res/raw). iOS onboarding_03 데이터셋(mp4) 대응. */
+    @RawRes val video: Int? = null,
+    /** 영상 원본 가로/세로 비율 — 왜곡 없이 표시하기 위함. */
+    val videoAspectRatio: Float = 1f,
 )
 
 private val onboardingPages = listOf(
@@ -107,7 +115,9 @@ private val onboardingPages = listOf(
     OnboardingPage(
         id = 2,
         accentEmoji = "🍻",
-        image = R.drawable.onboarding_03,
+        // iOS onboarding_03 데이터셋 영상(원본 332×720 비율)을 음소거 루프로 재생.
+        video = R.raw.onboarding_03,
+        videoAspectRatio = 332f / 720f,
         titleRes = R.string.taiping_geumanhago_han_mogeum_masiseyo,
         subtitleRes = R.string.byeoljeomman_kog_geuggangui_dansunham_nuguna_swibgo_gabyeobg,
         descriptionRes = R.string.jigeumeun_jarireul_jeulgiseyo_masyeobon_jepumeuro_deungrogha,
@@ -435,37 +445,52 @@ private fun OnboardingPageContent(
                     ),
             )
 
-            Image(
-                painter = painterResource(page.image),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                // 카드(가로 꽉 · 높이 420)를 빈틈없이 채움. Fit 은 portrait 이미지가 가로 패딩 한계에 걸리는
-                // 화면에서 위/아래 레터박스(여백)가 생겨, Crop 으로 채우고 넘치는 위/아래만 잘라낸다.
-                // clip(32) 이 채워진 이미지의 모서리를 둥글게 처리.
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth()
-                    .height(420.dp)
-                    .shadow(
-                        elevation = 25.dp,
-                        shape = RoundedCornerShape(32.dp),
-                        spotColor = accentGradient.first().copy(alpha = 0.35f),
-                    )
-                    .clip(RoundedCornerShape(32.dp))
-                    // iOS overlay(RoundedRectangle(32).stroke(흰색 그라데이션, 1.5)) 대응.
-                    .border(
-                        width = 1.5.dp,
-                        brush = Brush.linearGradient(
-                            listOf(
-                                Color.White.copy(alpha = 0.85f),
-                                Color.White.copy(alpha = 0.15f),
-                                Color.White.copy(alpha = 0.05f),
-                                Color.White.copy(alpha = 0.45f),
-                            ),
+            // iOS mediaContent — 이미지/영상 공통 카드 스타일(그림자·라운드·테두리)에 미디어만 교체.
+            val cardDecoration = Modifier
+                .shadow(
+                    elevation = 25.dp,
+                    shape = RoundedCornerShape(32.dp),
+                    spotColor = accentGradient.first().copy(alpha = 0.35f),
+                )
+                .clip(RoundedCornerShape(32.dp))
+                // iOS overlay(RoundedRectangle(32).stroke(흰색 그라데이션, 1.5)) 대응.
+                .border(
+                    width = 1.5.dp,
+                    brush = Brush.linearGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.85f),
+                            Color.White.copy(alpha = 0.15f),
+                            Color.White.copy(alpha = 0.05f),
+                            Color.White.copy(alpha = 0.45f),
                         ),
-                        shape = RoundedCornerShape(32.dp),
                     ),
-            )
+                    shape = RoundedCornerShape(32.dp),
+                )
+
+            if (page.video != null) {
+                // 영상은 원본 비율(aspectRatio)로 fit — iOS .aspectRatio(_, .fit) 대응(세로 영상이 카드 안에 들어옴).
+                OQLoopingVideoView(
+                    rawResId = page.video,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .height(420.dp)
+                        .aspectRatio(page.videoAspectRatio)
+                        .then(cardDecoration),
+                )
+            } else if (page.image != null) {
+                Image(
+                    painter = painterResource(page.image),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    // 카드(가로 꽉 · 높이 420)를 빈틈없이 채움. Fit 은 portrait 이미지가 가로 패딩 한계에 걸리는
+                    // 화면에서 위/아래 레터박스(여백)가 생겨, Crop 으로 채우고 넘치는 위/아래만 잘라낸다.
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .height(420.dp)
+                        .then(cardDecoration),
+                )
+            }
 
             if (page.id == 0) {
                 val display = if (productCount > 0) productCount.formatThousands() else "00,000"

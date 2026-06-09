@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,12 +69,12 @@ fun ProductListRow(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
             ) {
-                Text(
+                AutoResizeText(
                     text = info.product.name,
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.SemiBold,
+                        color = textPrimary,
                     ),
-                    color = textPrimary,
                     maxLines = 2,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(Dimens.Padding)) {

@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +80,7 @@ fun SubscriptionPromotionRow(
                     color = Color.White.copy(alpha = 0.85f),
                 ),
             )
-            Text(
+            AutoResizeText(
                 text = stringResource(R.string.premium_subscription_description),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color.White,

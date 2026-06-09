@@ -53,6 +53,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -294,14 +295,14 @@ private fun TopBar(
         )
         // 제목은 back·우측 아이콘 사이 남는 공간만 차지(weight) + 길면 … 처리.
         // weight/ellipsis 가 없으면 긴 제목이 우측 버튼을 화면 밖으로 밀어낸다.
-        Text(
+        AutoResizeText(
             text = title,
             style = MaterialTheme.typography.titleMedium.copy(
                 color = textPrimary,
                 fontWeight = FontWeight.Bold,
             ),
             maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            minScaleFactor = 0.6f,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier
                 .weight(1f)

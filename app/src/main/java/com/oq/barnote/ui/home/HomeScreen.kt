@@ -198,14 +198,13 @@ private fun BarcodeScanCta(
             ) {
                 // iOS 의 .layoutPriority(1) 대응 — 타이틀이 폭을 우선 차지. weight(fill=false) 라 짧을 땐
                 // 본문 폭만 쓰고 우측을 비워 좌측 정렬이 되고, 좁으면 2줄/생략으로 줄어든다.
-                Text(
+                AutoResizeText(
                     text = stringResource(R.string.bakodeu_seukaenhagi),
                     style = MaterialTheme.typography.titleMedium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                     ),
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
 
