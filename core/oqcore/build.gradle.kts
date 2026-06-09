@@ -53,6 +53,9 @@ dependencies {
     // Chrome Custom Tabs (OQSafariView). iOS `SFSafariViewController` 대응.
     implementation(libs.androidx.browser)
 
+    // 온보딩 등 루프 영상 재생(OQLoopingVideoView) — MediaPlayer+TextureView 직접 렌더 깨짐 방지용 ExoPlayer.
+    implementation(libs.media3.exoplayer)
+
     // Kakao SDK (카카오톡 공유). iOS `KakaoSDKShare` 대응.
     implementation(libs.kakao.share)
 }

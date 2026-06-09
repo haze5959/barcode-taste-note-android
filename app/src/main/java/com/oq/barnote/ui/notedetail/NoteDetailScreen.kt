@@ -77,6 +77,7 @@ import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.designsystem.component.AutoResizeText
 import com.oq.barnote.core.designsystem.component.InfoPopOver
 import com.oq.barnote.core.designsystem.component.RatingView
+import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.Flavor
 import com.oq.barnote.core.domain.NoteDetail
 import com.oq.barnote.core.domain.NoteInfo
@@ -88,6 +89,7 @@ import com.oq.barnote.core.domain.PublicScope
 import com.oq.barnote.extension.detail
 import com.oq.barnote.extension.shareUrl
 import com.oq.barnote.extension.title
+import com.oq.barnote.ui.component.BTNGridImages
 import com.oq.barnote.ui.component.BTNImage
 import com.oq.barnote.ui.component.EmptyStateView
 import com.oq.barnote.ui.component.ZoomableImageViewer
@@ -464,10 +466,12 @@ private fun HeroSection(
             .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(Dimens.Radius))
             .shadow(elevation = 10.dp, shape = RoundedCornerShape(Dimens.Radius), clip = false),
     ) {
-        BTNImage(
-            path = info.displayImageIds.firstOrNull(),
+        // iOS NoteDetailView.heroSection — OQGridImagesView(pathArr: displayImageIds) 와 동일.
+        // 이미지가 여러 개면 NoteDetailRow 처럼 그리드(분할)로, 1 개면 단일 이미지로 표시.
+        BTNGridImages(
+            paths = info.displayImageIds,
             modifier = Modifier.fillMaxSize(),
-            cornerRadius = 0.dp,
+            fallbackIcon = info.product.type.icon(),
         )
         // 하단 그라디언트
         Box(

@@ -62,6 +62,7 @@ import com.oq.barnote.ui.component.SettingsDivider
 import com.oq.barnote.ui.component.SettingsRow
 import com.oq.barnote.ui.component.SettingsSection
 import com.oq.barnote.ui.component.SettingsSwitch
+import com.oq.barnote.ui.permission.rememberNotificationPermission
 import com.oq.barnote.core.oqcore.util.shareFile
 import com.oq.barnote.core.oqcore.views.OQSafariView
 
@@ -77,8 +78,18 @@ fun SettingsRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // iOS `SettingsFeature.swift:59-63` onAppear — 화면이 앞으로 올 때마다(최초 진입 포함, 시스템
-    // 설정에서 알림을 변경하고 복귀하는 경우 포함) 실제 OS 알림 권한과 토글 상태를 동기화.
+    // iOS `SettingsFeature.onAppear` 의 `requestAuthorization()` 대응 — 최초 진입 시 알림 권한을 요청한다
+    // (미결정이면 시스템 다이얼로그 표시). iOS 와 동일하게 로그인 여부와 무관. 권한 결과는 아래 OnResume
+    // reconcile 이 토글 상태(isNotificationEnabled)에 반영한다 — 허용 시 ON 으로 설정됨.
+    val notificationPermission = rememberNotificationPermission(
+        onResult = { viewModel.onEvent(SettingsUiEvent.OnResume) },
+    )
+    LaunchedEffect(Unit) {
+        notificationPermission.requestIfNeeded()
+    }
+
+    // 화면이 앞으로 올 때마다(최초 진입 포함, 시스템 설정에서 알림 변경 후 복귀 포함) 실제 OS 알림 권한과
+    // 토글 상태를 동기화. iOS `SettingsFeature.swift:59-63` 대응.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.onEvent(SettingsUiEvent.OnResume)
     }

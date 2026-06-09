@@ -1,6 +1,7 @@
 package com.oq.barnote.ui.picker
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
@@ -196,6 +197,9 @@ fun rememberComposeMediaAttachmentPicker(): MediaAttachmentPicker {
     val head = editingQueue.firstOrNull()
     if (head != null) {
         key(head.id) {
+            // 이미지 편집 중에는 시스템 스와이프(예측형) 뒤로가기를 막는다 — 실수로 편집이 사라지지 않도록
+            // 취소/완료 버튼으로만 종료. (이 블록은 편집 중일 때만 컴포즈되어 그때만 back 을 가로챔)
+            BackHandler { /* 무시: 뒤로가기 차단 */ }
             OQImageEditor(
                 imageBytes = head.data,
                 palette = barNotePalette(),

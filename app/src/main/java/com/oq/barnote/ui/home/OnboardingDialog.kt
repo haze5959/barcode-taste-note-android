@@ -115,9 +115,10 @@ private val onboardingPages = listOf(
     OnboardingPage(
         id = 2,
         accentEmoji = "🍻",
-        // iOS onboarding_03 데이터셋 영상(원본 332×720 비율)을 음소거 루프로 재생.
+        // iOS onboarding_03 영상. Android 렌더 깨짐 방지로 16정렬(336×720)·yuv420p(tv range)로
+        // 재인코딩한 mp4 를 음소거 루프 재생. (원본 332폭은 H.264 매크로블록 비정렬이라 GPU 깨짐 유발)
         video = R.raw.onboarding_03,
-        videoAspectRatio = 332f / 720f,
+        videoAspectRatio = 336f / 720f,
         titleRes = R.string.taiping_geumanhago_han_mogeum_masiseyo,
         subtitleRes = R.string.byeoljeomman_kog_geuggangui_dansunham_nuguna_swibgo_gabyeobg,
         descriptionRes = R.string.jigeumeun_jarireul_jeulgiseyo_masyeobon_jepumeuro_deungrogha,

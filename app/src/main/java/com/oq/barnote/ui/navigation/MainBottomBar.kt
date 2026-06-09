@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -194,7 +196,14 @@ internal fun MainBottomBar(
                     label = if (tab == MainTab.Barcode) {
                         null
                     } else {
-                        @Composable { Text(text = stringResource(tab.labelRes)) }
+                        @Composable {
+                            // 라벨이 2줄 이상이 될 때(다국어 등) 한쪽으로 치우치지 않도록 가운데 정렬.
+                            Text(
+                                text = stringResource(tab.labelRes),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = accent,

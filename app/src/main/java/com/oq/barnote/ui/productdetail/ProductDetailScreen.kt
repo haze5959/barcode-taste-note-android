@@ -945,10 +945,12 @@ private fun TabsSection(
         }
         add(ProductDetailUiState.Tab.Images to stringResource(R.string.imiji))
     }
-    // iOS 세그먼트 탭 색상 — 선택: accent fill + textPrimary, 미선택: 투명 + textSecondary.
+    // 세그먼트 탭 색상 — 선택: accent(주황) fill + 흰색 글자, 미선택: 투명 + textSecondary.
     // (기본 Material3 TabRow 의 보라 primary 색이 앱 컬러 스타일과 안 맞던 문제 해결.)
     val tabAccent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
-    val tabTextSelected = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    // 선택 탭은 accent(주황) 배경이라 다른 accent 버튼(주 CTA: foreground=Color.White)과 동일하게
+    // 흰색 글자로 고정. text_primary 는 라이트=검정/다크=흰색이라 라이트 주황 배경 위에서 검정으로 보였음.
+    val tabTextSelected = Color.White
     val tabTextUnselected = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
     Row(
         modifier = Modifier
@@ -973,6 +975,8 @@ private fun TabsSection(
                         color = if (isSelected) tabTextSelected else tabTextUnselected,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     ),
+                    // 2줄이 될 때(다국어 등) 줄별로 치우치지 않도록 가운데 정렬.
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             }
         }
@@ -1253,12 +1257,14 @@ private fun CapsuleButton(
                 Modifier
             },
         )
-        Text(
+        // 캡슐 버튼 라벨 — 긴 문구(다국어)에서도 2줄로 줄바꿈되지 않고 한 줄로 축소되도록 AutoResizeText.
+        AutoResizeText(
             text = text,
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = foreground,
                 fontWeight = FontWeight.SemiBold,
             ),
+            maxLines = 1,
         )
     }
 }

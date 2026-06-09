@@ -24,11 +24,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,6 +49,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -380,8 +380,10 @@ private fun OQImageEditorContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // 배경(검정)은 시스템 바 밑까지 full-bleed, 콘텐츠(상단 툴바·이미지·하단 버튼)는 systemBars
+            // (상단 상태바 + 하단 내비게이션바) inset 안에 둔다. → 하단 버튼이 내비바에 잘리지 않음.
             .background(Color.Black)
-            .windowInsetsPadding(WindowInsets.statusBars),
+            .windowInsetsPadding(WindowInsets.systemBars),
     ) {
         // Top bar
         Row(
@@ -432,7 +434,7 @@ private fun OQImageEditorContent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .pointerInput(currentBitmap, cropRect) {
+                    .pointerInput(currentBitmap) {
                         val handleTapPx = 60.dp.toPx()
                         detectTransformGesturesCustom(
                             onGesture = { _, pan, zoom, _ ->
@@ -498,13 +500,12 @@ private fun OQImageEditorContent(
             }
         }
 
-        // Bottom bar
+        // Bottom bar — 하단 내비게이션바 inset 은 루트 systemBars 가 처리하므로 여기선 버튼 여백만.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(vertical = 12.dp, horizontal = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -616,6 +617,9 @@ private fun CropBoxOverlay(
     var moveInitial by remember { mutableStateOf<Rect?>(null) }
     var accumulatedDx by remember { mutableStateOf(0f) }
     var accumulatedDy by remember { mutableStateOf(0f) }
+    // pointerInput 을 cropRect 로 키잉하면 드래그 중 cropRect 가 바뀔 때마다 제스처가 재시작(취소)되어
+    // 드래그가 한 프레임 만에 끊긴다. 안정 키(Unit) + rememberUpdatedState 로 최신 cropRect 만 읽는다.
+    val latestCropRect by rememberUpdatedState(cropRect)
     Box(
         modifier = Modifier
             .offset {
@@ -625,10 +629,10 @@ private fun CropBoxOverlay(
                 width = with(density) { cropRect.width.toDp() },
                 height = with(density) { cropRect.height.toDp() },
             )
-            .pointerInput(cropRect) {
+            .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = {
-                        moveInitial = cropRect
+                        moveInitial = latestCropRect
                         accumulatedDx = 0f
                         accumulatedDy = 0f
                     },
@@ -646,7 +650,7 @@ private fun CropBoxOverlay(
                     change.consume()
                     accumulatedDx += drag.x
                     accumulatedDy += drag.y
-                    val start = moveInitial ?: cropRect
+                    val start = moveInitial ?: latestCropRect
                     onMove(start, accumulatedDx, accumulatedDy)
                 }
             },
@@ -697,6 +701,8 @@ private fun CornerHandle(
     var initial by remember { mutableStateOf<Rect?>(null) }
     var accumulatedDx by remember { mutableStateOf(0f) }
     var accumulatedDy by remember { mutableStateOf(0f) }
+    // 드래그 중 cropRect 변경으로 코너 제스처가 재시작되지 않도록 안정 키 + rememberUpdatedState 사용.
+    val latestCropRect by rememberUpdatedState(cropRect)
 
     Box(
         modifier = Modifier
@@ -707,10 +713,10 @@ private fun CornerHandle(
                 )
             }
             .size(tapSizeDp)
-            .pointerInput(corner, cropRect) {
+            .pointerInput(corner) {
                 detectDragGestures(
                     onDragStart = {
-                        initial = cropRect
+                        initial = latestCropRect
                         accumulatedDx = 0f
                         accumulatedDy = 0f
                     },
@@ -728,7 +734,7 @@ private fun CornerHandle(
                     change.consume()
                     accumulatedDx += drag.x
                     accumulatedDy += drag.y
-                    val start = initial ?: cropRect
+                    val start = initial ?: latestCropRect
                     onDrag(corner, start, accumulatedDx, accumulatedDy)
                 }
             },

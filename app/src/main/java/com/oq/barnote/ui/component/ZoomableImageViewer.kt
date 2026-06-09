@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
@@ -125,6 +126,8 @@ fun ZoomableImageViewer(
                 BTNImage(
                     path = imageIds[page],
                     cornerRadius = 0.dp,
+                    // 풀스크린 뷰어는 원본 비율 유지(aspect-fit) — 기본값 Crop(가득 채우고 잘림) 대신 Fit.
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {

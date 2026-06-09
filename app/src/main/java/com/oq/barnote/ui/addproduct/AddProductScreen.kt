@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -136,7 +133,9 @@ internal fun AddProductScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Dimens.BtnPadding),
-                verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+                // iOS AddProductView 의 VStack(spacing: C.V.sectionSpacing) 및 AddNote/EditNote 와 동일하게
+                // 섹션 간격은 SectionSpacing(28dp). 기존 Spacing(15dp)은 폼 섹션 간격으로는 좁았음.
+                verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
             ) {
                 // iOS AddProductView body 순서와 일치:
                 //   제품 이름(OQTF) → 주류 타입(typeSelector) → AI 안내 박스 → 제품 설명(OQTE) → 제품 이미지.
@@ -285,47 +284,55 @@ private fun ProductTypeGrid(
     val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
 
     val types = ProductType.values().toList()
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    // iOS typeSelector 의 2-column 그리드. LazyVerticalGrid + 고정 height 는 부모 verticalScroll 안에서
+    // 행 높이를 과대 추정해 그리드 하단에 빈 공간이 쌓이고(→ 다음 AI 안내 박스가 과하게 떠 보임), 글꼴
+    // 배율에도 취약하다. 콘텐츠 크기에 맞춰지는 chunked Row 로 구성해 다른 섹션과 세로 간격을 통일한다.
+    Column(
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
-        horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
-        // 2-column 이므로 row 개수 = ceil(size / 2). LazyVerticalGrid 가 자체 스크롤이라 부모 verticalScroll
-        // 안에서 사용할 땐 명시적 height 필요.
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(((types.size + 1) / 2 * 60).dp),
     ) {
-        items(items = types, key = { it.name }) { type ->
-            val isSelected = type == selectedType
+        types.chunked(2).forEach { rowTypes ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(Dimens.Radius))
-                    .background(if (isSelected) accent.copy(alpha = 0.18f) else surfaceSecondary)
-                    .border(
-                        width = 1.dp,
-                        color = if (isSelected) accent else divider,
-                        shape = RoundedCornerShape(Dimens.Radius),
-                    )
-                    .clickable { onSelect(type) }
-                    .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.Padding),
-                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
             ) {
-                Text(
-                    text = type.title(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = if (isSelected) accent else textPrimary,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    ),
-                    modifier = Modifier.weight(1f),
-                )
-                if (isSelected) {
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = null,
-                        tint = accent,
-                        modifier = Modifier.size(18.dp),
-                    )
+                rowTypes.forEach { type ->
+                    val isSelected = type == selectedType
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(Dimens.Radius))
+                            .background(if (isSelected) accent.copy(alpha = 0.18f) else surfaceSecondary)
+                            .border(
+                                width = 1.dp,
+                                color = if (isSelected) accent else divider,
+                                shape = RoundedCornerShape(Dimens.Radius),
+                            )
+                            .clickable { onSelect(type) }
+                            .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.Padding),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = type.title(),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = if (isSelected) accent else textPrimary,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            ),
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = null,
+                                tint = accent,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    }
+                }
+                // 홀수 개일 때 마지막 행의 빈 칸을 채워 2-column 폭 정렬을 유지.
+                if (rowTypes.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
