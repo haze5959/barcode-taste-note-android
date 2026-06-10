@@ -24,12 +24,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
@@ -69,6 +73,7 @@ import com.oq.barnote.Constants
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.oqcore.util.openUrl
 import com.oq.barnote.core.oqcore.views.OQFillButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType
@@ -111,8 +116,12 @@ fun SubscriptionRoute(
         onEvent = { event ->
             when (event) {
                 SubscriptionUiEvent.TappedSubscribe -> {
-                    activity?.let { viewModel.launchPurchase(it) }
-                        ?: viewModel.onEvent(event)
+                    if (uiState.isSubscribed) {
+                        context.openUrl("https://play.google.com/store/account/subscriptions?package=${context.packageName}")
+                    } else {
+                        activity?.let { viewModel.launchPurchase(it, basePlanId = uiState.selectedBasePlanId) }
+                            ?: viewModel.onEvent(event)
+                    }
                 }
                 else -> viewModel.onEvent(event)
             }
@@ -175,7 +184,20 @@ internal fun SubscriptionScreen(
                 TopBar(onBack = onBack)
                 HeaderSection(modifier = Modifier.appearAnim(appeared, delayMillis = 40))
                 FeatureList(appeared = appeared)
+                if (state.isSubscribed) {
+                    ActiveSubscriptionBanner(
+                        modifier = Modifier.appearAnim(appeared, delayMillis = 460)
+                    )
+                } else {
+                    PlanSelectionSection(
+                        selectedPlanId = state.selectedBasePlanId,
+                        onPlanSelected = { onEvent(SubscriptionUiEvent.SelectBasePlan(it)) },
+                        modifier = Modifier.appearAnim(appeared, delayMillis = 460)
+                    )
+                }
+                Spacer(modifier = Modifier.height(Dimens.Spacing))
                 CtaSection(
+                    isSubscribed = state.isSubscribed,
                     isPurchasing = state.isPurchasing,
                     onSubscribe = { onEvent(SubscriptionUiEvent.TappedSubscribe) },
                     onRestore = { onEvent(SubscriptionUiEvent.TappedRestorePurchases) },
@@ -411,6 +433,7 @@ private fun FeatureCard(item: FeatureItem, modifier: Modifier = Modifier) {
 
 @Composable
 private fun CtaSection(
+    isSubscribed: Boolean,
     isPurchasing: Boolean,
     onSubscribe: () -> Unit,
     onRestore: () -> Unit,
@@ -448,21 +471,25 @@ private fun CtaSection(
                 ),
         ) {
             OQFillButton(
-                text = stringResource(R.string.gudoghagi),
+                text = stringResource(
+                    if (isSubscribed) R.string.gudog_gwanri else R.string.gudoghagi
+                ),
                 onClick = onSubscribe,
                 palette = palette,
                 radius = Dimens.Radius.value,
                 enabled = !isPurchasing,
             )
         }
-        // iOS `.storeButton(.visible, for: .restorePurchases)` — "구매 복원" 의미에 맞는 라벨 사용.
-        OQRoundedButton(
-            text = stringResource(R.string.gumae_bogwon),
-            onClick = onRestore,
-            style = OQRoundedButtonStyleType.TextSecondary,
-            palette = palette,
-            radius = Dimens.Radius.value,
-        )
+        if (!isSubscribed) {
+            // iOS `.storeButton(.visible, for: .restorePurchases)` — "구매 복원" 의미에 맞는 라벨 사용.
+            OQRoundedButton(
+                text = stringResource(R.string.gumae_bogwon),
+                onClick = onRestore,
+                style = OQRoundedButtonStyleType.TextSecondary,
+                palette = palette,
+                radius = Dimens.Radius.value,
+            )
+        }
         // iOS `.subscriptionStorePolicyDestination(...)` — 이용약관 / 개인정보처리방침 링크.
         PolicyLinks()
     }
@@ -505,6 +532,206 @@ private fun PolicyLinks() {
                     OQSafariView.open(context, "${Constants.S.WEB_BASE_URL}/privacy_policy")
                 }
                 .padding(Dimens.Padding),
+        )
+    }
+}
+
+@Composable
+private fun PlanSelectionSection(
+    selectedPlanId: String,
+    onPlanSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val textSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+    val surfaceSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.surface_secondary)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.BtnPadding),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.select_plan),
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = textPrimary,
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+
+        // Monthly Plan Card
+        PlanCard(
+            title = stringResource(R.string.monthly_plan),
+            description = stringResource(R.string.monthly_plan_desc),
+            isSelected = selectedPlanId == "monthly",
+            onClick = { onPlanSelected("monthly") },
+            accentColor = accent,
+            textPrimary = textPrimary,
+            textSecondary = textSecondary,
+            surfaceColor = surfaceSecondary
+        )
+
+        // Yearly Plan Card
+        PlanCard(
+            title = stringResource(R.string.yearly_plan),
+            description = stringResource(R.string.yearly_plan_desc),
+            badgeText = stringResource(R.string.recommended),
+            isSelected = selectedPlanId == "yearly",
+            onClick = { onPlanSelected("yearly") },
+            accentColor = accent,
+            textPrimary = textPrimary,
+            textSecondary = textSecondary,
+            surfaceColor = surfaceSecondary
+        )
+    }
+}
+
+@Composable
+private fun PlanCard(
+    title: String,
+    description: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    accentColor: Color,
+    textPrimary: Color,
+    textSecondary: Color,
+    surfaceColor: Color,
+    badgeText: String? = null,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Dimens.Radius))
+            .background(if (isSelected) accentColor.copy(alpha = 0.05f) else surfaceColor)
+            .border(
+                width = if (isSelected) 2.dp else 1.dp,
+                color = if (isSelected) accentColor else textSecondary.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(Dimens.Radius)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = Dimens.Spacing, vertical = Dimens.Spacing + 2.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 2.dp,
+                        color = if (isSelected) accentColor else textSecondary.copy(alpha = 0.4f),
+                        shape = CircleShape
+                    )
+                    .background(if (isSelected) accentColor else Color.Transparent),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            color = textPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                    if (badgeText != null) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(accentColor)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = badgeText,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                    }
+                }
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = textSecondary
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActiveSubscriptionBanner(
+    modifier: Modifier = Modifier
+) {
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val textSecondary = colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.BtnPadding)
+            .clip(RoundedCornerShape(Dimens.Radius))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        accent.copy(alpha = 0.16f),
+                        accent.copy(alpha = 0.05f),
+                    ),
+                ),
+            )
+            .border(
+                width = 1.dp,
+                color = accent.copy(alpha = 0.25f),
+                shape = RoundedCornerShape(Dimens.Radius),
+            )
+            .padding(Dimens.Spacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.AutoAwesome,
+            contentDescription = null,
+            tint = accent,
+            modifier = Modifier.size(32.dp)
+        )
+        Text(
+            text = stringResource(R.string.peurimieom_gudog_jung),
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = textPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        Text(
+            text = stringResource(R.string.active_subscription_desc),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = textSecondary
+            ),
+            textAlign = TextAlign.Center
         )
     }
 }

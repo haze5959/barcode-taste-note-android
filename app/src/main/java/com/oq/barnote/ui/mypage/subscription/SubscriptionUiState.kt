@@ -9,6 +9,8 @@ data class SubscriptionUiState(
     val isLoadingUser: Boolean = true,
     val isPurchasing: Boolean = false,
     val errorMessage: String? = null,
+    val selectedBasePlanId: String = "monthly",
+    val isSubscribed: Boolean = false,
 )
 
 sealed interface SubscriptionUiEvent {
@@ -16,6 +18,7 @@ sealed interface SubscriptionUiEvent {
     data object TappedSubscribe : SubscriptionUiEvent
     data object TappedRestorePurchases : SubscriptionUiEvent
     data object DismissError : SubscriptionUiEvent
+    data class SelectBasePlan(val basePlanId: String) : SubscriptionUiEvent
 }
 
 sealed interface SubscriptionNavEffect {

@@ -77,14 +77,23 @@ class SubscriptionViewModel @Inject constructor(
             SubscriptionUiEvent.TappedRestorePurchases -> restorePurchases()
             SubscriptionUiEvent.DismissError ->
                 _uiState.update { it.copy(errorMessage = null) }
+            is SubscriptionUiEvent.SelectBasePlan ->
+                _uiState.update { it.copy(selectedBasePlanId = event.basePlanId) }
         }
     }
 
     private fun loadUser() {
         viewModelScope.launch {
             val userId = userStore.getUser()?.id
+            val isSubscribed = userStore.checkSubscriptionStatus()
             if (userId != null) {
-                _uiState.update { it.copy(userId = userId, isLoadingUser = false) }
+                _uiState.update {
+                    it.copy(
+                        userId = userId,
+                        isLoadingUser = false,
+                        isSubscribed = isSubscribed
+                    )
+                }
             } else {
                 _uiState.update { it.copy(isLoadingUser = false) }
                 _navEffect.send(SubscriptionNavEffect.AuthorizationFailed)

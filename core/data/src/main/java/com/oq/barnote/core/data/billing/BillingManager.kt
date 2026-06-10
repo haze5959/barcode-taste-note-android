@@ -183,11 +183,17 @@ class BillingManager @Inject constructor(
             }
         }
         val details = detailsList.firstOrNull() ?: return queryResult
-        val offerToken = details.subscriptionOfferDetails
-            ?.firstOrNull { basePlanId == null || it.basePlanId == basePlanId }
-            ?.offerToken
-            ?: details.subscriptionOfferDetails?.firstOrNull()?.offerToken
-            ?: return queryResult
+        
+        // 해당 basePlanId에 일치하는 모든 offer/plan 목록 추출
+        val matchingOffers = details.subscriptionOfferDetails
+            ?.filter { basePlanId == null || it.basePlanId == basePlanId }
+            .orEmpty()
+            
+        // 프로모션 혜택(무료체험 등, offerId != null)을 우선 선택하고, 없으면 기본 요금제(offerId == null) 선택
+        val selectedOffer = matchingOffers.firstOrNull { it.offerId != null }
+            ?: matchingOffers.firstOrNull()
+            
+        val offerToken = selectedOffer?.offerToken ?: return queryResult
 
         val flowParams = com.android.billingclient.api.BillingFlowParams.newBuilder()
             .setProductDetailsParamsList(

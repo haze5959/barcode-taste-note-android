@@ -577,4 +577,11 @@ Are you sure you want to close?</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Tap the delete button to cancel a reservation.</string>
     <string name="gumae_bogwon">Restore Purchases</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">Downloading translation resources. It may take some time on the first run.</string>
+    <string name="select_plan">Select Plan</string>
+    <string name="monthly_plan">Monthly Plan</string>
+    <string name="yearly_plan">Yearly Plan</string>
+    <string name="monthly_plan_desc">Billed monthly, cancel anytime</string>
+    <string name="yearly_plan_desc">Billed annually, best value</string>
+    <string name="recommended">Recommended</string>
+    <string name="active_subscription_desc">You are enjoying an ad-free experience and all features without limits.</string>
 </resources>
