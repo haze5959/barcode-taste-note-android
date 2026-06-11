@@ -4,6 +4,19 @@ set -e
 # 스크립트 위치(= 프로젝트 루트)로 이동. (iOS deploy-appstore.command 와 동일 패턴)
 cd "$(dirname "$0")"
 
+# macOS에서 JAVA_HOME이 지정되지 않은 경우, Android Studio 내장 Java(JBR/JRE) 자동 지정
+if [ "$(uname)" = "Darwin" ] && [ -z "$JAVA_HOME" ]; then
+    STUDIO_JBR="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+    STUDIO_JRE="/Applications/Android Studio.app/Contents/jre/Contents/Home"
+    if [ -d "$STUDIO_JBR" ]; then
+        export JAVA_HOME="$STUDIO_JBR"
+        echo "ℹ️  Android Studio 내장 Java(JBR) 자동 설정: $JAVA_HOME"
+    elif [ -d "$STUDIO_JRE" ]; then
+        export JAVA_HOME="$STUDIO_JRE"
+        echo "ℹ️  Android Studio 내장 Java(JRE) 자동 설정: $JAVA_HOME"
+    fi
+fi
+
 echo "=========================================="
 echo "    BarNote Play Store Deployment Script  "
 echo "=========================================="
