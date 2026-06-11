@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -84,7 +85,9 @@ fun OQToastHost(
     palette: Palette = Palette(),
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.fillMaxWidth().zIndex(100f)) {
+    // 호스트는 edge-to-edge Activity 루트에 놓이므로, 상태바(시간/배터리 인디케이터)를 가리지 않도록
+    // 상태바 inset 만큼 내려서 표시한다. 카드 자체의 16dp 여백은 그 아래에 더해짐.
+    Box(modifier = modifier.fillMaxWidth().statusBarsPadding().zIndex(100f)) {
         val cfg = current
         val isTop = cfg?.position == OQToastPosition.Top
         AnimatedVisibility(

@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -314,7 +315,8 @@ private fun TopBar(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = null,
             tint = textPrimary,
-            modifier = Modifier.size(Dimens.IconSize).clickable(onClick = onBack).padding(4.dp),
+            modifier = Modifier.size(Dimens.FabHSize).clip(CircleShape)
+                .clickable(onClick = onBack).padding(12.dp),
         )
         // 제목은 back·우측 아이콘 사이 남는 공간만 차지(weight) + 길면 … 처리.
         // weight/ellipsis 가 없으면 긴 제목이 우측 버튼을 화면 밖으로 밀어낸다.
@@ -336,16 +338,18 @@ private fun TopBar(
             imageVector = Icons.Filled.ReportProblem,
             contentDescription = null,
             tint = textPrimary,
-            modifier = Modifier.size(Dimens.IconSize).clickable(onClick = onReport).padding(4.dp),
+            modifier = Modifier.size(Dimens.FabHSize).clip(CircleShape)
+                .clickable(onClick = onReport).padding(12.dp),
         )
         // 즐겨찾기 토글
         Icon(
             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
             contentDescription = null,
             tint = accent,
-            modifier = Modifier.size(Dimens.IconSize)
+            modifier = Modifier.size(Dimens.FabHSize)
+                .clip(CircleShape)
                 .clickable(onClick = onToggleFavorite)
-                .padding(4.dp),
+                .padding(12.dp),
         )
     }
 }

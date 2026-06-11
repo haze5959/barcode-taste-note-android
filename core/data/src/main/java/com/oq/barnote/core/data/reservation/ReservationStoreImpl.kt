@@ -17,6 +17,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.inject.Inject
@@ -71,12 +72,16 @@ class ReservationStoreImpl @Inject constructor(
             notificationScheduler.cancelNoteReservation(duplicate.id)
         }
 
-        // 2. 기본 시간 로드 → 다음날 해당 시간
+        // 2. 기본 시간 로드 → 다음 도래 시각: 오늘 그 시간이 아직 안 지났으면 오늘, 지났으면 다음날.
+        //    (iOS 는 항상 다음날(+1일)이지만, 당일 미래 시간이면 오늘 알림이 자연스러워 의도적으로 개선)
         val defaultTime = loadDefaultTime()
-        val nextDay = LocalDate.now(ZoneId.systemDefault()).plusDays(1)
-        val scheduledAt = nextDay.atTime(defaultTime)
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
+        val zone = ZoneId.systemDefault()
+        val now = ZonedDateTime.now(zone)
+        var scheduledZoned = LocalDate.now(zone).atTime(defaultTime).atZone(zone)
+        if (!scheduledZoned.isAfter(now)) {
+            scheduledZoned = scheduledZoned.plusDays(1)
+        }
+        val scheduledAt = scheduledZoned.toInstant()
 
         // 3. 예약 생성
         val reservation = NoteReservation(

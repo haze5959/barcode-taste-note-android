@@ -106,6 +106,10 @@ class NotificationSchedulerImpl @Inject constructor(
             OQLog.w("Exact alarm not permitted; falling back to inexact.")
             alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
         }
+        OQLog.i(
+            "[Reservation] 알림 등록: id=${reservation.id} at=${reservation.scheduledDate} " +
+                "(exact=$canScheduleExact)",
+        )
     }
 
     override suspend fun cancelNoteReservation(id: String) {

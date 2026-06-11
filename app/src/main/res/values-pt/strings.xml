@@ -5,6 +5,7 @@
     <string name="aembeo_eil">Amber Ale</string>
     <string name="ai_bunseog_jung">Análise da IA...</string>
     <string name="ai_seukaen_enjin">Motor de digitalização IA</string>
+    <string name="ai_seukaen_silpae">Falha na leitura por IA</string>
     <string name="ai_seukaenhagi">Analisar com IA</string>
     <string name="airisi_wiseuki">Whisky irlandês</string>
     <string name="ajig_i_jepume_daehae_jagseonghan_noteuga_eobseoyo">Ainda não escreveu notas para este produto.</string>
@@ -154,6 +155,7 @@ para escrever notas de degustação de forma rápida e precisa.</string>
     <string name="gudog_gwanri">Gerenciar assinatura</string>
     <string name="gudog_jeongbo">Informação de Subscrição</string>
     <string name="gudoghagi">Subscrever</string>
+    <string name="gudogeun_gigan_jongryo_24sigan_jeonggaji_haejihaji_anheumyeon">A assinatura é renovada automaticamente, a menos que seja cancelada pelo menos 24 horas antes do fim do período atual.</string>
     <string name="gudogja">Subscritores</string>
     <string name="gurisbic_saegsange_hobgwa_molteuga_gyunhyeong_jabhin_sangmye">Ale de alta fermentação com tom acobreado, com equilíbrio entre lúpulo e malte.</string>
     <string name="gurisbic_saegsangui_gyunhyeong_jabhin_kaereomel_molteu_eil">Ale de tom acobreado com carácter equilibrado de malte caramelizado.</string>
@@ -212,6 +214,7 @@ Por favor verifique os resultados da pesquisa.</string>
     <string name="imi_deungrogdoen_jepumieyo">Este produto já está registado!</string>
     <string name="imiji">Imagem</string>
     <string name="imiji_ceombu">Anexar Imagem</string>
+    <string name="imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka">Não foi possível reconhecer as informações do produto na imagem.\nTente escanear novamente ou cadastre o produto manualmente.</string>
     <string name="ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida">Isto não pode ser desfeito e elimina todos os seus dados.</string>
     <string name="inseuta_web_kakaotogeuro_nae_sieumnoteu_mogroggwa_jeulgyeoca">Compartilhe sua lista de notas de degustação e produtos favoritos via Instagram, Web, etc.</string>
     <string name="inseuta_web_kakaotogeuro_sieumnoteureul_gongyuhal_su_issseub">Você pode compartilhar sua nota de degustação via Instagram, Web, etc.</string>
@@ -348,6 +351,7 @@ Pode consultar os seus produtos provados em O Meu Perfil mesmo sem nota.</string
     <string name="naebonaegi">Exportar</string>
     <string name="naecureol_wain">Vinho natural</string>
     <string name="naeil_i_sigane_alrimeul_deurilgeyo">Vou relembrá-lo amanhã a esta hora.</string>
+    <string name="oneul_i_sigane_alrimeul_deurilgeyo">Vou relembrá-lo hoje a esta hora.</string>
     <string name="naeil_sieumnoteu_jagseong_alrimeul_bonaedeurilggayo">Enviamos um lembrete de nota de prova amanhã?</string>
     <string name="naeyong">Conteúdo</string>
     <string name="nagagi">Sair</string>
@@ -462,6 +466,7 @@ Os seus rascunhos são guardados em segurança!</string>
     <string name="sayongja_cadan">Bloquear utilizador</string>
     <string name="semiyong">Sémillon</string>
     <string name="seobiseu_iyongyaggwan">Termos de Serviço</string>
+    <string name="iyongyaggwan_eula">Termos de Uso (EULA)</string>
     <string name="seoljeong">Definições</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">Por favor permita notificações nas definições.</string>
     <string name="alrim_gwonhani_pilyohabnida">Permissão de notificação necessária.</string>

@@ -30,7 +30,7 @@
     <string name="error_module_error">應用程式內部模組錯誤。</string>
     <string name="error_network_invalid_response">伺服器回應無效。</string>
     <string name="error_network_invalid_url">無效的訪問。</string>
-    <string name="error_network_status_code_lld">伺服器通訊失敗（代碼：%d）</string>
+    <string name="error_network_status_code_lld">網路連線不穩定，請稍後再試。（代碼：%d）</string>
     <string name="error_network_transport_failed">網路連線不穩定。</string>
     <string name="error_network_unauthorized">登入已過期或您沒有權限。</string>
     <string name="error_translation_failed">翻譯不支援此語言或發生錯誤。</string>

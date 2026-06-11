@@ -11,6 +11,8 @@
     <!-- AlarmManager 정확 시간 알림 (Android 12+) -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- 재부팅 시 예약 알림 재등록 (AlarmManager 알람은 재부팅에 사라짐 — iOS UNUserNotificationCenter 와 달리) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- FCM -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <!-- Google Play Billing (구독) -->
@@ -50,7 +52,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -113,6 +116,16 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.oq.barnote.NOTE_RESERVATION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 재부팅 후 예약 알림 재등록. BOOT_COMPLETED 는 시스템만 발신 가능한 protected broadcast 라
+             exported=true 여도 안전 (intent-filter 선언 시 exported 명시는 API 31+ 필수). -->
+        <receiver
+            android:name="com.oq.barnote.core.data.notification.BootCompletedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 

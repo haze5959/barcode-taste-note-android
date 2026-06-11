@@ -10,6 +10,7 @@ import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.oqcore.util.AppController
 import com.oq.barnote.core.oqcore.util.OQImageOptimize
 import com.oq.barnote.core.oqcore.utils.OQHapticService
+import com.oq.barnote.core.oqcore.utils.OQLog
 import com.oq.barnote.ui.navigation.Destinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -62,6 +63,17 @@ class AICameraViewModel @Inject constructor(
                 viewModelScope.launch { _navEffect.send(AICameraNavEffect.Cancelled) }
             AICameraUiEvent.DismissError ->
                 _uiState.update { it.copy(errorMessage = null) }
+            // "닫기" — 이 화면은 시스템 카메라 종료 후 검정 배경뿐이라 알럿을 닫으며 이전 화면으로 복귀.
+            AICameraUiEvent.DismissAiScanFailedAlert -> {
+                _uiState.update { it.copy(showAiScanFailedAlert = false) }
+                viewModelScope.launch { _navEffect.send(AICameraNavEffect.Cancelled) }
+            }
+            // "제품 직접 등록하기" — 바코드 스캔 흐름이면 바코드를 함께 전달, 없으면 바코드 없이 진입.
+            // iOS confirmAddProductRegistration(barcode optional 화) 대응.
+            AICameraUiEvent.ConfirmDirectRegistration -> {
+                _uiState.update { it.copy(showAiScanFailedAlert = false) }
+                viewModelScope.launch { _navEffect.send(AICameraNavEffect.GoAddProduct(barcodeId)) }
+            }
         }
     }
 
@@ -108,19 +120,22 @@ class AICameraViewModel @Inject constructor(
                                 ),
                             )
                         },
-                        onFailure = {
-                            // iOS `aiProductCreated(.failure)` — error 햅틱 + 에러 다이얼로그.
+                        onFailure = { error ->
+                            // iOS `aiProductCreated(.failure)` — 일반 에러 팝업 대신 직접 등록을
+                            // 유도하는 전용 알럿 표시. error 햅틱 + 로그만 남긴다.
                             haptic.error()
-                            appController.showError(it)
+                            OQLog.e("AI 스캔 실패: $error")
+                            _uiState.update { it.copy(showAiScanFailedAlert = true) }
                         },
                     )
                 },
-                onFailure = {
+                onFailure = { error ->
                     appController.setAiScanLoading(false)
                     _uiState.update { it.copy(isProcessing = false) }
-                    // iOS 는 업로드 실패도 `aiProductCreated(.failure)` 로 라우팅 → error 햅틱 + 에러 다이얼로그.
+                    // iOS 는 업로드 실패도 `aiProductCreated(.failure)` 로 라우팅 → 동일한 전용 알럿.
                     haptic.error()
-                    appController.showError(it)
+                    OQLog.e("AI 스캔 실패: $error")
+                    _uiState.update { it.copy(showAiScanFailedAlert = true) }
                 },
             )
         }

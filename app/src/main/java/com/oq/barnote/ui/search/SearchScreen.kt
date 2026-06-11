@@ -355,7 +355,11 @@ private fun SearchResultGrid(
         state = listState,
         columns = if (state.isListView) GridCells.Fixed(1)
         else GridCells.Adaptive(minSize = Dimens.GridMinWSize),
-        verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+        // 간략히 보기(1열 리스트)는 내 노트 리스트 뷰와 동일하게 촘촘한 Padding(8dp) 간격,
+        // 그리드(카드) 뷰는 기존 Spacing(15dp) 유지.
+        verticalArrangement = Arrangement.spacedBy(
+            if (state.isListView) Dimens.Padding else Dimens.Spacing,
+        ),
         horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
         contentPadding = PaddingValues(
             start = Dimens.Padding,

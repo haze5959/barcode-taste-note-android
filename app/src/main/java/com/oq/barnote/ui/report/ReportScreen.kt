@@ -78,9 +78,10 @@ internal fun ReportScreen(
                     contentDescription = null,
                     tint = textPrimary,
                     modifier = Modifier
-                        .size(Dimens.IconSize)
+                        .size(Dimens.FabHSize)
+                        .clip(CircleShape)
                         .clickable(onClick = onBack)
-                        .padding(4.dp),
+                        .padding(12.dp),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -94,7 +95,7 @@ internal fun ReportScreen(
                     ),
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Spacer(modifier = Modifier.size(Dimens.IconSize))
+                Spacer(modifier = Modifier.size(Dimens.FabHSize))
             }
 
             Column(

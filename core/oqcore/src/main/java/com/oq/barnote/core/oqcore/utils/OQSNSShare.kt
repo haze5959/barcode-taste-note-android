@@ -20,14 +20,16 @@ import android.text.TextUtils
 import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import com.kakao.sdk.share.ShareClient
-import com.kakao.sdk.share.WebSharerClient
 import com.kakao.sdk.share.model.ImageUploadResult
 import com.oq.barnote.core.oqcore.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -62,14 +64,27 @@ class OQSNSShareManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val fileManager: OQFileManager
 ) {
-    suspend fun share(type: OQSNSShareType, data: OQSNSShareData) {
-        withContext(Dispatchers.Main) {
-            when (type) {
-                OQSNSShareType.Instagram -> shareToInstagramStory(data)
-                OQSNSShareType.Kakao -> shareToKakaoTalk(data)
-                OQSNSShareType.Url -> shareToUrl(data)
-                OQSNSShareType.Other -> shareWithActivityController(data)
-            }
+    /**
+     * 공유 작업 전용 스코프. 공유 시트가 닫히면서(onDismiss) 호출측 rememberCoroutineScope 가 취소돼도
+     * 공유 플로우(이미지 다운로드 → 인텐트 발사)가 끝까지 진행되도록 호출 스코프와 분리한다.
+     * (기존: 시트 dispose 와 함께 호출 코루틴이 취소 → 첫 suspension 에서 조용히 중단 = "무반응" 버그)
+     */
+    private val shareScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /**
+     * fire-and-forget 공유 진입점. iOS `share(type:data:)` (Task 내부 실행) 대응.
+     * 어떤 실패도 앱 크래시로 전파하지 않고 로그만 남긴다.
+     */
+    fun share(type: OQSNSShareType, data: OQSNSShareData) {
+        shareScope.launch {
+            runCatching {
+                when (type) {
+                    OQSNSShareType.Instagram -> shareToInstagramStory(data)
+                    OQSNSShareType.Kakao -> shareToKakaoTalk(data)
+                    OQSNSShareType.Url -> shareToUrl(data)
+                    OQSNSShareType.Other -> shareWithActivityController(data)
+                }
+            }.onFailure { OQLog.e("SNS share($type) failed", it) }
         }
     }
 
@@ -77,15 +92,23 @@ class OQSNSShareManager @Inject constructor(
      * Instagram Stories 공유. iOS `shareToInstagramStory` 대응.
      *
      * 동작 흐름 (iOS 와 동일):
+     *  0. 설치 선체크 (iOS `canOpenURL(instagram-stories://)`) — 미설치면 에셋 준비 없이 즉시 스토어 폴백
      *  1. 배경 = 첫 이미지 URL 다운로드 → FileProvider content URI (없으면 그라디언트 #231557→#FF1361 폴백)
      *  2. 스티커 = 프로필 + 닉/제목/설명 브랜드 카드 비트맵 ([buildStickerBitmap]) → FileProvider URI (interactive asset)
      *  3. `com.instagram.share.ADD_TO_STORY` 인텐트로 Instagram 호출 (대상 앱에 URI read 권한 부여)
-     *  4. 미설치/실패 → Play 스토어 폴백 (iOS: App Store)
+     *  4. 실패 → Play 스토어 폴백 (iOS: App Store)
      *
      * 다운로드·비트맵 생성은 IO 에서, 실제 [Context.startActivity] 는 Main 에서 수행.
      * @see <a href="https://developers.facebook.com/docs/instagram-platform/sharing-to-stories">IG Stories 공유</a>
      */
     private suspend fun shareToInstagramStory(data: OQSNSShareData) {
+        // iOS canOpenURL 선체크 대응 — 미설치 기기에서 grantUriPermission(Unknown package 예외)이나
+        // 불필요한 다운로드 없이 곧장 스토어로. (manifest <queries> 에 패키지 선언되어 API 30+ 조회 가능)
+        if (!isPackageInstalled(INSTAGRAM_PACKAGE)) {
+            fallbackToBrowser(INSTAGRAM_STORE_URL)
+            return
+        }
+
         val (backgroundUri, stickerUri) = withContext(Dispatchers.IO) {
             // 배경 = 첫 이미지 (iOS: data.imageURLs.first)
             val bg = data.imageURLs.firstOrNull()?.takeIf { it.isNotBlank() }
@@ -116,33 +139,46 @@ class OQSNSShareManager @Inject constructor(
         }
 
         // Instagram 에 임시 파일 read 권한 부여 (FLAG 만으론 일부 단말에서 누락될 수 있어 명시).
+        // grant 실패가 공유 자체를 막지 않도록 개별 runCatching.
         listOfNotNull(backgroundUri, stickerUri).forEach { uri ->
-            context.grantUriPermission("com.instagram.android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            runCatching {
+                context.grantUriPermission(INSTAGRAM_PACKAGE, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }.onFailure { OQLog.w("Instagram share: grantUriPermission failed: ${it.message}") }
         }
 
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            // 미설치 → Play 스토어 (iOS: App Store 폴백)
-            fallbackToBrowser("https://play.google.com/store/apps/details?id=com.instagram.android")
+            // 선체크 후에도 레이스(직후 삭제 등)로 실패할 수 있음 → Play 스토어 (iOS: App Store 폴백)
+            fallbackToBrowser(INSTAGRAM_STORE_URL)
         } catch (e: Exception) {
             OQLog.e("Instagram story share failed: ${e.message}")
-            fallbackToBrowser("https://play.google.com/store/apps/details?id=com.instagram.android")
+            fallbackToBrowser(INSTAGRAM_STORE_URL)
         }
     }
 
     /**
-     * 카카오톡 공유 ([ShareClient.shareCustom]). iOS `ShareApi.shared.shareCustom` 와 동등.
+     * 카카오톡 공유 ([ShareClient.shareCustom]). iOS `shareToKakaoTalk` 와 동일 흐름.
      *
-     * 동작 흐름:
+     * 동작 흐름 (iOS 와 동일):
+     *  0. [ShareClient.isKakaoTalkSharingAvailable] 선체크 — 미설치면 스크랩 등 서버 호출 없이
+     *     즉시 Play 스토어 폴백 (iOS: App Store 카카오톡 페이지)
      *  1. 외부 이미지 URL 들을 [ShareClient.scrapImage] 로 카카오 서버에 캐싱 → 카카오 URL 획득
      *  2. 이미지 개수에 따라 templateId 분기 (iOS 와 동일): 0~1=131000 / 2=131001 / 3+=130706
      *  3. templateArgs 구성 (TITLE, DESC, NICK, PROFILE, IMG1~3, SHARE_URL, PATH, query params)
-     *  4. [ShareClient.isKakaoTalkSharingAvailable] 체크
-     *     - 설치: `ShareClient.shareCustom` → result.intent 으로 카카오톡 앱 호출
-     *     - 미설치: [WebSharerClient.makeCustomUrl] → 브라우저로 폴백
+     *  4. `ShareClient.shareCustom` → result.intent 으로 카카오톡 앱 호출
      */
     private suspend fun shareToKakaoTalk(data: OQSNSShareData) {
+        // iOS isKakaoTalkSharingAvailable 선체크 대응. SDK 미초기화(키 미설정) 등 어떤 예외도
+        // 크래시로 전파하지 않도록 runCatching — 사용 불가면 스토어 폴백.
+        val available = runCatching {
+            ShareClient.instance.isKakaoTalkSharingAvailable(context)
+        }.onFailure { OQLog.e("Kakao availability check failed", it) }.getOrDefault(false)
+        if (!available) {
+            fallbackToBrowser(KAKAO_TALK_STORE_URL)
+            return
+        }
+
         val templateArgs = mutableMapOf<String, String>(
             "TITLE" to data.title,
             "DESC" to data.description,
@@ -180,12 +216,8 @@ class OQSNSShareManager @Inject constructor(
             }
         }
 
-        if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
-            // Kakao SDK 의 shareCustom 콜백은 worker thread 에서 호출. UI 작업은 Main 에서.
-            shareCustomViaApp(templateId, templateArgs)
-        } else {
-            shareCustomViaWeb(templateId, templateArgs)
-        }
+        // Kakao SDK 의 shareCustom 콜백은 worker thread 에서 호출. UI 작업은 Main 에서.
+        shareCustomViaApp(templateId, templateArgs)
     }
 
     /** 카카오톡 앱 설치 → ShareClient.shareCustom 호출 후 받은 intent 로 앱 띄움. */
@@ -209,17 +241,6 @@ class OQSNSShareManager @Inject constructor(
                 if (cont.isActive) cont.resume(Unit)
             }
         }
-    }
-
-    /** 카카오톡 미설치 → 웹 공유 URL 생성 후 브라우저로 폴백. iOS `fallbackToSafari` 대응. */
-    private fun shareCustomViaWeb(templateId: Long, templateArgs: Map<String, String>) {
-        runCatching {
-            val sharerUrl = WebSharerClient.instance.makeCustomUrl(templateId, templateArgs)
-            val intent = Intent(Intent.ACTION_VIEW, sharerUrl).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
-        }.onFailure { OQLog.e("Kakao WebSharer fallback failed", it) }
     }
 
     /**
@@ -267,6 +288,25 @@ class OQSNSShareManager @Inject constructor(
         } catch (e: Exception) {
             OQLog.e("Failed to open browser: ${e.message}")
         }
+    }
+
+    /**
+     * 패키지 설치 여부. iOS `UIApplication.canOpenURL(스킴)` 대응.
+     * API 30+ 패키지 가시성 제한이 있어 manifest `<queries>` 에 대상 패키지가 선언돼 있어야 한다
+     * (com.instagram.android / com.kakao.talk 선언됨).
+     */
+    private fun isPackageInstalled(packageName: String): Boolean = runCatching {
+        context.packageManager.getPackageInfo(packageName, 0)
+        true
+    }.getOrDefault(false)
+
+    private companion object {
+        const val INSTAGRAM_PACKAGE = "com.instagram.android"
+        const val INSTAGRAM_STORE_URL =
+            "https://play.google.com/store/apps/details?id=$INSTAGRAM_PACKAGE"
+        // iOS 는 미설치 시 App Store 카카오톡 페이지로 보냄 — Play 스토어 등가.
+        const val KAKAO_TALK_STORE_URL =
+            "https://play.google.com/store/apps/details?id=com.kakao.talk"
     }
 
     // ───────── Instagram Stories 공유 헬퍼 ─────────

@@ -16,6 +16,10 @@ object Constants {
         const val IMAGE_BASE_URL: String = "https://barnote.net/images"
         const val AUTH_AUDIENCE: String = "https://barnote.net/"
 
+        // 법적 문서 링크 (자동 갱신 구독 심사 가이드라인 필수 정보) — iOS C.S.termsOfServiceUrl 대응.
+        const val TERMS_OF_SERVICE_URL: String = "$WEB_BASE_URL/terms_of_service"
+        const val PRIVACY_POLICY_URL: String = "$WEB_BASE_URL/privacy_policy"
+
         // SharedPreferences / DataStore 키
         const val LAST_SELECTED_TAB_KEY: String = "last_selected_tab"
         const val HAS_SEEN_ONBOARDING_KEY: String = "has_seen_onboarding"

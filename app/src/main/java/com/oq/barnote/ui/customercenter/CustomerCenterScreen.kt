@@ -86,9 +86,10 @@ internal fun CustomerCenterScreen(
                     contentDescription = null,
                     tint = textPrimary,
                     modifier = Modifier
-                        .size(Dimens.IconSize)
+                        .size(Dimens.FabHSize)
+                        .clip(CircleShape)
                         .clickable(onClick = onBack)
-                        .padding(4.dp),
+                        .padding(12.dp),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -104,9 +105,10 @@ internal fun CustomerCenterScreen(
                     contentDescription = null,
                     tint = accent,
                     modifier = Modifier
-                        .size(Dimens.IconSize)
+                        .size(Dimens.FabHSize)
+                        .clip(CircleShape)
                         .clickable { onEvent(CustomerCenterUiEvent.TappedReportBug) }
-                        .padding(4.dp),
+                        .padding(12.dp),
                 )
             }
 

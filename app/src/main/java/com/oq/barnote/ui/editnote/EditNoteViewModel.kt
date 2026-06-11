@@ -114,7 +114,8 @@ class EditNoteViewModel @Inject constructor(
             is EditNoteUiEvent.DetailChanged ->
                 _uiState.update {
                     // 0(미입력/초기화)은 키 제거 — 카운트 정확 + 슬라이더 완전 해제.
-                    val updated = if (event.value <= 0) {
+                    // 단 감정(feeling)은 Happy 의 rawValue 가 0 이라 이 규칙에서 제외 — 0도 유효한 선택값.
+                    val updated = if (event.value <= 0 && event.detail != NoteDetail.feeling) {
                         it.detailScores - event.detail
                     } else {
                         it.detailScores + (event.detail to event.value)

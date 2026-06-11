@@ -26,6 +26,8 @@ import com.oq.barnote.ui.util.RefreshOnResume
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -83,9 +85,10 @@ internal fun UserListScreen(
                     contentDescription = null,
                     tint = textPrimary,
                     modifier = Modifier
-                        .size(Dimens.IconSize)
+                        .size(Dimens.FabHSize)
+                        .clip(CircleShape)
                         .clickable(onClick = onBack)
-                        .padding(4.dp),
+                        .padding(12.dp),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -107,12 +110,13 @@ internal fun UserListScreen(
                         contentDescription = null,
                         tint = textPrimary,
                         modifier = Modifier
-                            .size(Dimens.IconSize)
+                            .size(Dimens.FabHSize)
+                            .clip(CircleShape)
                             .clickable { onEvent(UserListUiEvent.TappedSearch) }
-                            .padding(4.dp),
+                            .padding(12.dp),
                     )
                 } else {
-                    Spacer(modifier = Modifier.size(Dimens.IconSize))
+                    Spacer(modifier = Modifier.size(Dimens.FabHSize))
                 }
             }
 

@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -112,7 +114,9 @@ internal fun AddNoteScreen(
     // 닫기 흐름(입력 있으면 discard 확인)으로 보낸다. 제스처로 작성 내용이 사라지는 것 방지.
     BackHandler(enabled = true) { onEvent(AddNoteUiEvent.RequestClose) }
 
-    Box(modifier = Modifier.fillMaxSize().background(background)) {
+    // imePadding: 키보드가 올라오면 그 높이만큼 하단을 비워, 스크롤 영역(weight)과 하단 컨트롤 바가
+    // 키보드 위로 올라온다 — 맨 아래 노트(OQTE) 입력 시 키보드가 입력창을 가리던 문제 해결.
+    Box(modifier = Modifier.fillMaxSize().background(background).imePadding()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -125,10 +129,11 @@ internal fun AddNoteScreen(
                     contentDescription = null,
                     tint = textPrimary,
                     modifier = Modifier
-                        .size(Dimens.IconSize)
+                        .size(Dimens.FabHSize)
+                        .clip(CircleShape)
                         // iOS `closeButtonTapped` 대응 — 입력 있으면 discard alert, 없으면 즉시 종료.
                         .clickable { onEvent(AddNoteUiEvent.RequestClose) }
-                        .padding(4.dp),
+                        .padding(12.dp),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -141,7 +146,7 @@ internal fun AddNoteScreen(
                     ),
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Spacer(modifier = Modifier.size(Dimens.IconSize))
+                Spacer(modifier = Modifier.size(Dimens.FabHSize))
             }
 
             if (state.isLoadingExisting) {

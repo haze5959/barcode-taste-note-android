@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -29,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -97,7 +100,8 @@ internal fun EditNoteScreen(
     val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
     val palette = barNotePalette()
 
-    Box(modifier = Modifier.fillMaxSize().background(background)) {
+    // imePadding: 키보드가 입력창(하단 OQTE)을 가리지 않도록 키보드 높이만큼 하단을 비움 (AddNote 와 동일).
+    Box(modifier = Modifier.fillMaxSize().background(background).imePadding()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -110,9 +114,10 @@ internal fun EditNoteScreen(
                     contentDescription = null,
                     tint = textPrimary,
                     modifier = Modifier
-                        .size(Dimens.IconSize)
+                        .size(Dimens.FabHSize)
+                        .clip(CircleShape)
                         .clickable { onEvent(EditNoteUiEvent.RequestClose) }
-                        .padding(4.dp),
+                        .padding(12.dp),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -123,7 +128,7 @@ internal fun EditNoteScreen(
                     ),
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Spacer(modifier = Modifier.size(Dimens.IconSize))
+                Spacer(modifier = Modifier.size(Dimens.FabHSize))
             }
 
             if (state.isLoading) {

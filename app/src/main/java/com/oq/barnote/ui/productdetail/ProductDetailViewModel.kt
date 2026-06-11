@@ -159,6 +159,7 @@ class ProductDetailViewModel @Inject constructor(
     private val notificationScheduler: NotificationScheduler,
     private val noteTranslator: NoteTranslator,
     private val haptic: com.oq.barnote.core.oqcore.utils.OQHapticService,
+    private val productHandoff: com.oq.barnote.ui.util.ProductHandoff,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -194,6 +195,9 @@ class ProductDetailViewModel @Inject constructor(
                     if (isOverFreeNoteLimit()) {
                         _navEffect.send(ProductDetailNavEffect.GoSubscription)
                     } else {
+                        // iOS `addNote(.init(product: product))` 대응 — 이미 가진 product 객체를
+                        // 핸드오프로 전달해 AddNote 가 제품 정보를 재조회하지 않도록 한다.
+                        productHandoff.put(product)
                         _navEffect.send(ProductDetailNavEffect.AddNote(product.id))
                     }
                 }
@@ -544,12 +548,20 @@ class ProductDetailViewModel @Inject constructor(
                     .putBoolean(Constants.S.HAS_CONFIRMED_RESERVATION_KEY, true)
                     .apply()
                 // iOS ProductDetailFeature(~396-410): "{HH:mm} 시음 노트 알림 예약" 타이틀 +
-                // "내일 이 시간에 알림을 드릴게요." 서브타이틀 + "설정" 액션(→ 예약 설정 화면).
+                // "설정" 액션(→ 예약 설정 화면). 예약 정책이 '다음 도래 시각'이라 서브타이틀은
+                // 예약일이 오늘이면 "오늘", 내일이면 "내일"로 분기.
                 val timeString = formatScheduledTime(reservation.scheduledDate)
+                val isToday = runCatching {
+                    Instant.parse(reservation.scheduledDate).atZone(ZoneId.systemDefault())
+                        .toLocalDate() == java.time.LocalDate.now(ZoneId.systemDefault())
+                }.getOrDefault(false)
                 appController.showToast(
                     OQToastConfig(
                         title = context.getString(R.string.sieum_noteu_alrim_yeyag, timeString),
-                        subTitle = context.getString(R.string.naeil_i_sigane_alrimeul_deurilgeyo),
+                        subTitle = context.getString(
+                            if (isToday) R.string.oneul_i_sigane_alrimeul_deurilgeyo
+                            else R.string.naeil_i_sigane_alrimeul_deurilgeyo,
+                        ),
                         icon = Icons.Filled.CalendarMonth,
                         position = OQToastPosition.Top,
                         button = OQToastButton(

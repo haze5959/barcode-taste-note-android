@@ -6,6 +6,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,6 +42,7 @@ import java.io.File
 fun AICameraRoute(
     onBack: () -> Unit,
     onProductCreated: (productId: String, productName: String) -> Unit,
+    onGoAddProduct: (barcode: String?) -> Unit,
     viewModel: AICameraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -48,6 +53,7 @@ fun AICameraRoute(
                 is AICameraNavEffect.ProductCreated ->
                     onProductCreated(effect.productId, effect.productName)
                 AICameraNavEffect.Cancelled -> onBack()
+                is AICameraNavEffect.GoAddProduct -> onGoAddProduct(effect.barcode)
             }
         }
     }
@@ -136,4 +142,29 @@ internal fun AICameraScreen(
     // 시스템 카메라가 화면을 덮고, 촬영 후 AI 분석 로딩은 글로벌 GlobalAiScanLoadingOverlay 가 표시.
     // 따라서 이 화면 본체는 전환 중 단순 검정 배경.
     Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+
+    // AI 인식 실패 — 일반 에러 팝업 대신 직접 등록을 유도하는 전용 알럿. iOS `showAiScanFailedAlert` 대응.
+    if (state.showAiScanFailedAlert) {
+        AlertDialog(
+            onDismissRequest = { onEvent(AICameraUiEvent.DismissAiScanFailedAlert) },
+            title = { Text(text = stringResource(R.string.ai_seukaen_silpae)) },
+            text = {
+                Text(
+                    text = stringResource(
+                        R.string.imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka,
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(AICameraUiEvent.ConfirmDirectRegistration) }) {
+                    Text(text = stringResource(R.string.jepum_jigjeob_deungroghagi))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(AICameraUiEvent.DismissAiScanFailedAlert) }) {
+                    Text(text = stringResource(R.string.dadgi))
+                }
+            },
+        )
+    }
 }

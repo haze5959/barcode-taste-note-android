@@ -411,6 +411,8 @@ private fun OQImageEditorContent(
                     text = stringResource(R.string.common_done),
                     color = palette.accent,
                     fontWeight = FontWeight.Bold,
+                    // 헤더 핵심 액션 — TextButton 기본 라벨(14sp)이 작아 titleMedium(16sp)로 키움.
+                    style = MaterialTheme.typography.titleMedium,
                 )
             }
         }

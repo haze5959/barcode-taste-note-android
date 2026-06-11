@@ -230,20 +230,10 @@ private fun OnboardingContent(
     ) {
         DecorativeOrbs(gradient = accentGradient)
 
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-        ) { page ->
-            OnboardingPageContent(
-                page = onboardingPages[page],
-                productCount = animatedProductCount,
-                accentGradient = accentGradient,
-                textPrimary = textPrimary,
-                textSecondary = textSecondary,
-                accent = accent,
-            )
-        }
-
+        // TopBar / Pager / BottomBar 를 한 Column 에 배치 — 페이지 콘텐츠(설명 문구)가 BottomBar 와
+        // 같은 레이아웃 축을 공유해 어떤 화면 크기/내비게이션 바에서도 구조적으로 겹치지 않는다.
+        // (기존: 풀스크린 pager 위 BottomBar 오버레이 + 페이지 하단 96dp 고정 예약 → 3버튼 내비 등
+        //  inset 이 큰 기기에서 BottomBar 가 예약 영역을 넘어 문구와 겹치고, 큰 화면에선 과한 여백)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -257,7 +247,21 @@ private fun OnboardingContent(
                 surfaceSecondary = surfaceSecondary,
                 onSkip = onDismiss,
             )
-            Spacer(modifier = Modifier.weight(1f))
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            ) { page ->
+                OnboardingPageContent(
+                    page = onboardingPages[page],
+                    productCount = animatedProductCount,
+                    accentGradient = accentGradient,
+                    textPrimary = textPrimary,
+                    textSecondary = textSecondary,
+                    accent = accent,
+                )
+            }
             BottomBar(
                 isLastPage = pagerState.currentPage >= onboardingPages.size - 1,
                 accentGradient = accentGradient,
@@ -415,10 +419,10 @@ private fun OnboardingPageContent(
     textSecondary: Color,
     accent: Color,
 ) {
+    // TopBar/BottomBar 와 같은 Column 축에 있어 별도 top 패딩·하단 고정 예약이 불필요 —
+    // 1:2 weight 스페이서로 카드가 중앙보다 살짝 위, 문구가 그 아래 오는 비율만 유지한다.
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 56.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.weight(1f))
@@ -553,7 +557,6 @@ private fun OnboardingPageContent(
         }
 
         Spacer(modifier = Modifier.weight(2f))
-        Spacer(modifier = Modifier.height(96.dp))
     }
 }
 
@@ -569,7 +572,10 @@ private fun BottomBar(
             .padding(
                 start = Dimens.BtnPadding,
                 end = Dimens.BtnPadding,
-                bottom = 8.dp,
+                // 위 설명 문구와의 최소 간격(weight 스페이서가 0 으로 줄어드는 작은 화면 대비) +
+                // 시스템 내비 inset 위 약간의 여백.
+                top = Dimens.Padding,
+                bottom = Dimens.Padding,
             ),
     ) {
         Row(

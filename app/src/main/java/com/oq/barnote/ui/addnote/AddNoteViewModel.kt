@@ -118,6 +118,7 @@ class AddNoteViewModel @Inject constructor(
     private val reservationStore: ReservationStore,
     private val notificationScheduler: NotificationScheduler,
     private val hapticService: OQHapticService,
+    private val productHandoff: com.oq.barnote.ui.util.ProductHandoff,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -132,7 +133,21 @@ class AddNoteViewModel @Inject constructor(
             is AddNoteUiEvent.OnAppear -> {
                 if (_uiState.value.productId.isEmpty()) {
                     _uiState.update { it.copy(productId = event.productId) }
-                    fetchProduct(event.productId)
+                    // iOS `AddNoteFeature.State(product:)` 대응 — 발신 화면(제품상세 등)이 핸드오프로
+                    // 건넨 product 객체가 있으면 그대로 사용해 서버 재조회를 생략한다.
+                    // (프로세스 재생성/딥링크 등으로 비어 있으면 기존 조회로 폴백)
+                    val handed = productHandoff.take(event.productId)
+                    if (handed != null) {
+                        _uiState.update {
+                            it.copy(
+                                productName = handed.name,
+                                productDescription = handed.desc,
+                                productType = handed.type,
+                            )
+                        }
+                    } else {
+                        fetchProduct(event.productId)
+                    }
                 }
             }
             is AddNoteUiEvent.RatingChanged ->
@@ -151,7 +166,8 @@ class AddNoteViewModel @Inject constructor(
             is AddNoteUiEvent.DetailChanged -> {
                 _uiState.update { state ->
                     // 0(미입력/초기화)은 키 자체를 제거 — "N개 평가 완료" 카운트 정확 + 슬라이더 완전 해제.
-                    val updated = if (event.value <= 0) {
+                    // 단 감정(feeling)은 Happy 의 rawValue 가 0 이라 이 규칙에서 제외 — 0도 유효한 선택값.
+                    val updated = if (event.value <= 0 && event.detail != NoteDetail.feeling) {
                         state.detailScores - event.detail
                     } else {
                         state.detailScores + (event.detail to event.value)

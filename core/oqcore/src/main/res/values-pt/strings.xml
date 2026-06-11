@@ -30,7 +30,7 @@ Para fotos do iCloud ou panorâmicas, abra-as primeiro no aplicativo Fotos e ten
     <string name="error_module_error">Erro no módulo interno do aplicativo.</string>
     <string name="error_network_invalid_response">Resposta inválida do servidor.</string>
     <string name="error_network_invalid_url">Acesso inválido.</string>
-    <string name="error_network_status_code_lld">Falha na comunicação com o servidor (Código: %d)</string>
+    <string name="error_network_status_code_lld">A conexão está instável. Tente novamente mais tarde. (Código: %d)</string>
     <string name="error_network_transport_failed">A conexão de rede está instável.</string>
     <string name="error_network_unauthorized">A sessão expirou ou você não tem permissão.</string>
     <string name="error_translation_failed">A tradução não é suportada para este idioma ou ocorreu um erro.</string>

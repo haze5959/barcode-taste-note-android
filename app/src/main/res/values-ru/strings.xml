@@ -5,6 +5,7 @@
     <string name="aembeo_eil">Эмбер-эль</string>
     <string name="ai_bunseog_jung">ИИ анализирует...</string>
     <string name="ai_seukaen_enjin">Механизм сканирования ИИ</string>
+    <string name="ai_seukaen_silpae">Сбой ИИ-сканирования</string>
     <string name="ai_seukaenhagi">Сканировать с помощью ИИ</string>
     <string name="airisi_wiseuki">Ирландский виски</string>
     <string name="ajig_i_jepume_daehae_jagseonghan_noteuga_eobseoyo">Вы еще не писали заметок об этом продукте.</string>
@@ -154,6 +155,7 @@
     <string name="gudog_gwanri">Управление подпиской</string>
     <string name="gudog_jeongbo">Информация о подписке</string>
     <string name="gudoghagi">Подписаться</string>
+    <string name="gudogeun_gigan_jongryo_24sigan_jeonggaji_haejihaji_anheumyeon">Подписка продлевается автоматически, если не отменить её не позднее чем за 24 часа до окончания текущего периода.</string>
     <string name="gudogja">Подписчики</string>
     <string name="gurisbic_saegsange_hobgwa_molteuga_gyunhyeong_jabhin_sangmye">Эль верхового брожения медного оттенка, со сбалансированными хмелем и солодом.</string>
     <string name="gurisbic_saegsangui_gyunhyeong_jabhin_kaereomel_molteu_eil">Эль медного цвета со сбалансированным карамельно-солодовым характером.</string>
@@ -212,6 +214,7 @@
     <string name="imi_deungrogdoen_jepumieyo">Этот продукт уже зарегистрирован!</string>
     <string name="imiji">Изображение</string>
     <string name="imiji_ceombu">Прикрепить изображение</string>
+    <string name="imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka">Не удалось распознать информацию о продукте на изображении.\nПопробуйте отсканировать ещё раз или добавьте продукт вручную.</string>
     <string name="ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida">Это действие необратимо и удалит все ваши данные.</string>
     <string name="inseuta_web_kakaotogeuro_nae_sieumnoteu_mogroggwa_jeulgyeoca">Поделитесь своим списком дегустационных заметок и любимыми продуктами через Instagram, Web и т. д.</string>
     <string name="inseuta_web_kakaotogeuro_sieumnoteureul_gongyuhal_su_issseub">Вы можете поделиться своей дегустационной заметкой через Instagram, Web и т. д.</string>
@@ -348,6 +351,7 @@
     <string name="naebonaegi">Экспорт</string>
     <string name="naecureol_wain">Натуральное вино</string>
     <string name="naeil_i_sigane_alrimeul_deurilgeyo">Я напомню вам завтра в это время.</string>
+    <string name="oneul_i_sigane_alrimeul_deurilgeyo">Я напомню вам сегодня в это время.</string>
     <string name="naeil_sieumnoteu_jagseong_alrimeul_bonaedeurilggayo">Отправить вам напоминание о дегустационной заметке завтра?</string>
     <string name="naeyong">Содержание</string>
     <string name="nagagi">Выход</string>
@@ -462,6 +466,7 @@
     <string name="sayongja_cadan">Заблокировать пользователя</string>
     <string name="semiyong">Семильон</string>
     <string name="seobiseu_iyongyaggwan">Условия обслуживания</string>
+    <string name="iyongyaggwan_eula">Условия использования (EULA)</string>
     <string name="seoljeong">Настройки</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">Пожалуйста, разрешите уведомления в настройках.</string>
     <string name="alrim_gwonhani_pilyohabnida">Требуется разрешение на уведомления.</string>

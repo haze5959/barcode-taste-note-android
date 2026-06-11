@@ -5,6 +5,7 @@
     <string name="aembeo_eil">Amber Ale</string>
     <string name="ai_bunseog_jung">AI Analyzing...</string>
     <string name="ai_seukaen_enjin">AI Scan Engine</string>
+    <string name="ai_seukaen_silpae">AI Scan Failed</string>
     <string name="ai_seukaenhagi">Scan with AI</string>
     <string name="airisi_wiseuki">Irish Whiskey</string>
     <string name="ajig_i_jepume_daehae_jagseonghan_noteuga_eobseoyo">You haven\'t written any notes for this product yet.</string>
@@ -155,6 +156,7 @@ to write tasting notes quickly and accurately.</string>
     <string name="gudog_gwanri">Manage Subscription</string>
     <string name="gudog_jeongbo">Subscription Info</string>
     <string name="gudoghagi">Subscribe</string>
+    <string name="gudogeun_gigan_jongryo_24sigan_jeonggaji_haejihaji_anheumyeon">Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period.</string>
     <string name="gudogja">Subscribers</string>
     <string name="gurisbic_saegsange_hobgwa_molteuga_gyunhyeong_jabhin_sangmye">Top-fermented ale with a copper hue and balanced hop and malt character.</string>
     <string name="gurisbic_saegsangui_gyunhyeong_jabhin_kaereomel_molteu_eil">Copper-colored ale with balanced caramel malt character.</string>
@@ -213,6 +215,7 @@ Please check the search results.</string>
     <string name="imi_deungrogdoen_jepumieyo">This product is already registered!</string>
     <string name="imiji">Image</string>
     <string name="imiji_ceombu">Attach Image</string>
+    <string name="imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka">We couldn\'t recognize product information from the image.\nTry scanning again or register the product manually.</string>
     <string name="ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida">This cannot be undone and deletes all your data.</string>
     <string name="inseuta_web_kakaotogeuro_nae_sieumnoteu_mogroggwa_jeulgyeoca">Share your tasting note list and favorite products via Instagram, Web, etc.</string>
     <string name="inseuta_web_kakaotogeuro_sieumnoteureul_gongyuhal_su_issseub">You can share your tasting note via Instagram, Web, etc.</string>
@@ -350,6 +353,7 @@ You can check your tasted products in My Page even without writing a note.</stri
     <string name="naebonaegi">Export</string>
     <string name="naecureol_wain">Natural Wine</string>
     <string name="naeil_i_sigane_alrimeul_deurilgeyo">I\'ll remind you at this time tomorrow.</string>
+    <string name="oneul_i_sigane_alrimeul_deurilgeyo">I\'ll remind you at this time today.</string>
     <string name="naeil_sieumnoteu_jagseong_alrimeul_bonaedeurilggayo">Shall we send you a tasting note reminder tomorrow?</string>
     <string name="naeyong">Content</string>
     <string name="nagagi">Exit</string>
@@ -464,6 +468,7 @@ Your drafts are securely saved!</string>
     <string name="sayongja_cadan">Block User</string>
     <string name="semiyong">Sémillon</string>
     <string name="seobiseu_iyongyaggwan">Terms of Service</string>
+    <string name="iyongyaggwan_eula">Terms of Use (EULA)</string>
     <string name="seoljeong">Settings</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">Please allow notifications in settings.</string>
     <string name="alrim_gwonhani_pilyohabnida">Notification permission required.</string>

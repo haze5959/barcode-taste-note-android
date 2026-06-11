@@ -321,7 +321,8 @@ private fun TopBar(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = null,
             tint = textPrimary,
-            modifier = Modifier.size(Dimens.IconSize).clickable(onClick = onBack).padding(4.dp),
+            modifier = Modifier.size(Dimens.FabHSize).clip(CircleShape)
+                .clickable(onClick = onBack).padding(12.dp),
         )
         // 제목은 back·우측 아이콘 사이 남는 공간만 차지(weight) + 길면 … 처리.
         // weight/ellipsis 가 없으면 긴 제목이 우측 버튼을 화면 밖으로 밀어낸다.
@@ -343,15 +344,15 @@ private fun TopBar(
                 imageVector = Icons.Filled.Edit,
                 contentDescription = null,
                 tint = textPrimary,
-                modifier = Modifier.size(Dimens.IconSize)
-                    .clickable { onEvent(NoteDetailUiEvent.TappedEdit) }.padding(4.dp),
+                modifier = Modifier.size(Dimens.FabHSize).clip(CircleShape)
+                    .clickable { onEvent(NoteDetailUiEvent.TappedEdit) }.padding(12.dp),
             )
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = null,
                 tint = textPrimary,
-                modifier = Modifier.size(Dimens.IconSize)
-                    .clickable { onEvent(NoteDetailUiEvent.TappedDelete) }.padding(4.dp),
+                modifier = Modifier.size(Dimens.FabHSize).clip(CircleShape)
+                    .clickable { onEvent(NoteDetailUiEvent.TappedDelete) }.padding(12.dp),
             )
         } else if (hasInfo) {
             var menuOpen by remember { mutableStateOf(false) }
@@ -360,8 +361,8 @@ private fun TopBar(
                     imageVector = Icons.Filled.MoreVert,
                     contentDescription = null,
                     tint = textPrimary,
-                    modifier = Modifier.size(Dimens.IconSize)
-                        .clickable { menuOpen = true }.padding(4.dp),
+                    modifier = Modifier.size(Dimens.FabHSize).clip(CircleShape)
+                        .clickable { menuOpen = true }.padding(12.dp),
                 )
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(

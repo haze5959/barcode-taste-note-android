@@ -184,6 +184,9 @@ internal fun SubscriptionScreen(
                 TopBar(onBack = onBack)
                 HeaderSection(modifier = Modifier.appearAnim(appeared, delayMillis = 40))
                 FeatureList(appeared = appeared)
+                // 자동 갱신 구독 필수 고지 — 갱신 정책 안내와 이용약관(EULA)·개인정보 처리방침 링크를
+                // 페이월에 직접 노출. iOS SubscriptionView HeaderView 의 고지 블록 대응.
+                AutoRenewalNotice(modifier = Modifier.appearAnim(appeared, delayMillis = 460))
                 if (state.isSubscribed) {
                     ActiveSubscriptionBanner(
                         modifier = Modifier.appearAnim(appeared, delayMillis = 460)
@@ -258,9 +261,10 @@ private fun TopBar(onBack: () -> Unit) {
             contentDescription = null,
             tint = textPrimary,
             modifier = Modifier
-                .size(Dimens.IconSize)
+                .size(Dimens.FabHSize)
+                .clip(CircleShape)
                 .clickable(onClick = onBack)
-                .padding(4.dp),
+                .padding(12.dp),
         )
     }
 }
@@ -516,7 +520,7 @@ private fun PolicyLinks() {
             style = MaterialTheme.typography.labelMedium.copy(color = textSecondary),
             modifier = Modifier
                 .clickable {
-                    OQSafariView.open(context, "${Constants.S.WEB_BASE_URL}/terms_of_service")
+                    OQSafariView.open(context, Constants.S.TERMS_OF_SERVICE_URL)
                 }
                 .padding(Dimens.Padding),
         )
@@ -529,10 +533,58 @@ private fun PolicyLinks() {
             style = MaterialTheme.typography.labelMedium.copy(color = textSecondary),
             modifier = Modifier
                 .clickable {
-                    OQSafariView.open(context, "${Constants.S.WEB_BASE_URL}/privacy_policy")
+                    OQSafariView.open(context, Constants.S.PRIVACY_POLICY_URL)
                 }
                 .padding(Dimens.Padding),
         )
+    }
+}
+
+/**
+ * 자동 갱신 구독 필수 고지. iOS `SubscriptionView` HeaderView 의 고지 블록 대응 —
+ * 갱신 정책 캡션 + 이용약관(EULA)/개인정보 처리방침 링크를 페이월 본문에 직접 노출.
+ */
+@Composable
+private fun AutoRenewalNotice(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    val textSecondary =
+        colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.SectionSpacing)
+            .padding(top = Dimens.Spacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+    ) {
+        Text(
+            text = stringResource(R.string.gudogeun_gigan_jongryo_24sigan_jeonggaji_haejihaji_anheumyeon),
+            style = MaterialTheme.typography.labelSmall.copy(color = textSecondary),
+            textAlign = TextAlign.Center,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing)) {
+            Text(
+                text = stringResource(R.string.iyongyaggwan_eula),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = accent,
+                    fontWeight = FontWeight.Medium,
+                ),
+                modifier = Modifier
+                    .clickable { OQSafariView.open(context, Constants.S.TERMS_OF_SERVICE_URL) }
+                    .padding(vertical = 2.dp),
+            )
+            Text(
+                text = stringResource(R.string.gaeinjeongbo_ceoribangcim),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = accent,
+                    fontWeight = FontWeight.Medium,
+                ),
+                modifier = Modifier
+                    .clickable { OQSafariView.open(context, Constants.S.PRIVACY_POLICY_URL) }
+                    .padding(vertical = 2.dp),
+            )
+        }
     }
 }
 

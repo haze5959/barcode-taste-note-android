@@ -78,8 +78,10 @@ fun OQSNSShareBottomSheet(
                         ShareItem(type = type, palette = palette) {
                             coroutineScope.launch {
                                 sheetState.hide()
-                                onDismiss()
+                                // share() 는 매니저 자체 스코프에서 fire-and-forget 으로 즉시 반환 —
+                                // onDismiss() 로 시트가 dispose 되어 이 코루틴이 취소돼도 공유는 계속 진행.
                                 manager.share(type, data)
+                                onDismiss()
                             }
                         }
                     }

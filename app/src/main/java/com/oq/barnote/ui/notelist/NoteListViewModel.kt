@@ -99,6 +99,7 @@ class NoteListViewModel @Inject constructor(
     private val appController: AppController,
     private val preferences: NoteListPreferences,
     private val userStore: UserStore,
+    private val productHandoff: com.oq.barnote.ui.util.ProductHandoff,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NoteListUiState())
@@ -185,6 +186,8 @@ class NoteListViewModel @Inject constructor(
                     if (userStore.noteCount.value >= Constants.N.FREE_NOTE_COUNT && !isSubscribed) {
                         _navEffect.send(NoteListNavEffect.GoSubscription)
                     } else {
+                        // iOS 와 동일하게 product 객체를 핸드오프로 전달 — AddNote 재조회 생략.
+                        productHandoff.put(alert.product)
                         _navEffect.send(NoteListNavEffect.AddNote(alert.product.id))
                     }
                 }

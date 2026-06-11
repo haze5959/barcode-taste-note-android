@@ -30,7 +30,7 @@ Per foto di iCloud o panoramiche, aprile prima nell\'app Foto e riprova.</string
     <string name="error_module_error">Errore del modulo interno dell\'app.</string>
     <string name="error_network_invalid_response">Risposta del server non valida.</string>
     <string name="error_network_invalid_url">Accesso non valido.</string>
-    <string name="error_network_status_code_lld">Comunicazione con il server non riuscita (Codice: %d)</string>
+    <string name="error_network_status_code_lld">La connessione è instabile. Riprova più tardi. (Codice: %d)</string>
     <string name="error_network_transport_failed">La connessione di rete è instabile.</string>
     <string name="error_network_unauthorized">La sessione è scaduta o non si dispone delle autorizzazioni.</string>
     <string name="error_translation_failed">La traduzione non è supportata per questa lingua o si è verificato un errore.</string>

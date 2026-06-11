@@ -30,7 +30,7 @@
     <string name="error_module_error">Внутренняя ошибка модуля приложения.</string>
     <string name="error_network_invalid_response">Недопустимый ответ сервера.</string>
     <string name="error_network_invalid_url">Недопустимый доступ.</string>
-    <string name="error_network_status_code_lld">Сбой связи с сервером (Код: %d)</string>
+    <string name="error_network_status_code_lld">Соединение нестабильно. Повторите попытку позже. (Код: %d)</string>
     <string name="error_network_transport_failed">Сетевое соединение нестабильно.</string>
     <string name="error_network_unauthorized">Срок действия входа истек или у вас нет разрешения.</string>
     <string name="error_translation_failed">Перевод не поддерживается для этого языка или произошла ошибка.</string>

@@ -30,7 +30,7 @@
     <string name="error_module_error">应用程序内部模块错误。</string>
     <string name="error_network_invalid_response">服务器响应无效。</string>
     <string name="error_network_invalid_url">无效的访问。</string>
-    <string name="error_network_status_code_lld">服务器通信失败（代码：%d）</string>
+    <string name="error_network_status_code_lld">网络连接不稳定，请稍后重试。（代码：%d）</string>
     <string name="error_network_transport_failed">网络连接不稳定。</string>
     <string name="error_network_unauthorized">登录已过期或您没有权限。</string>
     <string name="error_translation_failed">翻译不支持此语言或发生错误。</string>

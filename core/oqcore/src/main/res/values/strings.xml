@@ -30,7 +30,7 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="error_module_error">Internal error</string>
     <string name="error_network_invalid_response">Invalid server response</string>
     <string name="error_network_invalid_url">Invalid access</string>
-    <string name="error_network_status_code_lld">Server error: %d</string>
+    <string name="error_network_status_code_lld">Connection is unstable. Please try again later. (Code: %d)</string>
     <string name="error_network_transport_failed">Network connection failed</string>
     <string name="error_network_unauthorized">Unauthorized</string>
     <string name="error_translation_failed">Translation is not supported for this language or an error occurred.</string>

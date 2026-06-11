@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,12 +68,13 @@ fun OQTopBar(
                 contentDescription = null,
                 tint = palette.textPrimary,
                 modifier = Modifier
-                    .size(NAV_ICON_SIZE)
+                    .size(NAV_TOUCH_SIZE)
+                    .clip(CircleShape)
                     .clickable(onClick = onNavClick)
-                    .padding(4.dp),
+                    .padding(12.dp),
             )
         } else {
-            Spacer(modifier = Modifier.size(NAV_ICON_SIZE))
+            Spacer(modifier = Modifier.size(NAV_TOUCH_SIZE))
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -92,10 +95,11 @@ fun OQTopBar(
             trailing()
         } else {
             // 타이틀을 정확히 가운데 두기 위해 좌측 아이콘과 동일 폭의 대칭 Spacer.
-            Spacer(modifier = Modifier.size(NAV_ICON_SIZE))
+            Spacer(modifier = Modifier.size(NAV_TOUCH_SIZE))
         }
     }
 }
 
-// Dimens.IconSize (designsystem) 와 동일 값. oqcore 는 designsystem 에 의존하지 않아 리터럴 사용.
-private val NAV_ICON_SIZE = 28.dp
+// 최소 터치 타깃 48dp(Material). 아이콘 시각 크기는 내부 padding(12dp)으로 24dp.
+// oqcore 는 designsystem 에 의존하지 않아 리터럴 사용.
+private val NAV_TOUCH_SIZE = 48.dp

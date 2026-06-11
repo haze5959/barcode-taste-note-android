@@ -180,9 +180,10 @@ internal fun BarcodeScannerScreen(
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier
-                        .size(Dimens.IconSize)
+                        .size(Dimens.FabHSize)
+                        .clip(CircleShape)
                         .clickable(onClick = onBack)
-                        .padding(4.dp),
+                        .padding(12.dp),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(

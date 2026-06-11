@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import com.oq.barnote.core.domain.Product
 import com.oq.barnote.core.oqcore.R
+import com.oq.barnote.core.oqcore.utils.OQLog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -31,16 +32,20 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION_NOTE_RESERVATION) return
+        OQLog.i("[Reservation] 알람 수신: id=${intent.getStringExtra(EXTRA_RESERVATION_ID)}")
 
-        val reservationId = intent.getStringExtra(EXTRA_RESERVATION_ID) ?: return
-        val productJson = intent.getStringExtra(EXTRA_PRODUCT_JSON) ?: return
+        val reservationId = intent.getStringExtra(EXTRA_RESERVATION_ID)
+            ?: return OQLog.w("[Reservation] reservationId 누락 — 알림 표시 생략")
+        val productJson = intent.getStringExtra(EXTRA_PRODUCT_JSON)
+            ?: return OQLog.w("[Reservation] productJson 누락 — 알림 표시 생략")
         val product = runCatching { json.decodeFromString(Product.serializer(), productJson) }
-            .getOrNull() ?: return
+            .getOrNull()
+            ?: return OQLog.w("[Reservation] product 디코딩 실패 — 알림 표시 생략")
 
         val tapIntent = NotificationTapDispatch.launchIntent(context)?.apply {
             putExtra(NotificationTapDispatch.EXTRA_TYPE, NotificationTapDispatch.TYPE_NOTE_RESERVATION)
             putExtra(NotificationTapDispatch.EXTRA_PRODUCT_JSON, productJson)
-        } ?: return
+        } ?: return OQLog.w("[Reservation] launchIntent null — 알림 표시 생략")
 
         val tapPendingIntent = PendingIntent.getActivity(
             context,
@@ -67,6 +72,7 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
 
         context.getSystemService<NotificationManager>()
             ?.notify(reservationId.hashCode(), notification)
+        OQLog.i("[Reservation] 알림 표시 완료: id=$reservationId")
     }
 
     companion object {

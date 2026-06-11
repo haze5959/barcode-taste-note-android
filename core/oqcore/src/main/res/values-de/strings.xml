@@ -30,7 +30,7 @@
     <string name="error_module_error">Interner Modulfehler der App.</string>
     <string name="error_network_invalid_response">Ungültige Serverantwort.</string>
     <string name="error_network_invalid_url">Ungültiger Zugriff.</string>
-    <string name="error_network_status_code_lld">Serverkommunikation fehlgeschlagen (Code: %d)</string>
+    <string name="error_network_status_code_lld">Die Verbindung ist instabil. Bitte versuchen Sie es später erneut. (Code: %d)</string>
     <string name="error_network_transport_failed">Netzwerkverbindung ist instabil.</string>
     <string name="error_network_unauthorized">Anmeldung ist abgelaufen oder Sie haben keine Berechtigung.</string>
     <string name="error_translation_failed">Die Übersetzung wird für diese Sprache nicht unterstützt oder es ist ein Fehler aufgetreten.</string>

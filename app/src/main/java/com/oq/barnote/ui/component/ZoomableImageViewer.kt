@@ -198,7 +198,7 @@ fun ZoomableImageViewer(
                     .clip(CircleShape)
                     .background(Color.Black.copy(alpha = 0.45f))
                     .clickable(onClick = onDismiss)
-                    .padding(6.dp),
+                    .padding(10.dp),
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,

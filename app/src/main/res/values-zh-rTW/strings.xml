@@ -5,6 +5,7 @@
     <string name="aembeo_eil">琥珀艾爾</string>
     <string name="ai_bunseog_jung">AI 正在分析...</string>
     <string name="ai_seukaen_enjin">AI掃描引擎</string>
+    <string name="ai_seukaen_silpae">AI 掃描失敗</string>
     <string name="ai_seukaenhagi">使用 AI 掃描</string>
     <string name="airisi_wiseuki">愛爾蘭威士忌</string>
     <string name="ajig_i_jepume_daehae_jagseonghan_noteuga_eobseoyo">您還沒有為該產品寫過筆記。</string>
@@ -154,6 +155,7 @@
     <string name="gudog_gwanri">管理訂閱</string>
     <string name="gudog_jeongbo">訂閱資訊</string>
     <string name="gudoghagi">訂閱</string>
+    <string name="gudogeun_gigan_jongryo_24sigan_jeonggaji_haejihaji_anheumyeon">除非在目前訂閱期結束前至少24小時取消，否則訂閱將自動續訂。</string>
     <string name="gudogja">訂閱者</string>
     <string name="gurisbic_saegsange_hobgwa_molteuga_gyunhyeong_jabhin_sangmye">銅色的上發酵艾爾，啤酒花與麥芽達到良好平衡。</string>
     <string name="gurisbic_saegsangui_gyunhyeong_jabhin_kaereomel_molteu_eil">銅色色調、焦糖麥芽風味均衡的艾爾。</string>
@@ -212,6 +214,7 @@
     <string name="imi_deungrogdoen_jepumieyo">該產品已註冊！</string>
     <string name="imiji">圖片</string>
     <string name="imiji_ceombu">附件圖像</string>
+    <string name="imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka">無法從圖片中識別產品資訊。\n請重新掃描或手動註冊產品。</string>
     <string name="ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida">此操作無法撤銷，將刪除您的所有資料。</string>
     <string name="inseuta_web_kakaotogeuro_nae_sieumnoteu_mogroggwa_jeulgyeoca">透過Instagram、Web等分享您的品酒筆記列表和收藏的產品。</string>
     <string name="inseuta_web_kakaotogeuro_sieumnoteureul_gongyuhal_su_issseub">您可以透過Instagram、Web等分享您的品酒筆記。</string>
@@ -348,6 +351,7 @@ AI 將分析標籤並提取資訊。</string>
     <string name="naebonaegi">匯出</string>
     <string name="naecureol_wain">自然酒</string>
     <string name="naeil_i_sigane_alrimeul_deurilgeyo">明天這個時候我會提醒您。</string>
+    <string name="oneul_i_sigane_alrimeul_deurilgeyo">今天這個時候我會提醒您。</string>
     <string name="naeil_sieumnoteu_jagseong_alrimeul_bonaedeurilggayo">明天給您發送品鑑筆記提醒嗎？</string>
     <string name="naeyong">內容</string>
     <string name="nagagi">退出</string>
@@ -462,6 +466,7 @@ AI 將分析標籤並提取資訊。</string>
     <string name="sayongja_cadan">封鎖用戶</string>
     <string name="semiyong">榭密雍</string>
     <string name="seobiseu_iyongyaggwan">服務條款</string>
+    <string name="iyongyaggwan_eula">使用條款（EULA）</string>
     <string name="seoljeong">設定</string>
     <string name="seoljeongeseo_alrimeul_heoyonghaejuseyo">請在設定中允許通知。</string>
     <string name="alrim_gwonhani_pilyohabnida">需要通知權限。</string>

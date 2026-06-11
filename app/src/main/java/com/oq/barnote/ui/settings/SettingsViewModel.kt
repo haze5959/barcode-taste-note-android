@@ -122,9 +122,9 @@ class SettingsViewModel @Inject constructor(
             SettingsUiEvent.DismissShareSheet ->
                 _uiState.update { it.copy(fileToShareUri = null) }
             SettingsUiEvent.TappedPrivacyPolicy ->
-                emitNav(SettingsNavEffect.OpenInAppBrowser("${Constants.S.WEB_BASE_URL}/privacy_policy"))
+                emitNav(SettingsNavEffect.OpenInAppBrowser(Constants.S.PRIVACY_POLICY_URL))
             SettingsUiEvent.TappedTermsOfService ->
-                emitNav(SettingsNavEffect.OpenInAppBrowser("${Constants.S.WEB_BASE_URL}/terms_of_service"))
+                emitNav(SettingsNavEffect.OpenInAppBrowser(Constants.S.TERMS_OF_SERVICE_URL))
         }
     }
 
@@ -195,6 +195,12 @@ class SettingsViewModel @Inject constructor(
 
     private fun handleExportData() {
         viewModelScope.launch {
+            // 비로그인 시 로그인 유도 — 페이월은 userId(obfuscatedAccountId)가 필요해 비로그인 상태에선
+            // 정상 동작하지 않음. iOS tappedExportData 의 isLoggedIn guard 대응.
+            if (!userStore.isLoggedIn()) {
+                emitNav(SettingsNavEffect.NeededLogin)
+                return@launch
+            }
             val isSubscribed = userStore.checkSubscriptionStatus()
             if (isSubscribed) {
                 _uiState.update { it.copy(showExportDataAlert = true) }

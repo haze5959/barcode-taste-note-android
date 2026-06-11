@@ -252,6 +252,13 @@ fun BarNoteNavHost(
                         popUpToRoute = Destinations.AI_CAMERA_ROUTE,
                     )
                 },
+                // AI 인식 실패 알럿의 "제품 직접 등록하기" — 바코드 스캔 흐름이었다면 바코드 유지.
+                onGoAddProduct = { barcode ->
+                    navController.replaceTop(
+                        route = Destinations.addProduct(barcode = barcode),
+                        popUpToRoute = Destinations.AI_CAMERA_ROUTE,
+                    )
+                },
             )
         }
 

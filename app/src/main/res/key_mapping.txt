@@ -3,6 +3,7 @@ aeb_ribyuhagi ← 앱 리뷰하기
 aembeo_eil ← 앰버 에일
 ai_bunseog_jung ← AI 분석 중...
 ai_seukaen_enjin ← AI 스캔 엔진
+ai_seukaen_silpae ← AI 스캔 실패
 ai_seukaenhagi ← AI 스캔하기
 airisi_wiseuki ← 아이리시 위스키
 ajig_i_jepume_daehae_jagseonghan_noteuga_eobseoyo ← 아직 이 제품에 대해 작성한 노트가 없어요.
@@ -150,6 +151,7 @@ gongyuhagi ← 공유하기
 goryangju ← 고량주
 gudog_gwanri ← 구독 관리
 gudog_jeongbo ← 구독 정보
+gudogeun_gigan_jongryo_24sigan_jeonggaji_haejihaji_anheumyeon ← 구독은 기간 종료 24시간 전까지 해지하지 않으면 자동으로 갱신됩니다.
 gudoghagi ← 구독하기
 gudogja ← 구독자
 gurisbic_saegsange_hobgwa_molteuga_gyunhyeong_jabhin_sangmye ← 구릿빛 색상에 홉과 몰트가 균형 잡힌 상면발효 에일.
@@ -209,10 +211,12 @@ ilban ← 일반
 imi_deungrogdoen_jepumieyo ← 이미 등록된 제품이에요!
 imiji ← 이미지
 imiji_ceombu ← 이미지 첨부
+imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka ← 이미지에서 제품 정보를 인식하지 못했어요.\n다시 스캔하거나 제품을 직접 등록해보세요.
 ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida ← 이는 되돌릴 수 없으며, 모든 데이터를 삭제합니다.
 inseuta_web_kakaotogeuro_nae_sieumnoteu_mogroggwa_jeulgyeoca ← 인스타 웹 카카오톡으로 내 시음노트 목록과 즐겨찾는 제품들을 공유해보세요.
 inseuta_web_kakaotogeuro_sieumnoteureul_gongyuhal_su_issseub ← 인스타 웹 카카오톡으로 시음노트를 공유할 수 있습니다.
 ipa ← IPA
+iyongyaggwan_eula ← 이용약관 (EULA)
 jaepaenijeu_wiseuki ← 재패니즈 위스키
 jagisogae ← 자기소개
 jagseong_jungin_noteureul_dadeulggayo ← 작성 중인 노트를 닫을까요?
@@ -377,6 +381,7 @@ obsyeon ← 옵션
 ogsusu_51_isang_migugeseo_sae_okeutonge_sugseonghan_wiseuki ← 옥수수 51% 이상, 미국에서 새 오크통에 숙성한 위스키. 바닐라·캐러멜 풍미.
 okeu_namu_songjin ← 오크, 나무, 송진
 okeutongeseo_orae_sugseonghae_saegi_jitgo_pungmiga_mugjighan ← 오크통에서 오래 숙성해 색이 짙고 풍미가 묵직한 럼. 캐러멜·향신료 뉘앙스.
+oneul_i_sigane_alrimeul_deurilgeyo ← 오늘 이 시간에 알림을 드릴게요.
 oryu_jebo ← 오류 제보
 oryu_jebohagi ← 오류 제보하기
 oryu_naeyongeul_jasehi_jagseonghaejuseyo ← 오류 내용을 자세히 작성해주세요.
