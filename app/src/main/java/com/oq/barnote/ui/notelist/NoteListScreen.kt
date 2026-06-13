@@ -404,7 +404,14 @@ private fun CalendarContent(
             }
         }
         if (state.selectedDate != null) {
-            if (state.selectedDateNotes.isEmpty()) {
+            if (state.isSelectedDateLoading) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(Dimens.Padding),
+                        contentAlignment = Alignment.Center,
+                    ) { CircularProgressIndicator() }
+                }
+            } else if (state.selectedDateNotes.isEmpty()) {
                 // iOS: ContentUnavailableView("작성한 노트가 없습니다", description: "이 날짜에는 작성된 테이스팅 노트가 없어요.")
                 item {
                     EmptyStateView(

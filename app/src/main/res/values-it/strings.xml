@@ -582,4 +582,8 @@ Sei sicuro di voler chiudere?</string>
     <string name="ibu_annae">Informazioni IBU</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Per annullare una prenotazione, tocca il pulsante di eliminazione.</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">Download delle risorse di traduzione. Potrebbe richiedere del tempo al primo avvio.</string>
+    <string name="free_trial_7_days">Primi 7 giorni gratuiti</string>
+    <string name="free_trial_1_month">Primo mese gratuito</string>
+    <string name="free_trial_generic">Prova gratuita</string>
+    <string name="first_year_half_price">Primo anno a metà prezzo</string>
 </resources>

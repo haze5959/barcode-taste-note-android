@@ -84,7 +84,7 @@ import java.util.concurrent.Executors
 fun BarcodeScannerRoute(
     onBack: () -> Unit,
     onProductFound: (id: String, productName: String) -> Unit,
-    onGoAddProduct: (barcode: String) -> Unit,
+    onGoAddProduct: (barcode: String?) -> Unit,
     onGoAICamera: (barcode: String?) -> Unit,
     onNeedLogin: () -> Unit,
     onGoSearch: () -> Unit,
@@ -199,19 +199,6 @@ internal fun BarcodeScannerScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // 하단 안내
-            Text(
-                text = stringResource(R.string.jepum_bakodeureul_seukaenhayeo_bbareuge_jepum_sangsero_jinib),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                ),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.Padding),
-            )
-
             // 하단 도움말 sheet (iOS draggable bottom sheet 대응).
             // drag 제스처 대신 헤더 탭으로 expand/collapse 토글 (Compose 단순화).
             HelpSheet(
@@ -230,7 +217,7 @@ internal fun BarcodeScannerScreen(
         if (state.notFoundBarcode != null) {
             AlertDialog(
                 onDismissRequest = { onEvent(BarcodeScannerUiEvent.DismissNotFound) },
-                title = { Text(text = stringResource(R.string.bakodeureul_cajeul_su_eobsnayo)) },
+                title = { Text(text = stringResource(R.string.jepumeul_coecoro_deungroghaeboseyo)) },
                 text = {
                     Text(
                         text = stringResource(R.string.jepummyeongman_ibryeoghasimyeon_doebnida_sangse_jeongboneun),

@@ -1,5 +1,12 @@
 package com.oq.barnote.ui.mypage.subscription
 
+import androidx.annotation.StringRes
+
+data class PlanPricingInfo(
+    val formattedPrice: String,
+    @StringRes val offerTextRes: Int? = null
+)
+
 /**
  * 구독 화면 상태. iOS `SubscriptionFeature.State` 는 비어있지만,
  * 안드로이드는 구매 진행 / 에러 표시 / userId 로드 상태가 필요해 분리.
@@ -11,6 +18,8 @@ data class SubscriptionUiState(
     val errorMessage: String? = null,
     val selectedBasePlanId: String = "monthly",
     val isSubscribed: Boolean = false,
+    val monthlyPricing: PlanPricingInfo? = null,
+    val yearlyPricing: PlanPricingInfo? = null,
 )
 
 sealed interface SubscriptionUiEvent {

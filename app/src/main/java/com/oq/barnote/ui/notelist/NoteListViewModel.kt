@@ -49,6 +49,8 @@ data class NoteListUiState(
     val calendarData: Map<Int, List<String>> = emptyMap(),
     /** 캘린더에서 선택된 날짜의 노트 상세 목록. */
     val selectedDateNotes: List<NoteInfo> = emptyList(),
+    /** 캘린더 선택 날짜 노트 조회 중 여부. */
+    val isSelectedDateLoading: Boolean = false,
     val selectedDate: java.time.LocalDate? = null,
     val isCalendarLoading: Boolean = false,
     /** iOS `showUnratedAlert: UnratedNoteAlert?` 대응 — rating 0 노트 탭 시 3-button 다이얼로그. */
@@ -216,6 +218,7 @@ class NoteListViewModel @Inject constructor(
                 currentMonth = month,
                 selectedDate = null,
                 selectedDateNotes = emptyList(),
+                isSelectedDateLoading = false,
                 calendarData = emptyMap(),
             )
         }
@@ -271,15 +274,19 @@ class NoteListViewModel @Inject constructor(
         _uiState.update { it.copy(selectedDate = date) }
         val noteIds = _uiState.value.calendarData[date.dayOfMonth].orEmpty()
         if (noteIds.isEmpty()) {
-            _uiState.update { it.copy(selectedDateNotes = emptyList()) }
+            _uiState.update { it.copy(selectedDateNotes = emptyList(), isSelectedDateLoading = false) }
             return
         }
+        _uiState.update { it.copy(isSelectedDateLoading = true) }
         viewModelScope.launch {
             repository.getNoteDetails(noteIds).fold(
                 onSuccess = { notes ->
-                    _uiState.update { it.copy(selectedDateNotes = notes) }
+                    _uiState.update { it.copy(selectedDateNotes = notes, isSelectedDateLoading = false) }
                 },
-                onFailure = { appController.showError(it) },
+                onFailure = {
+                    _uiState.update { it.copy(isSelectedDateLoading = false) }
+                    appController.showError(it)
+                },
             )
         }
     }
@@ -304,13 +311,17 @@ class NoteListViewModel @Inject constructor(
                     if (selected != null) {
                         val ids = data[selected.dayOfMonth].orEmpty()
                         if (ids.isEmpty()) {
-                            _uiState.update { it.copy(selectedDateNotes = emptyList()) }
+                            _uiState.update { it.copy(selectedDateNotes = emptyList(), isSelectedDateLoading = false) }
                         } else {
+                            _uiState.update { it.copy(isSelectedDateLoading = true) }
                             repository.getNoteDetails(ids).fold(
                                 onSuccess = { notes ->
-                                    _uiState.update { it.copy(selectedDateNotes = notes) }
+                                    _uiState.update { it.copy(selectedDateNotes = notes, isSelectedDateLoading = false) }
                                 },
-                                onFailure = { appController.showError(it) },
+                                onFailure = {
+                                    _uiState.update { it.copy(isSelectedDateLoading = false) }
+                                    appController.showError(it)
+                                },
                             )
                         }
                     }

@@ -582,4 +582,8 @@ rédigez vos propres notes de dégustation</string>
     <string name="ibu_annae">À propos de l\'IBU</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Pour annuler une réservation, appuyez sur le bouton de suppression.</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">Téléchargement des ressources de traduction. Cela peut prendre un certain temps lors de la première exécution.</string>
+    <string name="free_trial_7_days">7 premiers jours gratuits</string>
+    <string name="free_trial_1_month">1er mois gratuit</string>
+    <string name="free_trial_generic">Essai gratuit</string>
+    <string name="first_year_half_price">Première année à moitié prix</string>
 </resources>

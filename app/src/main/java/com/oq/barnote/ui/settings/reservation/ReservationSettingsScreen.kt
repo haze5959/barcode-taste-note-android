@@ -54,6 +54,7 @@ import java.time.LocalTime
 fun ReservationSettingsRoute(
     onBack: () -> Unit,
     onWriteNote: (Product) -> Unit,
+    onGoSubscription: () -> Unit,
     viewModel: ReservationSettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -66,6 +67,7 @@ fun ReservationSettingsRoute(
         viewModel.navEffect.collect { effect ->
             when (effect) {
                 is ReservationSettingsNavEffect.WriteNote -> onWriteNote(effect.product)
+                ReservationSettingsNavEffect.GoSubscription -> onGoSubscription()
             }
         }
     }

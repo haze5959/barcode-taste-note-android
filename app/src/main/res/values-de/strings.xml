@@ -582,4 +582,8 @@ Möchten Sie wirklich schließen?</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">Übersetzungsressourcen werden heruntergeladen. Der erste Start kann einige Zeit dauern.</string>
     <string name="ibu_annae">IBU-Info</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Um eine Reservierung abzubrechen, tippen Sie auf die Löschen-Schaltfläche.</string>
+    <string name="free_trial_7_days">Ersten 7 Tage kostenlos</string>
+    <string name="free_trial_1_month">Erster Monat kostenlos</string>
+    <string name="free_trial_generic">Kostenlose Testversion</string>
+    <string name="first_year_half_price">Erstes Jahr zum halben Preis</string>
 </resources>

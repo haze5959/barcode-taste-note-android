@@ -589,4 +589,8 @@ Are you sure you want to close?</string>
     <string name="yearly_plan_desc">Billed annually, best value</string>
     <string name="recommended">Recommended</string>
     <string name="active_subscription_desc">You are enjoying an ad-free experience and all features without limits.</string>
+    <string name="free_trial_7_days">First 7 days free</string>
+    <string name="free_trial_1_month">First 1 month free</string>
+    <string name="free_trial_generic">Free Trial</string>
+    <string name="first_year_half_price">First year 50% off</string>
 </resources>

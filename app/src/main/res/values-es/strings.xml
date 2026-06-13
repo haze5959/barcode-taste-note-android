@@ -582,4 +582,8 @@ escribe tus propias notas de cata</string>
     <string name="ibu_annae">Información de IBU</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Para cancelar una reserva, pulsa el botón de eliminar.</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">Descargando recursos de traducción. Puede llevar algún tiempo en la primera ejecución.</string>
+    <string name="free_trial_7_days">Primeros 7 días gratis</string>
+    <string name="free_trial_1_month">Primer mes gratis</string>
+    <string name="free_trial_generic">Prueba gratis</string>
+    <string name="first_year_half_price">Primer año a mitad de precio</string>
 </resources>

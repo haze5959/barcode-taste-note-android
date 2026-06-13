@@ -90,6 +90,7 @@ import com.oq.barnote.core.domain.ProductStyle
 import com.oq.barnote.core.domain.ProductType
 import com.oq.barnote.core.oqcore.util.Country
 import com.oq.barnote.core.oqcore.util.RelativeTime
+import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
 import com.oq.barnote.core.oqcore.util.openUrl
 import com.oq.barnote.ui.util.RefreshOnResume
 import com.oq.barnote.extension.categoryTitle
@@ -167,6 +168,7 @@ internal fun ProductDetailScreen(
     val background = colorResource(com.oq.barnote.core.designsystem.R.color.background_primary)
     val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
     val textPrimary = colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
+    val haptic = rememberOQHaptic()
 
     Box(modifier = Modifier.fillMaxSize().background(background)) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -177,7 +179,12 @@ internal fun ProductDetailScreen(
                 accent = accent,
                 onBack = onBack,
                 onReport = { onEvent(ProductDetailUiEvent.TappedReport) },
-                onToggleFavorite = { onEvent(ProductDetailUiEvent.ToggleFavorite) },
+                onToggleFavorite = {
+                    if (!state.isFavorite) {
+                        haptic.success()
+                    }
+                    onEvent(ProductDetailUiEvent.ToggleFavorite)
+                },
             )
 
             when {

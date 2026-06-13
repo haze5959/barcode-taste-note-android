@@ -2,9 +2,11 @@ package com.oq.barnote.ui.settings.reservation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oq.barnote.Constants
 import com.oq.barnote.core.domain.NoteReservation
 import com.oq.barnote.core.domain.NotificationScheduler
 import com.oq.barnote.core.domain.ReservationStore
+import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.util.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -30,6 +32,7 @@ class ReservationSettingsViewModel @Inject constructor(
     private val reservationStore: ReservationStore,
     private val notificationScheduler: NotificationScheduler,
     private val appController: AppController,
+    private val userStore: UserStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ReservationSettingsUiState())
@@ -98,7 +101,14 @@ class ReservationSettingsViewModel @Inject constructor(
     private fun confirmWriteNote() {
         val target = _uiState.value.selectedReservation ?: return
         _uiState.update { it.copy(showWriteNoteDialog = false, selectedReservation = null) }
-        viewModelScope.launch { _navEffect.send(ReservationSettingsNavEffect.WriteNote(target.product)) }
+        viewModelScope.launch {
+            val isSubscribed = userStore.checkSubscriptionStatus()
+            if (userStore.noteCount.value >= Constants.N.FREE_NOTE_COUNT && !isSubscribed) {
+                _navEffect.send(ReservationSettingsNavEffect.GoSubscription)
+            } else {
+                _navEffect.send(ReservationSettingsNavEffect.WriteNote(target.product))
+            }
+        }
     }
 }
 

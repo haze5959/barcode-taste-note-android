@@ -27,4 +27,5 @@ sealed interface ReservationSettingsUiEvent {
 
 sealed interface ReservationSettingsNavEffect {
     data class WriteNote(val product: Product) : ReservationSettingsNavEffect
+    data object GoSubscription : ReservationSettingsNavEffect
 }

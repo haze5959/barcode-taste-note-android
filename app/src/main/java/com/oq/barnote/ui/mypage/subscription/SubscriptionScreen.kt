@@ -195,6 +195,8 @@ internal fun SubscriptionScreen(
                     PlanSelectionSection(
                         selectedPlanId = state.selectedBasePlanId,
                         onPlanSelected = { onEvent(SubscriptionUiEvent.SelectBasePlan(it)) },
+                        monthlyPricing = state.monthlyPricing,
+                        yearlyPricing = state.yearlyPricing,
                         modifier = Modifier.appearAnim(appeared, delayMillis = 460)
                     )
                 }
@@ -546,45 +548,20 @@ private fun PolicyLinks() {
  */
 @Composable
 private fun AutoRenewalNotice(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
     val textSecondary =
         colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Dimens.SectionSpacing)
-            .padding(top = Dimens.Spacing),
+            .padding(bottom = Dimens.Spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
     ) {
         Text(
             text = stringResource(R.string.gudogeun_gigan_jongryo_24sigan_jeonggaji_haejihaji_anheumyeon),
             style = MaterialTheme.typography.labelSmall.copy(color = textSecondary),
             textAlign = TextAlign.Center,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing)) {
-            Text(
-                text = stringResource(R.string.iyongyaggwan_eula),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = accent,
-                    fontWeight = FontWeight.Medium,
-                ),
-                modifier = Modifier
-                    .clickable { OQSafariView.open(context, Constants.S.TERMS_OF_SERVICE_URL) }
-                    .padding(vertical = 2.dp),
-            )
-            Text(
-                text = stringResource(R.string.gaeinjeongbo_ceoribangcim),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = accent,
-                    fontWeight = FontWeight.Medium,
-                ),
-                modifier = Modifier
-                    .clickable { OQSafariView.open(context, Constants.S.PRIVACY_POLICY_URL) }
-                    .padding(vertical = 2.dp),
-            )
-        }
     }
 }
 
@@ -592,6 +569,8 @@ private fun AutoRenewalNotice(modifier: Modifier = Modifier) {
 private fun PlanSelectionSection(
     selectedPlanId: String,
     onPlanSelected: (String) -> Unit,
+    monthlyPricing: PlanPricingInfo?,
+    yearlyPricing: PlanPricingInfo?,
     modifier: Modifier = Modifier,
 ) {
     val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
@@ -623,7 +602,9 @@ private fun PlanSelectionSection(
             accentColor = accent,
             textPrimary = textPrimary,
             textSecondary = textSecondary,
-            surfaceColor = surfaceSecondary
+            surfaceColor = surfaceSecondary,
+            priceText = monthlyPricing?.formattedPrice,
+            offerText = monthlyPricing?.offerTextRes?.let { stringResource(it) }
         )
 
         // Yearly Plan Card
@@ -636,7 +617,9 @@ private fun PlanSelectionSection(
             accentColor = accent,
             textPrimary = textPrimary,
             textSecondary = textSecondary,
-            surfaceColor = surfaceSecondary
+            surfaceColor = surfaceSecondary,
+            priceText = yearlyPricing?.formattedPrice,
+            offerText = yearlyPricing?.offerTextRes?.let { stringResource(it) }
         )
     }
 }
@@ -652,6 +635,8 @@ private fun PlanCard(
     textSecondary: Color,
     surfaceColor: Color,
     badgeText: String? = null,
+    priceText: String? = null,
+    offerText: String? = null,
 ) {
     Box(
         modifier = Modifier
@@ -728,6 +713,26 @@ private fun PlanCard(
                     text = description,
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = textSecondary
+                    )
+                )
+                if (offerText != null) {
+                    Text(
+                        text = offerText,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = accentColor,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+
+            if (priceText != null) {
+                Text(
+                    text = priceText,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = textPrimary,
+                        fontWeight = FontWeight.Bold
                     )
                 )
             }

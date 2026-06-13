@@ -122,21 +122,21 @@ class ReservationStoreImpl @Inject constructor(
         val existing = loadReservations()
         if (existing.isEmpty()) return
 
-        val now = Instant.now()
         val zone = ZoneId.systemDefault()
+        val nowZoned = ZonedDateTime.now(zone)
         val updated = mutableListOf<NoteReservation>()
 
         for (reservation in existing) {
-            val originalInstant = runCatching { Instant.parse(reservation.scheduledDate) }
-                .getOrNull() ?: continue
-            val originalDate = originalInstant.atZone(zone).toLocalDate()
-            val newInstant = originalDate.atTime(time).atZone(zone).toInstant()
-
             // 기존 알림 취소
             notificationScheduler.cancelNoteReservation(reservation.id)
 
-            // 변경 후에도 미래면 재등록
-            if (!newInstant.isAfter(now)) continue
+            // 금일 아직 지나지 않은 시간이면 금일, 지났으면 다음 날로 설정
+            var scheduledZoned = LocalDate.now(zone).atTime(time).atZone(zone)
+            if (!scheduledZoned.isAfter(nowZoned)) {
+                scheduledZoned = scheduledZoned.plusDays(1)
+            }
+            val newInstant = scheduledZoned.toInstant()
+
             val newReservation = reservation.copy(scheduledDate = newInstant.toString())
             notificationScheduler.scheduleNoteReservation(newReservation)
             updated += newReservation

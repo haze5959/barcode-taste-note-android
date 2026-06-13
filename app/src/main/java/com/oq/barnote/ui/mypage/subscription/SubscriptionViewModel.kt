@@ -3,6 +3,8 @@ package com.oq.barnote.ui.mypage.subscription
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.billingclient.api.BillingClient
+import com.oq.barnote.Constants
+import com.oq.barnote.R
 import com.oq.barnote.core.data.billing.BillingManager
 import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.util.AppController
@@ -61,7 +63,7 @@ class SubscriptionViewModel @Inject constructor(
                             it.copy(
                                 isPurchasing = false,
                                 errorMessage = update.billingResult.debugMessage
-                                    .takeIf { msg -> msg.isNotBlank() },
+                                    .takeIf { msg -> msg.isNotBlank() } ?: "알 수 없는 에러가 발생했습니다. (Code: ${update.billingResult.responseCode})",
                             )
                         }
                     }
@@ -86,12 +88,52 @@ class SubscriptionViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = userStore.getUser()?.id
             val isSubscribed = userStore.checkSubscriptionStatus()
+
+            val details = billingManager.getSubscriptionProductDetails(Constants.S.SUBSCRIPTION_PRODUCT_ID)
+            var monthlyInfo: PlanPricingInfo? = null
+            var yearlyInfo: PlanPricingInfo? = null
+
+            details?.subscriptionOfferDetails?.forEach { offer ->
+                val basePlanId = offer.basePlanId
+                val phases = offer.pricingPhases.pricingPhaseList
+                val freePhase = phases.firstOrNull { it.priceAmountMicros == 0L }
+                val paidPhase = phases.lastOrNull { it.priceAmountMicros > 0L }
+                val introPhase = phases.firstOrNull { it.priceAmountMicros > 0L && it != paidPhase }
+
+                val price = paidPhase?.formattedPrice ?: ""
+                var offerTextRes: Int? = null
+                if (freePhase != null) {
+                    offerTextRes = when (freePhase.billingPeriod) {
+                        "P1W" -> R.string.free_trial_7_days
+                        "P1M" -> R.string.free_trial_1_month
+                        else -> R.string.free_trial_generic
+                    }
+                } else if (introPhase != null) {
+                    offerTextRes = R.string.first_year_half_price
+                }
+
+                if (price.isNotEmpty()) {
+                    val info = PlanPricingInfo(formattedPrice = price, offerTextRes = offerTextRes)
+                    if (basePlanId == "monthly") {
+                        if (monthlyInfo == null || (monthlyInfo?.offerTextRes == null && info.offerTextRes != null)) {
+                            monthlyInfo = info
+                        }
+                    } else if (basePlanId == "yearly") {
+                        if (yearlyInfo == null || (yearlyInfo?.offerTextRes == null && info.offerTextRes != null)) {
+                            yearlyInfo = info
+                        }
+                    }
+                }
+            }
+
             if (userId != null) {
                 _uiState.update {
                     it.copy(
                         userId = userId,
                         isLoadingUser = false,
-                        isSubscribed = isSubscribed
+                        isSubscribed = isSubscribed,
+                        monthlyPricing = monthlyInfo,
+                        yearlyPricing = yearlyInfo
                     )
                 }
             } else {
@@ -155,7 +197,8 @@ class SubscriptionViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isPurchasing = false,
-                        errorMessage = result?.debugMessage?.takeIf { msg -> msg.isNotBlank() },
+                        errorMessage = result?.debugMessage?.takeIf { msg -> msg.isNotBlank() }
+                            ?: "알 수 없는 에러가 발생했습니다. (Code: ${result?.responseCode})",
                     )
                 }
             }

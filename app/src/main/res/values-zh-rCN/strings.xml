@@ -582,4 +582,8 @@ AI 将分析标签并提取信息。</string>
     <string name="ibu_annae">IBU 说明</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">要取消预约，请点击删除按钮。</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">正在下载翻译资源。首次运行时可能需要一些时间。</string>
+    <string name="free_trial_7_days">前7天免费</string>
+    <string name="free_trial_1_month">前1个月免费</string>
+    <string name="free_trial_generic">免费试用</string>
+    <string name="first_year_half_price">首年半价</string>
 </resources>

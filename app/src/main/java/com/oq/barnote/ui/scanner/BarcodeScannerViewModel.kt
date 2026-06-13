@@ -48,8 +48,8 @@ class BarcodeScannerViewModel @Inject constructor(
                 }
             BarcodeScannerUiEvent.ConfirmAddProduct -> {
                 // notFoundBarcode 가 있으면 그 값으로, 없으면 bottom sheet 의 "직접 등록하기" 경로
-                // (iOS `showAddProductWithoutBarcode` 대응) — 빈 문자열로 AddProduct 진입.
-                val barcode = _uiState.value.notFoundBarcode.orEmpty()
+                // (iOS `showAddProductWithoutBarcode` 대응) — null 로 AddProduct 진입.
+                val barcode = _uiState.value.notFoundBarcode
                 _uiState.update { it.copy(notFoundBarcode = null) }
                 viewModelScope.launch {
                     _navEffect.send(BarcodeScannerNavEffect.GoAddProduct(barcode))

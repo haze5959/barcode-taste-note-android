@@ -162,6 +162,7 @@ fun BarNoteNavHost(
                 onWriteNote = { product ->
                     navController.navigate(Destinations.writeNote(product.id))
                 },
+                onGoSubscription = { navController.navigate(Destinations.SUBSCRIBE) },
             )
         }
 

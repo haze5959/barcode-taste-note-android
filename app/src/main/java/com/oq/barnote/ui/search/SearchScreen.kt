@@ -136,7 +136,7 @@ internal fun SearchScreen(
             .background(background),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // 검색 바 + 자동완성 overlay
+            // 검색 바
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -162,7 +162,41 @@ internal fun SearchScreen(
                         modifier = Modifier.weight(1f),
                     )
                 }
+            }
 
+            // 나머지 영역을 Box 로 감싸서 자동완성 패널이 위로 뜨도록 구성
+            Box(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Filter + Sort
+                    FilterAndSortRow(
+                        state = state,
+                        onEvent = onEvent,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(surfacePrimary),
+                    )
+
+                    HorizontalDivider(color = divider)
+
+                    // 컨텐츠
+                    Box(modifier = Modifier.weight(1f)) {
+                        SearchResultGrid(
+                            state = state,
+                            onEvent = onEvent,
+                        )
+                        FloatingActionGroup(
+                            isListView = state.isListView,
+                            onToggleListView = { onEvent(SearchUiEvent.ToggleListView) },
+                            onAddProduct = { showAddDialog = true },
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                // FAB 도 MainBottomBar 위로 올려 바에 가리지 않게 함.
+                                .padding(end = Dimens.BtnPadding, bottom = Dimens.BtnPadding + MainBottomBarHeight),
+                        )
+                    }
+                }
+
+                // 자동완성 overlay
                 if (shouldShowAutocomplete(state)) {
                     AutocompletePanel(
                         query = state.searchText,
@@ -173,40 +207,11 @@ internal fun SearchScreen(
                             onEvent(SearchUiEvent.SelectSuggestion(suggestion))
                         },
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
+                            .align(Alignment.TopCenter)
                             .padding(horizontal = Dimens.Padding)
-                            .padding(top = Dimens.Padding)
                             .zIndex(2f),
                     )
                 }
-            }
-
-            // Filter + Sort
-            FilterAndSortRow(
-                state = state,
-                onEvent = onEvent,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(surfacePrimary),
-            )
-
-            HorizontalDivider(color = divider)
-
-            // 컨텐츠
-            Box(modifier = Modifier.weight(1f)) {
-                SearchResultGrid(
-                    state = state,
-                    onEvent = onEvent,
-                )
-                FloatingActionGroup(
-                    isListView = state.isListView,
-                    onToggleListView = { onEvent(SearchUiEvent.ToggleListView) },
-                    onAddProduct = { showAddDialog = true },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        // FAB 도 MainBottomBar 위로 올려 바에 가리지 않게 함.
-                        .padding(end = Dimens.BtnPadding, bottom = Dimens.BtnPadding + MainBottomBarHeight),
-                )
             }
         }
 

@@ -589,4 +589,8 @@ AI가 라벨을 분석하여 정보를 추출합니다.</string>
     <string name="yearly_plan_desc">매년 자동 결제, 합리적인 가격</string>
     <string name="recommended">추천</string>
     <string name="active_subscription_desc">광고 없는 쾌적한 환경과 모든 기능들을 제한 없이 이용하고 있습니다.</string>
+    <string name="free_trial_7_days">첫 7일 무료</string>
+    <string name="free_trial_1_month">첫 1개월 무료</string>
+    <string name="free_trial_generic">무료 체험</string>
+    <string name="first_year_half_price">첫 1년 반값</string>
 </resources>

@@ -582,4 +582,8 @@
     <string name="ibu_annae">Об IBU</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">Чтобы отменить бронирование, нажмите кнопку удаления.</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">Скачивание ресурсов для перевода. Первый запуск может занять некоторое время.</string>
+    <string name="free_trial_7_days">Первые 7 дней бесплатно</string>
+    <string name="free_trial_1_month">Первый месяц бесплатно</string>
+    <string name="free_trial_generic">Бесплатная пробная версия</string>
+    <string name="first_year_half_price">Первый год за полцены</string>
 </resources>

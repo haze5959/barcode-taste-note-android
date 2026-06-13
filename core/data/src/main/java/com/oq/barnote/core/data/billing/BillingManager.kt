@@ -182,7 +182,10 @@ class BillingManager @Inject constructor(
                 cont.resume(result to list.orEmpty())
             }
         }
-        val details = detailsList.firstOrNull() ?: return queryResult
+        val details = detailsList.firstOrNull() ?: return BillingResult.newBuilder()
+            .setResponseCode(BillingClient.BillingResponseCode.ITEM_UNAVAILABLE)
+            .setDebugMessage("Product details not found")
+            .build()
         
         // 해당 basePlanId에 일치하는 모든 offer/plan 목록 추출
         val matchingOffers = details.subscriptionOfferDetails
@@ -193,7 +196,10 @@ class BillingManager @Inject constructor(
         val selectedOffer = matchingOffers.firstOrNull { it.offerId != null }
             ?: matchingOffers.firstOrNull()
             
-        val offerToken = selectedOffer?.offerToken ?: return queryResult
+        val offerToken = selectedOffer?.offerToken ?: return BillingResult.newBuilder()
+            .setResponseCode(BillingClient.BillingResponseCode.ITEM_UNAVAILABLE)
+            .setDebugMessage("No matching offer found for basePlanId: $basePlanId")
+            .build()
 
         val flowParams = com.android.billingclient.api.BillingFlowParams.newBuilder()
             .setProductDetailsParamsList(
@@ -211,6 +217,27 @@ class BillingManager @Inject constructor(
             }
             .build()
         return client.launchBillingFlow(activity, flowParams)
+    }
+
+    suspend fun getSubscriptionProductDetails(productId: String): com.android.billingclient.api.ProductDetails? {
+        ensureConnected()
+        val productList = listOf(
+            com.android.billingclient.api.QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(productId)
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build(),
+        )
+        val queryParams = com.android.billingclient.api.QueryProductDetailsParams.newBuilder()
+            .setProductList(productList)
+            .build()
+        val (_, detailsList) = suspendCancellableCoroutine<
+            Pair<BillingResult, List<com.android.billingclient.api.ProductDetails>>,
+            > { cont ->
+            client.queryProductDetailsAsync(queryParams) { result, list ->
+                cont.resume(result to list.orEmpty())
+            }
+        }
+        return detailsList.firstOrNull()
     }
 
     private suspend fun connect() {

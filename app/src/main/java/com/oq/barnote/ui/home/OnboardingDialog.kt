@@ -556,7 +556,8 @@ private fun OnboardingPageContent(
             )
         }
 
-        Spacer(modifier = Modifier.weight(2f))
+        // 설명(descriptionRes)과 하단 버튼 사이의 여백을 줄임
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -575,7 +576,8 @@ private fun BottomBar(
                 // 위 설명 문구와의 최소 간격(weight 스페이서가 0 으로 줄어드는 작은 화면 대비) +
                 // 시스템 내비 inset 위 약간의 여백.
                 top = Dimens.Padding,
-                bottom = Dimens.Padding,
+                // 시스템 네비게이션 버튼과 겹치지 않도록 충분한 하단 여백 추가
+                bottom = Dimens.Padding + 24.dp,
             ),
     ) {
         Row(

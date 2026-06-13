@@ -1,8 +1,27 @@
 package com.oq.barnote.core.oqcore.models
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
-@Serializable
+object APIErrorSerializer : KSerializer<APIError> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("APIError", PrimitiveKind.INT)
+
+    override fun serialize(encoder: Encoder, value: APIError) {
+        encoder.encodeInt(value.code)
+    }
+
+    override fun deserialize(decoder: Decoder): APIError {
+        val code = decoder.decodeInt()
+        return APIError.values().firstOrNull { it.code == code } ?: APIError.Unknown
+    }
+}
+
+@Serializable(with = APIErrorSerializer::class)
 enum class APIError(val code: Int) {
     InternalServerError(100),
     InternalDBError(101),

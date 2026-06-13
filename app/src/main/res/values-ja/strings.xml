@@ -582,4 +582,8 @@ AIがラベルを分析して情報を抽出します。</string>
     <string name="ibu_annae">IBU について</string>
     <string name="yeyageul_cwisoharyeomyeon_sagje_beoteuneul_nureuseyo">予約をキャンセルするには削除ボタンを押してください。</string>
     <string name="beonyeog_risoseu_daunrodeu_annae">翻訳リソースをダウンロードしています。初回起動時は少し時間がかかる場合があります。</string>
+    <string name="free_trial_7_days">最初の7日間無料</string>
+    <string name="free_trial_1_month">最初の1ヶ月無料</string>
+    <string name="free_trial_generic">無料体験</string>
+    <string name="first_year_half_price">初年度半額</string>
 </resources>
