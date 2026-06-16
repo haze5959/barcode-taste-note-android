@@ -4,9 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -31,6 +29,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 /**
  * Composable 컨텍스트에서 [MediaAttachmentPicker] 도메인 인터페이스를 사용할 수 있도록
@@ -171,24 +172,22 @@ fun rememberComposeMediaAttachmentPicker(): MediaAttachmentPicker {
 
     // 갤러리/카메라 선택 다이얼로그 (iOS action sheet 대응).
     if (showSourceChooser) {
-        AlertDialog(
-            onDismissRequest = {
-                showSourceChooser = false
-                completeWith(emptyList())
-            },
-            title = { Text(stringResource(R.string.sajin_byeongyeong)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showSourceChooser = false
-                    launchCamera()
-                }) { Text(stringResource(R.string.kamera)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showSourceChooser = false
-                    launchGallery()
-                }) { Text(stringResource(R.string.gaelreori)) }
-            },
+        OQAlert(
+            title = stringResource(R.string.sajin_byeongyeong),
+            message = "",
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.kamera),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            secondaryButton = OQAlertButton(
+                title = stringResource(R.string.gaelreori),
+                style = OQAlertButtonStyle.Secondary,
+            ),
+            onPrimary = { showSourceChooser = false; launchCamera() },
+            onSecondary = { showSourceChooser = false; launchGallery() },
+            onDismissRequest = { showSourceChooser = false; completeWith(emptyList()) },
+            dismissOnButtonClick = false,
+            palette = barNotePalette(),
         )
     }
 

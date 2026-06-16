@@ -41,12 +41,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -75,6 +73,10 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 import com.oq.barnote.ui.permission.rememberCameraPermission
 import com.oq.barnote.ui.util.rememberAppController
 import com.oq.barnote.ui.util.showNeededCameraSetting
@@ -215,30 +217,30 @@ internal fun BarcodeScannerScreen(
         // NotFound 3-button alert. iOS `showAddProductRegistrationAlert` 대응.
         // 1순위: AI 스캔하기 (sparkles), 2순위: 직접 등록하기, 3순위: 취소.
         if (state.notFoundBarcode != null) {
-            AlertDialog(
+            // iOS AppNavigationView.showAddProductRegistrationAlert — 시스템 AlertDialog 대신 커스텀
+            // OQAlert(3버튼: AI 스캔 / 직접 등록 / 취소). 각 버튼 탭 시 자동 dismiss(DismissNotFound).
+            OQAlert(
+                title = stringResource(R.string.jepumeul_coecoro_deungroghaeboseyo),
+                message = stringResource(
+                    R.string.jepummyeongman_ibryeoghasimyeon_doebnida_sangse_jeongboneun,
+                ),
+                primaryButton = OQAlertButton(
+                    title = stringResource(R.string.ai_seukaenhagi),
+                    style = OQAlertButtonStyle.Primary,
+                ),
+                secondaryButton = OQAlertButton(
+                    title = stringResource(R.string.jepum_jigjeob_deungroghagi),
+                    style = OQAlertButtonStyle.Secondary,
+                ),
+                tertiaryButton = OQAlertButton(
+                    title = stringResource(R.string.cwiso),
+                    style = OQAlertButtonStyle.Tertiary,
+                ),
+                onPrimary = { onEvent(BarcodeScannerUiEvent.RequestAIScan) },
+                onSecondary = { onEvent(BarcodeScannerUiEvent.ConfirmAddProduct) },
+                onTertiary = { onEvent(BarcodeScannerUiEvent.DismissNotFound) },
                 onDismissRequest = { onEvent(BarcodeScannerUiEvent.DismissNotFound) },
-                title = { Text(text = stringResource(R.string.jepumeul_coecoro_deungroghaeboseyo)) },
-                text = {
-                    Text(
-                        text = stringResource(R.string.jepummyeongman_ibryeoghasimyeon_doebnida_sangse_jeongboneun),
-                    )
-                },
-                confirmButton = {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        TextButton(onClick = { onEvent(BarcodeScannerUiEvent.RequestAIScan) }) {
-                            Text(text = stringResource(R.string.ai_seukaenhagi))
-                        }
-                        TextButton(onClick = { onEvent(BarcodeScannerUiEvent.ConfirmAddProduct) }) {
-                            Text(text = stringResource(R.string.jepum_jigjeob_deungroghagi))
-                        }
-                        TextButton(onClick = { onEvent(BarcodeScannerUiEvent.DismissNotFound) }) {
-                            Text(text = stringResource(R.string.cwiso))
-                        }
-                    }
-                },
+                palette = barNotePalette(),
             )
         }
     }

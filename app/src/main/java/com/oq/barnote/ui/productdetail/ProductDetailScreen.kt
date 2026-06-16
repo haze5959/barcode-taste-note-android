@@ -48,14 +48,12 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import com.oq.barnote.core.designsystem.component.AutoResizeText
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -102,6 +100,10 @@ import com.oq.barnote.ui.component.EmptyStateView
 import com.oq.barnote.ui.component.ZoomableImageViewer
 import com.oq.barnote.ui.component.FlavorCountChips
 import com.oq.barnote.ui.component.NoteDetailRow
+import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 /**
  * iOS `ProductDetailView` 와 1:1 매핑.
@@ -244,39 +246,41 @@ internal fun ProductDetailScreen(
 
     // 예약 확인 alert
     if (state.showReservationAlert) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.naeil_sieumnoteu_jagseong_alrimeul_bonaedeurilggayo),
+            message = stringResource(R.string.jigeumeun_jarireul_jeulgisigo_naeil_ijji_anhdorog_alryeodeur),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.yeyag),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.cwiso),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { onEvent(ProductDetailUiEvent.ConfirmReservation) },
+            onTertiary = { onEvent(ProductDetailUiEvent.DismissReservationAlert) },
             onDismissRequest = { onEvent(ProductDetailUiEvent.DismissReservationAlert) },
-            title = { Text(text = stringResource(R.string.naeil_sieumnoteu_jagseong_alrimeul_bonaedeurilggayo)) },
-            text = { Text(text = stringResource(R.string.jigeumeun_jarireul_jeulgisigo_naeil_ijji_anhdorog_alryeodeur)) },
-            confirmButton = {
-                TextButton(onClick = { onEvent(ProductDetailUiEvent.ConfirmReservation) }) {
-                    Text(text = stringResource(R.string.yeyag))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onEvent(ProductDetailUiEvent.DismissReservationAlert) }) {
-                    Text(text = stringResource(R.string.cwiso))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 
     // 신고 확인 alert
     if (state.showReportAlert) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.jepum_jeongbo_singo),
+            message = stringResource(R.string.i_jepumui_jalmosdoen_jeongbo_singo_hwagin),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.jagseonghagi),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.cwiso),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { onEvent(ProductDetailUiEvent.ConfirmReport) },
+            onTertiary = { onEvent(ProductDetailUiEvent.DismissReportAlert) },
             onDismissRequest = { onEvent(ProductDetailUiEvent.DismissReportAlert) },
-            title = { Text(text = stringResource(R.string.jepum_jeongbo_singo)) },
-            text = { Text(text = stringResource(R.string.i_jepumui_jalmosdoen_jeongbo_singo_hwagin)) },
-            confirmButton = {
-                TextButton(onClick = { onEvent(ProductDetailUiEvent.ConfirmReport) }) {
-                    Text(text = stringResource(R.string.jagseonghagi))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onEvent(ProductDetailUiEvent.DismissReportAlert) }) {
-                    Text(text = stringResource(R.string.cwiso))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 
@@ -703,19 +707,16 @@ private fun InfoSection(
                         .clickable { showFlavorCountInfo = true },
                 )
                 if (showFlavorCountInfo) {
-                    AlertDialog(
+                    OQAlert(
+                        title = "",
+                        message = stringResource(R.string.hyangmi_yeopui_susjaneun_sayongjaga_jagseonghan_noteueseo_se),
+                        primaryButton = OQAlertButton(
+                            title = "OK",
+                            style = OQAlertButtonStyle.Primary,
+                        ),
+                        onPrimary = { showFlavorCountInfo = false },
                         onDismissRequest = { showFlavorCountInfo = false },
-                        confirmButton = {
-                            TextButton(onClick = { showFlavorCountInfo = false }) { Text("OK") }
-                        },
-                        text = {
-                            Text(
-                                text = stringResource(
-                                    R.string.hyangmi_yeopui_susjaneun_sayongjaga_jagseonghan_noteueseo_se,
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        },
+                        palette = barNotePalette(),
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -1290,19 +1291,26 @@ private fun UnratedAlertDialog(
     onDelete: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onCancel,
-        title = { Text(text = stringResource(R.string.teiseuting_noteu_mijagseong)) },
-        text = { Text(text = stringResource(R.string.teiseuting_noteureul_jagseonghaji_anheun_jepumibnida)) },
-        confirmButton = {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                TextButton(onClick = onWrite) { Text(text = stringResource(R.string.jagseonghagi)) }
-                TextButton(onClick = onDelete) {
-                    Text(text = stringResource(R.string.masyeobon_mogrogeseo_jegeohagi_btn))
-                }
-                TextButton(onClick = onCancel) { Text(text = stringResource(R.string.cwiso)) }
-            }
-        },
+    OQAlert(
+        title = stringResource(R.string.teiseuting_noteu_mijagseong),
+        message = stringResource(R.string.teiseuting_noteureul_jagseonghaji_anheun_jepumibnida),
+        primaryButton = OQAlertButton(
+            title = stringResource(R.string.jagseonghagi),
+            style = OQAlertButtonStyle.Primary,
+        ),
+        secondaryButton = OQAlertButton(
+            title = stringResource(R.string.masyeobon_mogrogeseo_jegeohagi_btn),
+            style = OQAlertButtonStyle.Secondary,
+        ),
+        tertiaryButton = OQAlertButton(
+            title = stringResource(R.string.cwiso),
+            style = OQAlertButtonStyle.Tertiary,
+        ),
+        onPrimary = { onWrite() },
+        onSecondary = { onDelete() },
+        onTertiary = { onCancel() },
+        onDismissRequest = { onCancel() },
+        palette = barNotePalette(),
     )
 }
 

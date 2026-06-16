@@ -8,12 +8,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +53,10 @@ import com.oq.barnote.ui.theme.AppLanguageApplicator
 import com.oq.barnote.ui.theme.AppThemeApplicator
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 /**
  * 앱 진입점 Activity. iOS `AppNavigationView` 에 대응.
@@ -313,24 +315,21 @@ private fun AppRoot(
 
     // 글로벌 "로그인 필요" 다이얼로그
     if (appNavState.showNeededLoginAlert) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.rogeuin_pilyo),
+            message = stringResource(R.string.bogjabhan_gaib_eobsi_3comane_rogeuinhago_gineungeul_iyonghae),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.rogeuinhareo_gagi),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.cwiso),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { appNavViewModel.onEvent(AppNavigationUiEvent.ConfirmGoLogin) },
+            onTertiary = { appNavViewModel.onEvent(AppNavigationUiEvent.DismissNeededLogin) },
             onDismissRequest = { appNavViewModel.onEvent(AppNavigationUiEvent.DismissNeededLogin) },
-            title = { Text(text = stringResource(R.string.rogeuin_pilyo)) },
-            text = {
-                Text(
-                    text = stringResource(R.string.bogjabhan_gaib_eobsi_3comane_rogeuinhago_gineungeul_iyonghae),
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { appNavViewModel.onEvent(AppNavigationUiEvent.ConfirmGoLogin) }) {
-                    Text(text = stringResource(R.string.rogeuinhareo_gagi))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { appNavViewModel.onEvent(AppNavigationUiEvent.DismissNeededLogin) }) {
-                    Text(text = stringResource(R.string.cwiso))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 }

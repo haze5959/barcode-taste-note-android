@@ -13,12 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,6 +44,10 @@ import com.oq.barnote.core.oqcore.util.AppController
 import com.oq.barnote.core.oqcore.util.toDisplayMessage
 import com.oq.barnote.core.oqcore.views.OQToastConfig
 import com.oq.barnote.core.oqcore.views.OQToastHost
+import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 /**
  * 풀스크린 스크림이 뒤 레이어로 터치를 통과시키지 않도록 모든 포인터 이벤트를 Initial 패스에서 소비한다.
@@ -186,15 +188,16 @@ fun GlobalErrorDialogHost(appController: AppController) {
     currentError?.let { throwable ->
         val context = LocalContext.current
         val message = throwable.toDisplayMessage(context)
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.oryu),
+            message = message,
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.hwagin),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            onPrimary = { currentError = null },
             onDismissRequest = { currentError = null },
-            title = { Text(text = stringResource(R.string.oryu)) },
-            text = { Text(text = message) },
-            confirmButton = {
-                TextButton(onClick = { currentError = null }) {
-                    Text(text = stringResource(R.string.hwagin))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 }

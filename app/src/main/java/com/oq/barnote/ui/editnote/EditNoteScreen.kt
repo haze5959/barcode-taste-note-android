@@ -19,12 +19,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +51,9 @@ import com.oq.barnote.ui.component.NotePublicToggleSection
 import com.oq.barnote.ui.component.NoteRatingSelectorSection
 import com.oq.barnote.ui.picker.rememberComposeMediaAttachmentPicker
 import kotlinx.coroutines.launch
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 @Composable
 fun EditNoteRoute(
@@ -217,26 +218,21 @@ internal fun EditNoteScreen(
 
         // iOS `showDiscardAlert` — 닫기 시 폐기 확인.
         if (state.showDiscardAlert) {
-            AlertDialog(
+            OQAlert(
+                title = stringResource(R.string.noteu_sujeong_cwiso),
+                message = stringResource(R.string.sujeong_jungideon_naeyongi_sarajibnida_jeongmal_dadeulggayo),
+                primaryButton = OQAlertButton(
+                    title = stringResource(R.string.nagagi),
+                    style = OQAlertButtonStyle.Primary,
+                ),
+                tertiaryButton = OQAlertButton(
+                    title = stringResource(R.string.gyesog_sujeong),
+                    style = OQAlertButtonStyle.Tertiary,
+                ),
+                onPrimary = { onEvent(EditNoteUiEvent.DiscardConfirmed) },
+                onTertiary = { onEvent(EditNoteUiEvent.DismissDiscardAlert) },
                 onDismissRequest = { onEvent(EditNoteUiEvent.DismissDiscardAlert) },
-                title = { Text(text = stringResource(R.string.noteu_sujeong_cwiso)) },
-                text = {
-                    Text(
-                        text = stringResource(
-                            R.string.sujeong_jungideon_naeyongi_sarajibnida_jeongmal_dadeulggayo,
-                        ),
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = { onEvent(EditNoteUiEvent.DiscardConfirmed) }) {
-                        Text(text = stringResource(R.string.nagagi))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { onEvent(EditNoteUiEvent.DismissDiscardAlert) }) {
-                        Text(text = stringResource(R.string.gyesog_sujeong))
-                    }
-                },
+                palette = barNotePalette(),
             )
         }
     }

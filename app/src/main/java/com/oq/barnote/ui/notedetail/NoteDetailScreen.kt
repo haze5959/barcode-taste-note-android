@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -46,7 +45,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,6 +95,9 @@ import com.oq.barnote.ui.tip.BarNoteTip
 import com.oq.barnote.ui.tip.BarnoteTip
 import com.oq.barnote.ui.component.FlavorSummaryChips
 import com.oq.barnote.ui.component.NoteDetailSummary
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 /**
  * iOS `NoteDetailView` 와 1:1 매핑.
@@ -193,41 +194,41 @@ internal fun NoteDetailScreen(
 
     // 삭제 alert
     if (state.showDeleteAlert) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.noteu_jegeo),
+            message = stringResource(R.string.jeongmalro_i_noteureul_jegeohasigessseubnigga_jegeodoen_note),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.jegeohagi),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.cwiso),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { onEvent(NoteDetailUiEvent.ConfirmDelete) },
+            onTertiary = { onEvent(NoteDetailUiEvent.DismissDeleteAlert) },
             onDismissRequest = { onEvent(NoteDetailUiEvent.DismissDeleteAlert) },
-            title = { Text(text = stringResource(R.string.noteu_jegeo)) },
-            text = {
-                Text(text = stringResource(R.string.jeongmalro_i_noteureul_jegeohasigessseubnigga_jegeodoen_note))
-            },
-            confirmButton = {
-                TextButton(onClick = { onEvent(NoteDetailUiEvent.ConfirmDelete) }) {
-                    Text(text = stringResource(R.string.jegeohagi))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onEvent(NoteDetailUiEvent.DismissDeleteAlert) }) {
-                    Text(text = stringResource(R.string.cwiso))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 
     // 차단 alert
     if (state.showBlockAlert) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.sayongja_cadan),
+            message = stringResource(R.string.i_sayongjareul_cadanhasigessseubnigga_cadanhamyeon_haedang_s),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.cadanhagi),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.cwiso),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { onEvent(NoteDetailUiEvent.ConfirmBlock) },
+            onTertiary = { onEvent(NoteDetailUiEvent.DismissBlockAlert) },
             onDismissRequest = { onEvent(NoteDetailUiEvent.DismissBlockAlert) },
-            title = { Text(text = stringResource(R.string.sayongja_cadan)) },
-            text = { Text(text = stringResource(R.string.i_sayongjareul_cadanhasigessseubnigga_cadanhamyeon_haedang_s)) },
-            confirmButton = {
-                TextButton(onClick = { onEvent(NoteDetailUiEvent.ConfirmBlock) }) {
-                    Text(text = stringResource(R.string.cadanhagi))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onEvent(NoteDetailUiEvent.DismissBlockAlert) }) {
-                    Text(text = stringResource(R.string.cwiso))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 

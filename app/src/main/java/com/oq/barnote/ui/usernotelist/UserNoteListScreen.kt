@@ -1,10 +1,15 @@
 package com.oq.barnote.ui.usernotelist
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -134,9 +139,21 @@ internal fun UserNoteListScreen(
 
             // iOS ScrollView { VStack { profileHeader → Divider → tabPicker → 콘텐츠 } } 와 동일하게,
             // ProfileHeader·탭·콘텐츠를 패널 내부의 단일 스크롤로 묶어 전체가 함께 스크롤되게 한다(TopBar 만 고정).
-            when (state.selectedTab) {
-                UserNoteListUiState.Tab.Notes -> NotesPanel(state = state, onEvent = onEvent)
-                UserNoteListUiState.Tab.Favorites -> FavoritesPanel(state = state, onEvent = onEvent)
+            // 탭 전환 시 콘텐츠 크로스페이드. 두 패널의 상단(ProfileHeader·Divider·TabSelector)은
+            // 동일 구성·동일 간격이라 페이드 동안 헤더는 제자리에 머무는 것처럼 보이고 리스트만 부드럽게 교체된다.
+            AnimatedContent(
+                targetState = state.selectedTab,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(220)) togetherWith
+                        fadeOut(animationSpec = tween(220))
+                },
+                label = "userNoteListTabContent",
+            ) { tab ->
+                when (tab) {
+                    UserNoteListUiState.Tab.Notes -> NotesPanel(state = state, onEvent = onEvent)
+                    UserNoteListUiState.Tab.Favorites ->
+                        FavoritesPanel(state = state, onEvent = onEvent)
+                }
             }
         }
 
@@ -549,7 +566,9 @@ private fun FavoritesPanel(
             top = 0.dp,
             bottom = Dimens.FabHSize + Dimens.SectionSpacing,
         ),
-        verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+        // 세로 간격은 NotesPanel(LazyColumn) 과 동일하게 Dimens.Padding(8dp) — 탭 전환 시 상단
+        // ProfileHeader·Divider·TabSelector 위치가 어긋나지 않도록 통일. (가로는 그리드 열 간격이라 Spacing 유지)
+        verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
         horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {

@@ -38,12 +38,10 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -78,6 +76,9 @@ import com.oq.barnote.core.oqcore.views.OQFillButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType
 import com.oq.barnote.core.oqcore.views.OQSafariView
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 /**
  * 구독 화면 라우트. iOS `SubscriptionView` 에 대응.
@@ -213,15 +214,16 @@ internal fun SubscriptionScreen(
         }
 
         if (state.errorMessage != null) {
-            AlertDialog(
+            OQAlert(
+                title = stringResource(R.string.oryu_jebo),
+                message = state.errorMessage,
+                primaryButton = OQAlertButton(
+                    title = stringResource(R.string.dadgi),
+                    style = OQAlertButtonStyle.Primary,
+                ),
+                onPrimary = { onEvent(SubscriptionUiEvent.DismissError) },
                 onDismissRequest = { onEvent(SubscriptionUiEvent.DismissError) },
-                title = { Text(text = stringResource(R.string.oryu_jebo)) },
-                text = { Text(text = state.errorMessage) },
-                confirmButton = {
-                    TextButton(onClick = { onEvent(SubscriptionUiEvent.DismissError) }) {
-                        Text(text = stringResource(R.string.dadgi))
-                    }
-                },
+                palette = barNotePalette(),
             )
         }
     }

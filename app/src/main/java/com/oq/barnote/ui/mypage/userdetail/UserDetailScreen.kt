@@ -25,14 +25,12 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +64,9 @@ import com.oq.barnote.ui.component.BTNImage
 import com.oq.barnote.ui.picker.rememberComposeMediaAttachmentPicker
 import com.oq.barnote.ui.util.appControllerOrNull
 import kotlinx.coroutines.launch
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 @Composable
 fun UserDetailRoute(
@@ -563,26 +564,23 @@ private fun DeleteAccountButton(onClick: () -> Unit) {
 
 @Composable
 private fun DeleteAccountDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.hoeweon_taltoe)) },
-        text = {
-            Text(
-                text = stringResource(
-                    R.string.ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida,
-                ),
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(text = stringResource(R.string.taltoehagi))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.cwiso))
-            }
-        },
+    OQAlert(
+        title = stringResource(R.string.hoeweon_taltoe),
+        message = stringResource(
+            R.string.ineun_doedolril_su_eobseumyeo_modeun_deiteoreul_sagjehabnida,
+        ),
+        primaryButton = OQAlertButton(
+            title = stringResource(R.string.taltoehagi),
+            style = OQAlertButtonStyle.Primary,
+        ),
+        tertiaryButton = OQAlertButton(
+            title = stringResource(R.string.cwiso),
+            style = OQAlertButtonStyle.Tertiary,
+        ),
+        onPrimary = { onConfirm() },
+        onTertiary = { onDismiss() },
+        onDismissRequest = { onDismiss() },
+        palette = barNotePalette(),
     )
 }
 

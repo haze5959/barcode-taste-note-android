@@ -111,7 +111,9 @@ internal fun MainBottomBar(
     Box(
         modifier = modifier
             .navigationBarsPadding()
-            .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.Spacing)
+            // floating pill — 좌우를 화면 가장자리에서 확실히 띄운다. 아래 shadow(elevation 12dp, clip=false)가
+            // 바깥으로 번져 BtnPadding(18dp) 만으론 그림자가 가장자리에 거의 닿아 "붙어 보였음" → 24dp 로 키움.
+            .padding(horizontal = 24.dp, vertical = Dimens.Spacing)
             .shadow(Dimens.Radius, RoundedCornerShape(Dimens.Radius), clip = false)
             .clip(RoundedCornerShape(Dimens.Radius))
             .background(colorResource(com.oq.barnote.core.designsystem.R.color.tabbar_background))

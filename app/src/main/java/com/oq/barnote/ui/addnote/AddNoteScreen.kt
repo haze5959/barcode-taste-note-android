@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
@@ -28,7 +27,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +58,9 @@ import com.oq.barnote.ui.component.NoteRatingSelectorSection
 import com.oq.barnote.ui.picker.rememberComposeMediaAttachmentPicker
 import com.oq.barnote.extension.title
 import kotlinx.coroutines.launch
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 @Composable
 fun AddNoteRoute(
@@ -176,45 +177,41 @@ internal fun AddNoteScreen(
 
             // Discard alert (iOS `showDiscardAlert`)
             if (state.showDiscardAlert) {
-                AlertDialog(
+                OQAlert(
+                    title = stringResource(R.string.jagseong_jung_noteureul_dadeulggayo),
+                    message = stringResource(R.string.jagseong_jung_naeyongi_modu_sarajibnida),
+                    primaryButton = OQAlertButton(
+                        title = stringResource(R.string.nagagi),
+                        style = OQAlertButtonStyle.Primary,
+                    ),
+                    tertiaryButton = OQAlertButton(
+                        title = stringResource(R.string.gyesog_jagseong),
+                        style = OQAlertButtonStyle.Tertiary,
+                    ),
+                    onPrimary = { onEvent(AddNoteUiEvent.ConfirmDiscard) },
+                    onTertiary = { onEvent(AddNoteUiEvent.DismissDiscardAlert) },
                     onDismissRequest = { onEvent(AddNoteUiEvent.DismissDiscardAlert) },
-                    title = {
-                        Text(text = stringResource(R.string.jagseong_jung_noteureul_dadeulggayo))
-                    },
-                    text = {
-                        Text(text = stringResource(R.string.jagseong_jung_naeyongi_modu_sarajibnida))
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { onEvent(AddNoteUiEvent.ConfirmDiscard) }) {
-                            Text(text = stringResource(R.string.nagagi))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { onEvent(AddNoteUiEvent.DismissDiscardAlert) }) {
-                            Text(text = stringResource(R.string.gyesog_jagseong))
-                        }
-                    },
+                    palette = barNotePalette(),
                 )
             }
 
             // Login alert (iOS `showLoginAlert`) — submit 직전 로그아웃 감지 시.
             if (state.showLoginAlert) {
-                AlertDialog(
+                OQAlert(
+                    title = stringResource(R.string.geoeui_da_wasseoyo),
+                    message = stringResource(R.string.rogeuinhago_coejong_dangyereul_wanryohaseyo),
+                    primaryButton = OQAlertButton(
+                        title = stringResource(R.string.rogeuinhareo_gagi),
+                        style = OQAlertButtonStyle.Primary,
+                    ),
+                    tertiaryButton = OQAlertButton(
+                        title = stringResource(R.string.cwiso),
+                        style = OQAlertButtonStyle.Tertiary,
+                    ),
+                    onPrimary = { onEvent(AddNoteUiEvent.ConfirmGoLogin) },
+                    onTertiary = { onEvent(AddNoteUiEvent.DismissLoginAlert) },
                     onDismissRequest = { onEvent(AddNoteUiEvent.DismissLoginAlert) },
-                    title = { Text(text = stringResource(R.string.geoeui_da_wasseoyo)) },
-                    text = {
-                        Text(text = stringResource(R.string.rogeuinhago_coejong_dangyereul_wanryohaseyo))
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { onEvent(AddNoteUiEvent.ConfirmGoLogin) }) {
-                            Text(text = stringResource(R.string.rogeuinhareo_gagi))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { onEvent(AddNoteUiEvent.DismissLoginAlert) }) {
-                            Text(text = stringResource(R.string.cwiso))
-                        }
-                    },
+                    palette = barNotePalette(),
                 )
             }
 

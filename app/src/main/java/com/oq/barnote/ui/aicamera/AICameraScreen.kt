@@ -6,9 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +26,10 @@ import com.oq.barnote.ui.permission.rememberCameraPermission
 import com.oq.barnote.ui.util.rememberAppController
 import com.oq.barnote.ui.util.showNeededCameraSetting
 import java.io.File
+import com.oq.barnote.core.designsystem.barNotePalette
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 /**
  * AI 라벨 촬영 화면. iOS `OQCameraView` (UIImagePickerController(sourceType: .camera)) 대응.
@@ -145,26 +147,23 @@ internal fun AICameraScreen(
 
     // AI 인식 실패 — 일반 에러 팝업 대신 직접 등록을 유도하는 전용 알럿. iOS `showAiScanFailedAlert` 대응.
     if (state.showAiScanFailedAlert) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.ai_seukaen_silpae),
+            message = stringResource(
+                R.string.imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka,
+            ),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.jepum_jigjeob_deungroghagi),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.dadgi),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { onEvent(AICameraUiEvent.ConfirmDirectRegistration) },
+            onTertiary = { onEvent(AICameraUiEvent.DismissAiScanFailedAlert) },
             onDismissRequest = { onEvent(AICameraUiEvent.DismissAiScanFailedAlert) },
-            title = { Text(text = stringResource(R.string.ai_seukaen_silpae)) },
-            text = {
-                Text(
-                    text = stringResource(
-                        R.string.imijieseo_jepum_jeongboreul_insighaji_moshaesseoyo_dasi_seuka,
-                    ),
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { onEvent(AICameraUiEvent.ConfirmDirectRegistration) }) {
-                    Text(text = stringResource(R.string.jepum_jigjeob_deungroghagi))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onEvent(AICameraUiEvent.DismissAiScanFailedAlert) }) {
-                    Text(text = stringResource(R.string.dadgi))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 }

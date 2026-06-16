@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -49,6 +48,9 @@ import com.oq.barnote.ui.component.SettingsDivider
 import com.oq.barnote.ui.component.SettingsRow
 import com.oq.barnote.ui.component.SettingsSection
 import java.time.LocalTime
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 @Composable
 fun ReservationSettingsRoute(
@@ -136,28 +138,23 @@ internal fun ReservationSettingsScreen(
     }
 
     if (state.showWriteNoteDialog) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.sieum_noteu_jagseong),
+            message = stringResource(
+                R.string.jigeum_baro_haedang_jepumui_sieum_noteureul_jagseonghasigess,
+            ),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.jagseonghagi),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.najunge),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { onEvent(ReservationSettingsUiEvent.ConfirmWriteNote) },
+            onTertiary = { onEvent(ReservationSettingsUiEvent.DismissWriteNoteDialog) },
             onDismissRequest = { onEvent(ReservationSettingsUiEvent.DismissWriteNoteDialog) },
-            title = { Text(text = stringResource(R.string.sieum_noteu_jagseong)) },
-            text = {
-                Text(
-                    text = stringResource(
-                        R.string.jigeum_baro_haedang_jepumui_sieum_noteureul_jagseonghasigess,
-                    ),
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { onEvent(ReservationSettingsUiEvent.ConfirmWriteNote) }) {
-                    Text(text = stringResource(R.string.jagseonghagi))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { onEvent(ReservationSettingsUiEvent.DismissWriteNoteDialog) },
-                ) {
-                    Text(text = stringResource(R.string.najunge))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 }

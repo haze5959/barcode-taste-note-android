@@ -30,13 +30,11 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,6 +63,9 @@ import com.oq.barnote.ui.component.SettingsSwitch
 import com.oq.barnote.ui.permission.rememberNotificationPermission
 import com.oq.barnote.core.oqcore.util.shareFile
 import com.oq.barnote.core.oqcore.views.OQSafariView
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 @Composable
 fun SettingsRoute(
@@ -153,26 +154,23 @@ internal fun SettingsScreen(
 
     // 다이얼로그 / 시트
     if (state.showExportDataAlert) {
-        AlertDialog(
+        OQAlert(
+            title = stringResource(R.string.deiteo_naebonaegi),
+            message = stringResource(
+                R.string.str_100gaessig_sieum_noteu_deiteoreul_tegseuteu_pailro_naebo,
+            ),
+            primaryButton = OQAlertButton(
+                title = stringResource(R.string.daeum),
+                style = OQAlertButtonStyle.Primary,
+            ),
+            tertiaryButton = OQAlertButton(
+                title = stringResource(R.string.cwiso),
+                style = OQAlertButtonStyle.Tertiary,
+            ),
+            onPrimary = { onEvent(SettingsUiEvent.ConfirmExportData) },
+            onTertiary = { onEvent(SettingsUiEvent.DismissExportDataAlert) },
             onDismissRequest = { onEvent(SettingsUiEvent.DismissExportDataAlert) },
-            title = { Text(text = stringResource(R.string.deiteo_naebonaegi)) },
-            text = {
-                Text(
-                    text = stringResource(
-                        R.string.str_100gaessig_sieum_noteu_deiteoreul_tegseuteu_pailro_naebo,
-                    ),
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { onEvent(SettingsUiEvent.ConfirmExportData) }) {
-                    Text(text = stringResource(R.string.daeum))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onEvent(SettingsUiEvent.DismissExportDataAlert) }) {
-                    Text(text = stringResource(R.string.cwiso))
-                }
-            },
+            palette = barNotePalette(),
         )
     }
 

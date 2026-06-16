@@ -22,11 +22,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +50,9 @@ import com.oq.barnote.extension.title
 import com.oq.barnote.ui.component.NoteAttachmentSection
 import com.oq.barnote.ui.picker.rememberComposeMediaAttachmentPicker
 import kotlinx.coroutines.launch
+import com.oq.barnote.core.oqcore.views.OQAlert
+import com.oq.barnote.core.oqcore.views.OQAlertButton
+import com.oq.barnote.core.oqcore.views.OQAlertButtonStyle
 
 @Composable
 fun AddProductRoute(
@@ -219,22 +220,21 @@ internal fun AddProductScreen(
 
         // iOS `showDuplicatedProductAlert` 대응 — 동명 제품 이미 존재 시 검색 화면 이동 안내.
         if (state.showDuplicatedProductAlert) {
-            AlertDialog(
+            OQAlert(
+                title = stringResource(R.string.imi_deungrogdoen_jepumieyo),
+                message = stringResource(R.string.ibryeoghasin_ireumgwa_yusahan_jepumi_imi_jonjaehabnida_geoms),
+                primaryButton = OQAlertButton(
+                    title = stringResource(R.string.geomsaeghareo_gagi),
+                    style = OQAlertButtonStyle.Primary,
+                ),
+                tertiaryButton = OQAlertButton(
+                    title = stringResource(R.string.cwiso),
+                    style = OQAlertButtonStyle.Tertiary,
+                ),
+                onPrimary = { onEvent(AddProductUiEvent.SearchExistingProduct) },
+                onTertiary = { onEvent(AddProductUiEvent.DismissDuplicatedAlert) },
                 onDismissRequest = { onEvent(AddProductUiEvent.DismissDuplicatedAlert) },
-                title = { Text(text = stringResource(R.string.imi_deungrogdoen_jepumieyo)) },
-                text = {
-                    Text(text = stringResource(R.string.ibryeoghasin_ireumgwa_yusahan_jepumi_imi_jonjaehabnida_geoms))
-                },
-                confirmButton = {
-                    TextButton(onClick = { onEvent(AddProductUiEvent.SearchExistingProduct) }) {
-                        Text(text = stringResource(R.string.geomsaeghareo_gagi))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { onEvent(AddProductUiEvent.DismissDuplicatedAlert) }) {
-                        Text(text = stringResource(R.string.cwiso))
-                    }
-                },
+                palette = barNotePalette(),
             )
         }
     }
