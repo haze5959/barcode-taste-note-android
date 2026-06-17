@@ -3,7 +3,7 @@ package com.oq.barnote.core.data.auth
 import com.oq.barnote.core.data.di.ApplicationScope
 import com.oq.barnote.core.domain.AuthStore
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.utils.OQLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop

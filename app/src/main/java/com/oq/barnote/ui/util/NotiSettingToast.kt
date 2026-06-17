@@ -5,7 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PhotoCamera
 import com.oq.barnote.R
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.views.OQToastButton
 import com.oq.barnote.core.oqcore.views.OQToastConfig
 import com.oq.barnote.core.oqcore.views.OQToastPosition

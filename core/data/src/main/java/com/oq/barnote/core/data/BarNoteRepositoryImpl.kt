@@ -25,6 +25,7 @@ import com.oq.barnote.core.oqcore.models.CommonError
 import com.oq.barnote.core.oqcore.network.NetworkError
 import com.oq.barnote.core.oqcore.utils.OQLog
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import retrofit2.HttpException
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -451,6 +452,17 @@ private inline fun <T> safeCall(block: () -> T): Result<T> = try {
 } catch (e: CommonError) {
     OQLog.e(e.message ?: "CommonError", e)
     Result.failure(e)
+} catch (e: HttpException) {
+    // iOS NetworkClient 의 HTTP status 분기 대응 — 401 은 unauthorized(로그인 만료/권한 없음),
+    // 그 외 비정상 코드는 unacceptableStatusCode. (이전엔 모든 HTTP 에러가 Throwable→Transport 로 빠져
+    // 401 도 "통신 실패" 로 표시되던 문제. 매핑된 NetworkError 는 CommonErrorMessage 가 문구로 변환.)
+    OQLog.e("HTTP ${e.code()} ${e.message()}", e)
+    val netError = if (e.code() == 401) {
+        NetworkError.Unauthorized
+    } else {
+        NetworkError.UnacceptableStatusCode(e.code())
+    }
+    Result.failure(CommonError.Network(netError))
 } catch (e: Throwable) {
     OQLog.e(e.message ?: "Throwable", e)
     Result.failure(CommonError.Network(NetworkError.Transport(e)))

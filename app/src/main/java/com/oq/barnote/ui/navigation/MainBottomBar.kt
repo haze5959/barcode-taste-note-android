@@ -120,6 +120,8 @@ internal fun MainBottomBar(
             .border(1.dp, glassStroke, RoundedCornerShape(Dimens.Radius)),
     ) {
         NavigationBar(
+            // 좌우 끝 항목(홈/설정)이 선택될 때 인디케이터 pill 이 둥근 모서리에 닿지 않도록 내부 수평 패딩.
+            modifier = Modifier.padding(horizontal = Dimens.Padding),
             containerColor = Color.Transparent,
             // 인셋은 바깥 Box 의 navigationBarsPadding 이 처리 — 내부는 0.
             windowInsets = WindowInsets(0, 0, 0, 0),

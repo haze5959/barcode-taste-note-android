@@ -14,7 +14,7 @@ import com.oq.barnote.core.domain.ProductType
 import com.oq.barnote.core.domain.PublicScope
 import com.oq.barnote.core.domain.ReservationStore
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.utils.OQHapticService
 import com.oq.barnote.core.oqcore.utils.OQLog
 import dagger.hilt.android.lifecycle.HiltViewModel

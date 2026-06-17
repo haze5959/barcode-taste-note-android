@@ -12,7 +12,7 @@ import com.oq.barnote.core.domain.ProductType
 import com.oq.barnote.core.domain.UserInfo
 import com.oq.barnote.core.domain.UserStore
 import android.content.Context
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.ui.util.showNeededNotiSetting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

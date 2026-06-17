@@ -13,6 +13,12 @@ data class MyPageUiState(
     val neededReviewProduct: Boolean = false,
     val isLoading: Boolean = false,
     val isSubscribed: Boolean = false,
+    /**
+     * 최초 로그인 상태 판별(checkLogin)이 한 번이라도 끝났는지. false 면 아직 "미확정" 상태이므로
+     * 로그인/로그아웃 콘텐츠 대신 스켈레톤을 보여준다. (콜드 스타트 시 isLoading=false·myInfo=null 초기값
+     * 때문에 로그아웃 화면이 잠깐 깜빡인 뒤 스켈레톤이 뜨던 문제 방지.)
+     */
+    val hasLoadedOnce: Boolean = false,
 )
 
 /** 마이페이지 사용자 액션. iOS `MyPageFeature.Action` 에 대응. */

@@ -7,7 +7,7 @@ import com.oq.barnote.core.domain.NoteReservation
 import com.oq.barnote.core.domain.NotificationScheduler
 import com.oq.barnote.core.domain.ReservationStore
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

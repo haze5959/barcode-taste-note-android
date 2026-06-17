@@ -121,7 +121,8 @@ internal fun MyPageScreen(
             verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
         ) {
             when {
-                state.isLoading -> SkeletonContent()
+                // 로딩 중이거나 아직 최초 로그인 판별 전이면 스켈레톤 (로그아웃 화면 깜빡임 방지).
+                state.isLoading || !state.hasLoadedOnce -> SkeletonContent()
                 state.myInfo != null -> LoggedInContent(state = state, onEvent = onEvent)
                 else -> LoggedOutContent(onLogin = { onEvent(MyPageUiEvent.TappedLogin) })
             }

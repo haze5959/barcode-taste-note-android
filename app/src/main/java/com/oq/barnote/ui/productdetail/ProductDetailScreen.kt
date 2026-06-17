@@ -86,10 +86,10 @@ import com.oq.barnote.core.domain.Product
 import com.oq.barnote.core.domain.ProductDetailInfo
 import com.oq.barnote.core.domain.ProductStyle
 import com.oq.barnote.core.domain.ProductType
-import com.oq.barnote.core.oqcore.util.Country
-import com.oq.barnote.core.oqcore.util.RelativeTime
+import com.oq.barnote.core.oqcore.utils.Country
+import com.oq.barnote.core.oqcore.utils.RelativeTime
 import com.oq.barnote.core.oqcore.utils.rememberOQHaptic
-import com.oq.barnote.core.oqcore.util.openUrl
+import com.oq.barnote.core.oqcore.utils.openUrl
 import com.oq.barnote.ui.util.RefreshOnResume
 import com.oq.barnote.extension.categoryTitle
 import com.oq.barnote.extension.detail

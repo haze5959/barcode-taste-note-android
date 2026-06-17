@@ -8,7 +8,7 @@ import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.domain.NoteDetail
 import com.oq.barnote.core.domain.NoteDraft
 import com.oq.barnote.core.domain.PublicScope
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

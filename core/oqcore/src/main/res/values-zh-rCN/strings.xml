@@ -35,6 +35,7 @@
     <string name="error_network_unauthorized">登录已过期或您没有权限。</string>
     <string name="error_translation_failed">翻译不支持此语言或发生错误。</string>
     <string name="image_editor_mosaic">面部马赛克</string>
+    <string name="image_editor_no_face">未检测到人脸</string>
     <string name="image_editor_ratio">比例</string>
     <string name="image_editor_reset">重置</string>
     <string name="image_editor_rotate">旋转</string>

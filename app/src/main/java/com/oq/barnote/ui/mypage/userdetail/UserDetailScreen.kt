@@ -54,9 +54,9 @@ import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.domain.User
-import com.oq.barnote.core.oqcore.util.OQDateFormat
-import com.oq.barnote.core.oqcore.util.copyToClipboard
-import com.oq.barnote.core.oqcore.util.openUrl
+import com.oq.barnote.core.oqcore.utils.OQDateFormat
+import com.oq.barnote.core.oqcore.utils.copyToClipboard
+import com.oq.barnote.core.oqcore.utils.openUrl
 import com.oq.barnote.core.oqcore.views.OQTF
 import com.oq.barnote.core.oqcore.views.OQTopBar
 import com.oq.barnote.extension.shareUrl
@@ -136,11 +136,7 @@ internal fun UserDetailScreen(
             .fillMaxSize()
             .background(background),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             OQTopBar(
                 title = stringResource(R.string.nae_jeongbo),
                 onNavClick = onBack,
@@ -148,30 +144,36 @@ internal fun UserDetailScreen(
             )
 
             state.myInfo?.let { user ->
-                ProfileHeader(
-                    user = user,
-                    onTapImage = { onEvent(UserDetailUiEvent.TappedProfileImage) },
-                    onTapEdit = { onEvent(UserDetailUiEvent.TappedEditProfile) },
-                )
+                // iOS UserDetailView: [콘텐츠] + Spacer() + 하단 "회원 탈퇴하기". 콘텐츠는 스크롤 영역(weight)
+                // 으로 두고 DeleteAccountButton 을 그 아래(화면 맨 아래)에 고정한다 (Spacer() 등가 배치).
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    ProfileHeader(
+                        user = user,
+                        onTapImage = { onEvent(UserDetailUiEvent.TappedProfileImage) },
+                        onTapEdit = { onEvent(UserDetailUiEvent.TappedEditProfile) },
+                    )
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(top = Dimens.SectionSpacing),
-                    color = colorResource(com.oq.barnote.core.designsystem.R.color.divider),
-                )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(top = Dimens.SectionSpacing),
+                        color = colorResource(com.oq.barnote.core.designsystem.R.color.divider),
+                    )
 
-                InfoSection(
-                    user = user,
-                    isSubscribed = state.isSubscribed,
-                    onTapSubscribe = { onEvent(UserDetailUiEvent.TappedSubscribe) },
-                    onCopyUrl = { url ->
-                        onEvent(UserDetailUiEvent.TappedCopyWebUrl(url))
-                    },
-                    onOpenUrl = { url ->
-                        onEvent(UserDetailUiEvent.TappedOpenWebUrl(url))
-                    },
-                )
-
-                Spacer(modifier = Modifier.height(Dimens.SectionSpacing))
+                    InfoSection(
+                        user = user,
+                        isSubscribed = state.isSubscribed,
+                        onTapSubscribe = { onEvent(UserDetailUiEvent.TappedSubscribe) },
+                        onCopyUrl = { url ->
+                            onEvent(UserDetailUiEvent.TappedCopyWebUrl(url))
+                        },
+                        onOpenUrl = { url ->
+                            onEvent(UserDetailUiEvent.TappedOpenWebUrl(url))
+                        },
+                    )
+                }
 
                 DeleteAccountButton(
                     onClick = { onEvent(UserDetailUiEvent.TappedDeleteAccount) },

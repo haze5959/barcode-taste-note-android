@@ -8,7 +8,7 @@ import com.oq.barnote.core.domain.AuthStore
 import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.utils.OQLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

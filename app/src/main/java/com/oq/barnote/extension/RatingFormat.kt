@@ -1,6 +1,6 @@
 package com.oq.barnote.extension
 
-import com.oq.barnote.core.oqcore.util.formatDecimal
+import com.oq.barnote.core.oqcore.utils.formatDecimal
 
 /**
  * 별점 칩 텍스트 — "⭐️ 4.5" 형태. BarNote 의 여러 row 컴포넌트가 동일하게 쓰던

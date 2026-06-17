@@ -16,9 +16,9 @@ import com.oq.barnote.core.domain.PublicScope
 import com.oq.barnote.core.domain.ReservationStore
 import com.oq.barnote.core.domain.UnratedNoteAlert
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
-import com.oq.barnote.core.oqcore.util.OQDateFormat
-import com.oq.barnote.core.oqcore.util.copyToClipboard
+import com.oq.barnote.core.oqcore.utils.AppController
+import com.oq.barnote.core.oqcore.utils.OQDateFormat
+import com.oq.barnote.core.oqcore.utils.copyToClipboard
 import com.oq.barnote.core.oqcore.utils.OQLog
 import com.oq.barnote.core.oqcore.views.OQToastButton
 import com.oq.barnote.core.oqcore.views.OQToastConfig
@@ -278,7 +278,23 @@ class ProductDetailViewModel @Inject constructor(
             repository.getProductDetail(id).fold(
                 onSuccess = { info ->
                     val isFav = userStore.checkIsFavorite(id)
-                    _uiState.update { it.copy(isLoading = false, info = info, isFavorite = isFav) }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            info = info,
+                            isFavorite = isFav,
+                            // 갱신 시 탭 캐시를 무효화한다 — 이렇게 해야 아래 setTab 이 활성 탭 데이터를
+                            // 새로 조회한다. (노트 작성/삭제 후 복귀 시 '내 노트' 목록이 옛 캐시로 남던 버그 수정:
+                            // setTab(MyNotes) 가 `myNotes == null` 일 때만 fetchMyNotes 하므로 null 로 리셋.)
+                            notes = emptyList(),
+                            notePage = 1,
+                            hasMoreNotes = true,
+                            myNotes = null,
+                            imageIds = emptyList(),
+                            imagePage = 1,
+                            hasMoreImages = true,
+                        )
+                    }
                     // iOS: 마셔본 제품이면 myNotes 탭, 노트가 있으면 notes 탭.
                     val initialTab = when {
                         info.myNoteIds?.isNotEmpty() == true -> ProductDetailUiState.Tab.MyNotes

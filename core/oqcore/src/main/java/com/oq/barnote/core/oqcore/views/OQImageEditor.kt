@@ -21,22 +21,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AspectRatio
+import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.RotateRight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -45,10 +44,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,6 +70,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,8 +80,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.oq.barnote.core.oqcore.models.Palette
 import com.oq.barnote.core.oqcore.R
+import com.oq.barnote.core.oqcore.utils.OQBlurFace
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
 import kotlin.math.min
@@ -142,6 +148,33 @@ private fun OQImageEditorContent(
 ) {
     val density = LocalDensity.current
 
+    // 풀스크린 오버레이 — Compose WindowInsets/systemBarsPadding 이 호스트(Scaffold/NavHost) inset 처리와
+    // 얽혀 0/이중값을 줄 수 있어, Activity decorView 의 실제 시스템바 inset 을 직접 읽는다.
+    // (ZoomableImageViewer / OnboardingDialog 와 동일 패턴) — 상단 toolbar=topInset, 하단 버튼=bottomInset.
+    val view = LocalView.current
+    var topInset by remember { mutableStateOf(0.dp) }
+    var bottomInset by remember { mutableStateOf(0.dp) }
+    DisposableEffect(view) {
+        var ctx: android.content.Context? = view.context
+        while (ctx is android.content.ContextWrapper && ctx !is android.app.Activity) {
+            ctx = ctx.baseContext
+        }
+        val decor = (ctx as? android.app.Activity)?.window?.decorView
+        fun update() {
+            decor?.let { ViewCompat.getRootWindowInsets(it) }
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+                ?.let { bars ->
+                    topInset = with(density) { bars.top.toDp() }
+                    bottomInset = with(density) { bars.bottom.toDp() }
+                }
+        }
+        update()
+        val vto = decor?.viewTreeObserver
+        val listener = android.view.ViewTreeObserver.OnGlobalLayoutListener { update() }
+        vto?.addOnGlobalLayoutListener(listener)
+        onDispose { if (vto?.isAlive == true) vto.removeOnGlobalLayoutListener(listener) }
+    }
+
     // currentBitmap = 회전이 적용된 작업본. originalBitmap = 원본 (Reset 용).
     val originalBitmap = remember(imageBytes) {
         BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
@@ -162,6 +195,17 @@ private fun OQImageEditorContent(
     var resetTrigger by remember { mutableStateOf(0) }
 
     var menuExpanded by remember { mutableStateOf(false) }
+
+    // 얼굴 블러 — ML Kit 검출이 비동기라 코루틴 + 처리중/얼굴없음 안내 상태.
+    val scope = rememberCoroutineScope()
+    var isBlurProcessing by remember { mutableStateOf(false) }
+    var showNoFaceMessage by remember { mutableStateOf(false) }
+    if (showNoFaceMessage) {
+        LaunchedEffect(showNoFaceMessage) {
+            kotlinx.coroutines.delay(2000)
+            showNoFaceMessage = false
+        }
+    }
 
     if (originalBitmap == null) {
         // 디코딩 실패 시 즉시 취소 처리.
@@ -377,13 +421,14 @@ private fun OQImageEditorContent(
         onComplete(bytes)
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            // 배경(검정)은 시스템 바 밑까지 full-bleed, 콘텐츠(상단 툴바·이미지·하단 버튼)는 systemBars
-            // (상단 상태바 + 하단 내비게이션바) inset 안에 둔다. → 하단 버튼이 내비바에 잘리지 않음.
+            // 배경(검정)은 시스템 바 밑까지 full-bleed. 상단 콘텐츠만 실제 상태바 inset(topInset)으로 띄우고,
+            // 하단 버튼은 아래 Row 에서 bottomInset 으로 내비바를 피한다.
             .background(Color.Black)
-            .windowInsetsPadding(WindowInsets.systemBars),
+            .padding(top = topInset),
     ) {
         // Top bar
         Row(
@@ -502,12 +547,12 @@ private fun OQImageEditorContent(
             }
         }
 
-        // Bottom bar — 하단 내비게이션바 inset 은 루트 systemBars 가 처리하므로 여기선 버튼 여백만.
+        // Bottom bar — 시스템 내비게이션 버튼과 겹치지 않도록 실제 nav inset(bottomInset) 만큼 더 띄운다.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
-                .padding(vertical = 16.dp, horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp + bottomInset),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -559,6 +604,26 @@ private fun OQImageEditorContent(
                 },
             )
 
+            // 얼굴 블러 (ML Kit 검출 → 얼굴 가우시안 블러). iOS applyBlurFace 대응.
+            ToolbarButton(
+                icon = Icons.Default.BlurOn,
+                label = stringResource(R.string.image_editor_mosaic),
+                onClick = {
+                    if (isBlurProcessing) return@ToolbarButton
+                    val target = currentBitmap ?: return@ToolbarButton
+                    scope.launch {
+                        isBlurProcessing = true
+                        val blurred = OQBlurFace.blurFaces(target)
+                        isBlurProcessing = false
+                        if (blurred != null) {
+                            currentBitmap = blurred
+                        } else {
+                            showNoFaceMessage = true
+                        }
+                    }
+                },
+            )
+
             // 리셋.
             ToolbarButton(
                 icon = Icons.AutoMirrored.Filled.Undo,
@@ -572,6 +637,34 @@ private fun OQImageEditorContent(
                     isInitialized = false
                     resetTrigger++
                 },
+            )
+        }
+    }
+
+        // 얼굴 블러 처리 중 로딩 오버레이 — 검출~합성 동안 터치 차단 (루트 Box 자식으로 전체 위에 겹침).
+        if (isBlurProcessing) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = Color.White)
+            }
+        }
+
+        // 얼굴 미검출 안내 (2초 후 자동 사라짐). iOS 는 무동작이지만 피드백 제공.
+        if (showNoFaceMessage) {
+            Text(
+                text = stringResource(R.string.image_editor_no_face),
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.Black.copy(alpha = 0.75f))
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
             )
         }
     }

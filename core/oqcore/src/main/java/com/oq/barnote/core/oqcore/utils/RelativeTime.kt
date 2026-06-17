@@ -1,4 +1,4 @@
-package com.oq.barnote.core.oqcore.util
+package com.oq.barnote.core.oqcore.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

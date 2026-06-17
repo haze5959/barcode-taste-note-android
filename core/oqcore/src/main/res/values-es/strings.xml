@@ -35,6 +35,7 @@ Para fotos de iCloud o panorámicas, ábrelas primero en la aplicación Fotos y 
     <string name="error_network_unauthorized">La sesión ha expirado o no tienes permiso.</string>
     <string name="error_translation_failed">La traducción no es compatible con este idioma o se produjo un error.</string>
     <string name="image_editor_mosaic">Mosaico</string>
+    <string name="image_editor_no_face">No se encontró ninguna cara</string>
     <string name="image_editor_ratio">Proporción</string>
     <string name="image_editor_reset">Restablecer</string>
     <string name="image_editor_rotate">Girar</string>

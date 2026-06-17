@@ -71,7 +71,7 @@ import com.oq.barnote.Constants
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
-import com.oq.barnote.core.oqcore.util.openUrl
+import com.oq.barnote.core.oqcore.utils.openUrl
 import com.oq.barnote.core.oqcore.views.OQFillButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButton
 import com.oq.barnote.core.oqcore.views.OQRoundedButtonStyleType

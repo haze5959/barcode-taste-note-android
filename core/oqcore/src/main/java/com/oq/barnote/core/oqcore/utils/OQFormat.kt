@@ -1,4 +1,4 @@
-package com.oq.barnote.core.oqcore.util
+package com.oq.barnote.core.oqcore.utils
 
 import java.text.NumberFormat
 import java.util.Locale

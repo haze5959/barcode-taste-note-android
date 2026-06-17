@@ -1,4 +1,4 @@
-package com.oq.barnote.core.oqcore.util
+package com.oq.barnote.core.oqcore.utils
 
 import android.content.ClipData
 import android.content.ClipboardManager

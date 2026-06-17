@@ -1,4 +1,4 @@
-package com.oq.barnote.core.oqcore.util
+package com.oq.barnote.core.oqcore.utils
 
 import android.content.Context
 import com.oq.barnote.core.oqcore.R

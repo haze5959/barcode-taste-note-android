@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.oqcore.models.Palette
-import com.oq.barnote.core.oqcore.util.AppController
-import com.oq.barnote.core.oqcore.util.toDisplayMessage
+import com.oq.barnote.core.oqcore.utils.AppController
+import com.oq.barnote.core.oqcore.utils.toDisplayMessage
 import com.oq.barnote.core.oqcore.views.OQToastConfig
 import com.oq.barnote.core.oqcore.views.OQToastHost
 import com.oq.barnote.core.designsystem.barNotePalette

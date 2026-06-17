@@ -42,7 +42,7 @@ import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.ProductInfo
 import com.oq.barnote.core.domain.Report
-import com.oq.barnote.core.oqcore.util.OQDateFormat
+import com.oq.barnote.core.oqcore.utils.OQDateFormat
 import com.oq.barnote.ui.component.EmptyStateView
 
 @Composable

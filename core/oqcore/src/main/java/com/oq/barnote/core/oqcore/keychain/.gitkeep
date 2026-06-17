@@ -1,4 +1,0 @@
-package com.oq.barnote.core.oqcore.keychain
-
-// iOS: OQKeyChain.swift 대응
-// Android KeyStore / EncryptedSharedPreferences wrapper

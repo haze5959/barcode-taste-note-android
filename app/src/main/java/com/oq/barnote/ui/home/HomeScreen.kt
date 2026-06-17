@@ -53,7 +53,7 @@ import com.oq.barnote.core.designsystem.component.AutoResizeText
 import com.oq.barnote.ui.navigation.MainBottomBarHeight
 import com.oq.barnote.core.designsystem.component.ViewAllButton
 import com.oq.barnote.core.oqcore.ui.modifier.dashedBorder
-import com.oq.barnote.core.oqcore.util.formatThousands
+import com.oq.barnote.core.oqcore.utils.formatThousands
 import com.oq.barnote.core.domain.NoteInfo
 import com.oq.barnote.core.domain.ProductInfo
 import com.oq.barnote.ui.component.NoteRow

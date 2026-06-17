@@ -10,7 +10,7 @@ import com.auth0.android.callback.Callback
 import com.oq.barnote.core.data.di.ApplicationScope
 import com.oq.barnote.core.domain.AuthStore
 import com.oq.barnote.core.domain.Credentials
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.utils.OQLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
@@ -82,6 +82,15 @@ class Auth0AuthStore @Inject constructor(
     /** 진행 중인 [forceRefreshCredentials] Deferred. */
     private var pendingForceRefresh: Deferred<Credentials?>? = null
 
+    /**
+     * 로그아웃/세션정리 세대. [clear] 마다 증가. 진행 중이던 credential fetch 는 cancel 하지 않으므로
+     * (cancel 하면 제품 상세 등 진행 중 공개 요청이 예외로 깨짐), fetch 시작 시점의 세대를 기억했다가
+     * 완료 시 세대가 바뀌었으면(=중간에 clear 발생) `_isLoggedIn = true` 로 되돌리지 않는다.
+     * → 로그아웃 직후 in-flight fetch 가 완료되며 세션을 되살리던(가끔 로그인 정보가 그대로 보이던) 버그 방지.
+     */
+    @Volatile
+    private var authEpoch = 0
+
     // endregion
 
     override suspend fun hasCredentials(): Boolean {
@@ -107,11 +116,13 @@ class Auth0AuthStore @Inject constructor(
             }
             pendingFetch?.let { return@withLock it }
 
+            val epoch = authEpoch
             val newDeferred = appScope.async {
                 runCatching { fetchCredentials(minTtl = MIN_TTL_SECONDS) }
                     .map { it?.toDomain() }
                     .onSuccess { creds ->
-                        if (creds != null) {
+                        // fetch 도중 clear() 가 호출됐으면(세대 변경) 세션을 되살리지 않는다.
+                        if (creds != null && epoch == authEpoch) {
                             mutex.withLock { cachedCredentials = creds }
                             _isLoggedIn.value = true
                         }
@@ -139,11 +150,13 @@ class Auth0AuthStore @Inject constructor(
         val deferred = mutex.withLock {
             pendingForceRefresh?.let { return@withLock it }
 
+            val epoch = authEpoch
             val newDeferred = appScope.async {
                 runCatching { fetchCredentials(minTtl = FORCE_REFRESH_MIN_TTL_SECONDS) }
                     .map { it?.toDomain() }
                     .onSuccess { creds ->
-                        if (creds != null) {
+                        // fetch 도중 clear() 가 호출됐으면(세대 변경) 세션을 되살리지 않는다.
+                        if (creds != null && epoch == authEpoch) {
                             mutex.withLock { cachedCredentials = creds }
                             _isLoggedIn.value = true
                         }
@@ -195,6 +208,8 @@ class Auth0AuthStore @Inject constructor(
             // 호출자가 null 대신 예외를 받는다 (미로그인 시 제품 상세 요청이 깨지던 원인). 참조만 분리한다.
             pendingFetch = null
             pendingForceRefresh = null
+            // 세대 증가 — 이 시점 이후 완료되는 in-flight fetch 는 로그인 상태를 되돌리지 못한다.
+            authEpoch++
         }
         _isLoggedIn.value = false
         if (clearWebSession) {

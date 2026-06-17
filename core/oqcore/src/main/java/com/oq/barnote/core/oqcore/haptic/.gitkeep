@@ -1,4 +1,0 @@
-package com.oq.barnote.core.oqcore.haptic
-
-// iOS: OQHapticService.swift 대응
-// 안드로이드 Vibrator/HapticFeedback 서비스

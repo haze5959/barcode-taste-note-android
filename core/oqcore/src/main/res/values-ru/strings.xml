@@ -35,6 +35,7 @@
     <string name="error_network_unauthorized">Срок действия входа истек или у вас нет разрешения.</string>
     <string name="error_translation_failed">Перевод не поддерживается для этого языка или произошла ошибка.</string>
     <string name="image_editor_mosaic">Мозаика</string>
+    <string name="image_editor_no_face">Лицо не найдено</string>
     <string name="image_editor_ratio">Соотношение</string>
     <string name="image_editor_reset">Сброс</string>
     <string name="image_editor_rotate">Вращать</string>

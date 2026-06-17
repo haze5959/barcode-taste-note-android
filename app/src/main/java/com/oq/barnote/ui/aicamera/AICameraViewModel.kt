@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.oq.barnote.R
 import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.MediaAttachment
-import com.oq.barnote.core.oqcore.util.AppController
-import com.oq.barnote.core.oqcore.util.OQImageOptimize
+import com.oq.barnote.core.oqcore.utils.AppController
+import com.oq.barnote.core.oqcore.utils.OQImageOptimize
 import com.oq.barnote.core.oqcore.utils.OQHapticService
 import com.oq.barnote.core.oqcore.utils.OQLog
 import com.oq.barnote.ui.navigation.Destinations

@@ -35,6 +35,7 @@ Per foto di iCloud o panoramiche, aprile prima nell\'app Foto e riprova.</string
     <string name="error_network_unauthorized">La sessione è scaduta o non si dispone delle autorizzazioni.</string>
     <string name="error_translation_failed">La traduzione non è supportata per questa lingua o si è verificato un errore.</string>
     <string name="image_editor_mosaic">Mosaico</string>
+    <string name="image_editor_no_face">Nessun volto rilevato</string>
     <string name="image_editor_ratio">Rapporto</string>
     <string name="image_editor_reset">Reimposta</string>
     <string name="image_editor_rotate">Ruota</string>

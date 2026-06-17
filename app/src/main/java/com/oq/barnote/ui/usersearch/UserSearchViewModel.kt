@@ -7,7 +7,7 @@ import com.oq.barnote.Constants
 import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.NotificationScheduler
 import com.oq.barnote.core.domain.UserInfo
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.utils.OQLog
 import com.oq.barnote.ui.util.showNeededNotiSetting
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -41,7 +41,7 @@ import com.oq.barnote.core.domain.NoteInfo
 import com.oq.barnote.core.domain.PublicScope
 import com.oq.barnote.core.oqcore.ui.component.InfoTagStyle
 import com.oq.barnote.core.oqcore.ui.component.InfoTagView
-import com.oq.barnote.core.oqcore.util.RelativeTime
+import com.oq.barnote.core.oqcore.utils.RelativeTime
 import com.oq.barnote.core.oqcore.views.SkeletonView
 import com.oq.barnote.extension.title
 

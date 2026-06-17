@@ -58,4 +58,7 @@ dependencies {
 
     // Kakao SDK (카카오톡 공유). iOS `KakaoSDKShare` 대응.
     implementation(libs.kakao.share)
+
+    // ML Kit Face Detection (OQBlurFace — 이미지 편집기의 얼굴 가우시안 블러). 온디바이스 번들 모델.
+    implementation(libs.mlkit.face.detection)
 }

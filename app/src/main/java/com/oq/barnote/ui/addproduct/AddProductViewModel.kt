@@ -6,7 +6,7 @@ import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.domain.ProductDraft
 import com.oq.barnote.core.domain.ProductType
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.utils.OQHapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -21,8 +21,8 @@ import javax.inject.Inject
 data class AddProductUiState(
     val name: String = "",
     val description: String = "",
-    // iOS `AddProductFeature.State` 가 `selectedType = .whisky` 로 기본값을 두고 제출은 이름만 검증.
-    val type: ProductType = ProductType.Whisky,
+    // 기본 주류 타입은 Wine (요청에 따른 기본값 — iOS 는 .whisky 지만 Android 는 Wine). 제출은 이름만 검증.
+    val type: ProductType = ProductType.Wine,
     val barcode: String? = null,
     val attachment: MediaAttachment? = null,
     val imageId: String? = null,

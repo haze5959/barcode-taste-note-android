@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  *
  * `displayValue` 는 raw 문자열을 화면 표시용으로 변환합니다.
  * 단, `Country` (ISO → 국기 + 지역명) 매핑은 안드로이드 Locale API 가 필요하므로
- * [com.oq.barnote.core.oqcore.util.Country] 의 변환기를 [countryDisplay] 인자로 주입받습니다.
+ * [com.oq.barnote.core.oqcore.utils.Country] 의 변환기를 [countryDisplay] 인자로 주입받습니다.
  */
 @Serializable
 enum class ProductDetailInfo(val rawValue: String) {

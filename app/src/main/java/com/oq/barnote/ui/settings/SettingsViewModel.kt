@@ -15,8 +15,8 @@ import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.models.AppLanguage
 import com.oq.barnote.core.oqcore.models.AppTheme
 import com.oq.barnote.core.oqcore.models.CommonError
-import com.oq.barnote.core.oqcore.util.AppController
-import com.oq.barnote.core.oqcore.util.OQDateFormat
+import com.oq.barnote.core.oqcore.utils.AppController
+import com.oq.barnote.core.oqcore.utils.OQDateFormat
 import com.oq.barnote.extension.shareUrl
 import com.oq.barnote.extension.title
 import com.oq.barnote.ui.util.showNeededNotiSetting

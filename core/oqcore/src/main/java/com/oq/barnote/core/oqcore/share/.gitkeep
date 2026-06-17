@@ -1,4 +1,0 @@
-package com.oq.barnote.core.oqcore.share
-
-// iOS: OQSNSShare.swift 대응
-// 안드로이드 Intent 기반 SNS 공유 유틸리티

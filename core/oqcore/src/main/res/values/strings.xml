@@ -35,6 +35,7 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="error_network_unauthorized">Unauthorized</string>
     <string name="error_translation_failed">Translation is not supported for this language or an error occurred.</string>
     <string name="image_editor_mosaic">Mosaic</string>
+    <string name="image_editor_no_face">No face found</string>
     <string name="image_editor_ratio">Ratio</string>
     <string name="image_editor_reset">Reset</string>
     <string name="image_editor_rotate">Rotate</string>

@@ -8,7 +8,7 @@ import com.oq.barnote.core.domain.NotificationScheduler
 import com.oq.barnote.core.domain.Product
 import com.oq.barnote.core.domain.RemotePushType
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import android.content.Context
 import com.auth0.android.result.Credentials
 import com.oq.barnote.R

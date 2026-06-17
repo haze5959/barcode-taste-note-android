@@ -31,7 +31,7 @@ import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
 import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.NoteInfo
-import com.oq.barnote.core.oqcore.util.RelativeTime
+import com.oq.barnote.core.oqcore.utils.RelativeTime
 import com.oq.barnote.core.oqcore.views.SkeletonView
 import com.oq.barnote.extension.ratingStarText
 

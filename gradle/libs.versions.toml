@@ -32,6 +32,7 @@ appcompat = "1.7.0"
 mlkitTranslate = "17.0.3"
 mlkitLanguageId = "17.0.6"
 mlkitBarcode = "17.3.0"
+mlkitFaceDetection = "16.1.7"   # 얼굴 블러(OQBlurFace) — 번들 온디바이스 모델
 cameraX = "1.4.1"
 browser = "1.8.0"
 playReview = "2.0.2"
@@ -87,6 +88,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 mlkit-translate = { group = "com.google.mlkit", name = "translate", version.ref = "mlkitTranslate" }
 mlkit-language-id = { group = "com.google.mlkit", name = "language-id", version.ref = "mlkitLanguageId" }
 mlkit-barcode = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+mlkit-face-detection = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlkitFaceDetection" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }

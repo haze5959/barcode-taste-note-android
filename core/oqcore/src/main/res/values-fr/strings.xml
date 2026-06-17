@@ -35,6 +35,7 @@ Pour les photos iCloud ou panoramiques, ouvrez-les d\'abord dans l\'application 
     <string name="error_network_unauthorized">Votre session a expiré ou vous n\'avez pas l\'autorisation.</string>
     <string name="error_translation_failed">La traduction n\'est pas prise en charge pour cette langue ou une erreur s\'est produite.</string>
     <string name="image_editor_mosaic">Mosaïque</string>
+    <string name="image_editor_no_face">Aucun visage détecté</string>
     <string name="image_editor_ratio">Ratio</string>
     <string name="image_editor_reset">Réinitialiser</string>
     <string name="image_editor_rotate">Rotation</string>

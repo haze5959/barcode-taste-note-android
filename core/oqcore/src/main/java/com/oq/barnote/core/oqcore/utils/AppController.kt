@@ -1,4 +1,4 @@
-package com.oq.barnote.core.oqcore.util
+package com.oq.barnote.core.oqcore.utils
 
 import com.oq.barnote.core.oqcore.views.OQToastConfig
 import com.oq.barnote.core.oqcore.views.OQToastStyle

@@ -7,7 +7,7 @@ import com.oq.barnote.Constants
 import com.oq.barnote.R
 import com.oq.barnote.core.data.billing.BillingManager
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,4 +1,0 @@
-package com.oq.barnote.core.oqcore.log
-
-// iOS: OQLog.swift 대응
-// 로깅 유틸리티 (Timber 또는 커스텀 로거)

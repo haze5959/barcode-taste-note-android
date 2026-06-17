@@ -40,7 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
-import com.oq.barnote.core.oqcore.util.OQDateFormat
+import com.oq.barnote.core.oqcore.utils.OQDateFormat
 import com.oq.barnote.core.oqcore.views.OQTopBar
 import com.oq.barnote.core.domain.NoteReservation
 import com.oq.barnote.core.domain.Product

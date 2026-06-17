@@ -78,7 +78,7 @@ import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.component.AutoResizeText
 import com.oq.barnote.core.oqcore.ui.component.OQLoopingVideoView
-import com.oq.barnote.core.oqcore.util.formatThousands
+import com.oq.barnote.core.oqcore.utils.formatThousands
 import kotlinx.coroutines.launch
 
 private data class OnboardingPage(

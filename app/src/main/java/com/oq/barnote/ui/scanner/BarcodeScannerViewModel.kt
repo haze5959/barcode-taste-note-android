@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.models.CommonError
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.utils.OQHapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

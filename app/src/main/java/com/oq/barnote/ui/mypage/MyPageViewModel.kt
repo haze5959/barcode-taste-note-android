@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oq.barnote.core.domain.AuthStore
 import com.oq.barnote.core.domain.UserStore
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -133,7 +133,7 @@ class MyPageViewModel @Inject constructor(
             if (userStore.isLoggedIn()) {
                 fetchMyInfo()
             } else {
-                _uiState.update { MyPageUiState(isLoading = false) }
+                _uiState.update { MyPageUiState(isLoading = false, hasLoadedOnce = true) }
             }
         }
     }
@@ -149,6 +149,7 @@ class MyPageViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 isLoading = false,
+                hasLoadedOnce = true,
                 myInfo = user,
                 noteCount = noteCount,
                 favoriteCount = favoriteCount,
@@ -162,7 +163,10 @@ class MyPageViewModel @Inject constructor(
     private fun handleLogout() {
         viewModelScope.launch {
             authStore.clear(clearWebSession = true)
-            // AuthStore.isLoggedIn flow 가 false 로 전환되어 checkLogin 이 자동 호출됨.
+            // isLoggedIn flow collector(위 init)는 `!isLoading` 가드 때문에 마침 로딩 중이면 갱신을
+            // 건너뛸 수 있다. 로그아웃은 사용자가 명시적으로 누른 동작이므로 여기서 UI 를 즉시 로그아웃
+            // 상태로 직접 리셋해 로그인 정보가 남지 않게 한다 (flow 타이밍에 의존하지 않음).
+            _uiState.value = MyPageUiState(isLoading = false, hasLoadedOnce = true)
         }
     }
 

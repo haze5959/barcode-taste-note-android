@@ -29,7 +29,7 @@ import com.oq.barnote.core.data.notification.NotificationSchedulerImpl
 import com.oq.barnote.core.data.notification.NotificationTapDispatch
 import com.oq.barnote.core.designsystem.BarNoteTypography
 import com.oq.barnote.core.designsystem.barNoteColorScheme
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import com.oq.barnote.core.oqcore.views.OQParticleEmitterHost
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json

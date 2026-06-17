@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.oq.barnote.core.domain.MediaAttachment
-import com.oq.barnote.core.oqcore.util.OQImageOptimize
+import com.oq.barnote.core.oqcore.utils.OQImageOptimize
 import com.oq.barnote.core.oqcore.utils.OQLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

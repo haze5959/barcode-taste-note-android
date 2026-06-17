@@ -61,7 +61,7 @@ import com.oq.barnote.ui.component.SettingsRow
 import com.oq.barnote.ui.component.SettingsSection
 import com.oq.barnote.ui.component.SettingsSwitch
 import com.oq.barnote.ui.permission.rememberNotificationPermission
-import com.oq.barnote.core.oqcore.util.shareFile
+import com.oq.barnote.core.oqcore.utils.shareFile
 import com.oq.barnote.core.oqcore.views.OQSafariView
 import com.oq.barnote.core.oqcore.views.OQAlert
 import com.oq.barnote.core.oqcore.views.OQAlertButton

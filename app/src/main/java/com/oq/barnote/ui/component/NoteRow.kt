@@ -37,7 +37,7 @@ import com.oq.barnote.core.designsystem.R
 import com.oq.barnote.core.designsystem.component.RatingView
 import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.NoteInfo
-import com.oq.barnote.core.oqcore.util.RelativeTime
+import com.oq.barnote.core.oqcore.utils.RelativeTime
 import com.oq.barnote.core.oqcore.views.SkeletonView
 
 /**

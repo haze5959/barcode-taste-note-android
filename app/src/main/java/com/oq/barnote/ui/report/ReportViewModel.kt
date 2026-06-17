@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.oq.barnote.R
 import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.ProductInfo
-import com.oq.barnote.core.oqcore.util.AppController
+import com.oq.barnote.core.oqcore.utils.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel

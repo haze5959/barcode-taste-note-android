@@ -19,7 +19,7 @@ import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.domain.MediaAttachment
 import com.oq.barnote.core.domain.MediaAttachmentPicker
-import com.oq.barnote.core.oqcore.util.OQImageOptimize
+import com.oq.barnote.core.oqcore.utils.OQImageOptimize
 import com.oq.barnote.core.oqcore.utils.OQLog
 import com.oq.barnote.core.oqcore.views.OQImageEditor
 import com.oq.barnote.ui.permission.rememberCameraPermission
