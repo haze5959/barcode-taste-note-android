@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -144,6 +145,7 @@ internal fun SettingsScreen(
             )
 
             GeneralSection(state = state, onEvent = onEvent)
+            MembershipSection(onEvent = onEvent)
             SupportSection(onEvent = onEvent)
             DataSection(onEvent = onEvent)
             InfoSection(versionName = state.versionName, onEvent = onEvent)
@@ -188,6 +190,23 @@ internal fun SettingsScreen(
             selected = state.appLanguage,
             onSelect = { onEvent(SettingsUiEvent.SetLanguage(it)) },
             onDismiss = { onEvent(SettingsUiEvent.DismissLanguageSheet) },
+        )
+    }
+}
+
+/**
+ * '스토어' 섹션 — '프리미엄 멤버십' 진입점. iOS SettingsView 의 crown.fill '프리미엄 멤버십' 버튼 대응.
+ * 로그인 여부와 무관하게 페이월(SubscriptionScreen)로 이동한다.
+ */
+@Composable
+private fun MembershipSection(onEvent: (SettingsUiEvent) -> Unit) {
+    SettingsSection(header = stringResource(R.string.seutoeo)) {
+        SettingsRow(
+            icon = Icons.Filled.WorkspacePremium,
+            iconTint = Color(0xFFFFC107),
+            title = stringResource(R.string.peurimieom_membeosib),
+            showChevron = true,
+            onClick = { onEvent(SettingsUiEvent.TappedSubscription) },
         )
     }
 }

@@ -99,6 +99,9 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch { preferences.setAppLanguage(event.language) }
             }
 
+            // iOS SettingsFeature `tappedSubscription` 대응 — 로그인 여부와 무관하게 페이월로 이동.
+            SettingsUiEvent.TappedSubscription ->
+                emitNav(SettingsNavEffect.ShowSubscription)
             SettingsUiEvent.TappedReservationSettings ->
                 emitNav(SettingsNavEffect.ShowReservationSettings)
             SettingsUiEvent.TappedFeatureSuggestion ->

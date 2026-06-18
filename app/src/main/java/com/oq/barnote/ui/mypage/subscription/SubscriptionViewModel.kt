@@ -126,19 +126,17 @@ class SubscriptionViewModel @Inject constructor(
                 }
             }
 
-            if (userId != null) {
-                _uiState.update {
-                    it.copy(
-                        userId = userId,
-                        isLoadingUser = false,
-                        isSubscribed = isSubscribed,
-                        monthlyPricing = monthlyInfo,
-                        yearlyPricing = yearlyInfo
-                    )
-                }
-            } else {
-                _uiState.update { it.copy(isLoadingUser = false) }
-                _navEffect.send(SubscriptionNavEffect.AuthorizationFailed)
+            // iOS SubscriptionView 와 동일: 로그인 여부와 무관하게 페이월을 항상 표시한다.
+            // (App Store/Play 정책상 구매 전 강제 로그인 금지) userId 는 있으면 결제 시
+            // obfuscatedAccountId(=appAccountToken)로 첨부되고, 없으면 비로그인 구매로 진행된다.
+            _uiState.update {
+                it.copy(
+                    userId = userId,
+                    isLoadingUser = false,
+                    isSubscribed = isSubscribed,
+                    monthlyPricing = monthlyInfo,
+                    yearlyPricing = yearlyInfo
+                )
             }
         }
     }
@@ -167,13 +165,10 @@ class SubscriptionViewModel @Inject constructor(
     ) {
         _uiState.update { it.copy(isPurchasing = true) }
         viewModelScope.launch {
-            // userId 가 비어있으면 비로그인 상태 — 결제 시작 자체를 막음.
-            val userId = _uiState.value.userId ?: userStore.getUser()?.id
-            if (userId.isNullOrBlank()) {
-                _uiState.update { it.copy(isPurchasing = false) }
-                _navEffect.send(SubscriptionNavEffect.AuthorizationFailed)
-                return@launch
-            }
+            // iOS `.inAppPurchaseOptions { if let userId { [.appAccountToken(userId)] } else { [] } }` 와 동일:
+            // 로그인 상태면 obfuscatedAccountId(=appAccountToken)를 첨부하고, 비로그인이면 null 로 두고
+            // 그대로 구매를 진행한다(구매 자체는 막지 않음).
+            val userId = (_uiState.value.userId ?: userStore.getUser()?.id)?.takeIf { it.isNotBlank() }
             val result = runCatching {
                 billingManager.launchPurchaseFlow(
                     activity = activity,

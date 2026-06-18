@@ -36,6 +36,8 @@ sealed interface SettingsUiEvent {
     data object ShowThemeMenu : SettingsUiEvent
     data object DismissThemeMenu : SettingsUiEvent
 
+    /** '멤버십 > 프리미엄 멤버십' 진입 — 로그인 없이 페이월(SubscriptionScreen)로 이동. iOS `tappedSubscription` 대응. */
+    data object TappedSubscription : SettingsUiEvent
     data object TappedReservationSettings : SettingsUiEvent
     data object TappedFeatureSuggestion : SettingsUiEvent
     data object TappedCustomerCenter : SettingsUiEvent
