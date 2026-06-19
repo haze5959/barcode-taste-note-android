@@ -79,6 +79,7 @@ import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.Flavor
 import com.oq.barnote.core.domain.NoteDetail
 import com.oq.barnote.core.domain.NoteInfo
+import com.oq.barnote.core.oqcore.utils.OQDateFormat
 import com.oq.barnote.core.oqcore.utils.OQSNSShareData
 import com.oq.barnote.core.oqcore.utils.rememberOQShareManager
 import com.oq.barnote.core.oqcore.views.OQSNSShareBottomSheet
@@ -413,12 +414,12 @@ private fun Content(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Dimens.Padding)
-            // 공유 FAB 와 겹치지 않도록 여백
-            .padding(bottom = Dimens.FabHSize + Dimens.SectionSpacing),
+            // iOS ScrollView 의 .padding(.vertical, sectionSpacing) 와 동일하게 상단 간격도 섹션 간격(SectionSpacing)과
+            // 맞춰 패딩을 균일하게 한다. (기존엔 상단만 Spacer(Spacing=15)라 첫 섹션만 더 붙어 보였음)
+            // 하단은 공유 FAB 가림 방지로 FabHSize 만큼 추가.
+            .padding(top = Dimens.SectionSpacing, bottom = Dimens.FabHSize + Dimens.SectionSpacing),
         verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
     ) {
-        Spacer(modifier = Modifier.height(Dimens.Spacing))
-
         HeroSection(
             info = info,
             onTap = { onEvent(NoteDetailUiEvent.TappedHeroSection) },
@@ -475,14 +476,18 @@ private fun HeroSection(
             modifier = Modifier.fillMaxSize(),
             fallbackIcon = info.product.type.icon(),
         )
-        // 하단 그라디언트
+        // 하단 그라디언트 — iOS LinearGradient([.black 0.7, .clear], .bottom→.center) 와 동일:
+        // 아래는 검정, 중앙(0.5)부터 위는 투명. colorStops(0~1 비율)로 지정해 화면 밀도와 무관하게
+        // 항상 중앙부터 시작한다. (기존 startY 는 dp 값을 px 로 써서 고밀도 화면에선 거의 맨 위부터 시작했음)
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-                        startY = Dimens.HeroSectionHSize.value / 2,
+                        colorStops = arrayOf(
+                            0.5f to Color.Transparent,
+                            1f to Color.Black.copy(alpha = 0.7f),
+                        ),
                     ),
                 ),
         )
@@ -752,11 +757,12 @@ private fun MetaSection(
             )
         }
 
-        // 작성일 row
+        // 작성일 row — iOS info.note.registered.formattedWithTime 와 동일: 로컬 시간대 + 로케일(언어)별 표기
+        // (예: "2026년 6월 19일 오후 4:12"). 기존엔 UTC ISO 원문을 그대로 잘라 써서 시간대·언어가 안 맞았음.
         MetaRow(
             icon = Icons.Filled.CalendarMonth,
             label = stringResource(R.string.jagseong_il),
-            value = info.note.registered.take(16).replace('T', ' '),
+            value = OQDateFormat.formattedWithTime(info.note.registered),
         )
         // 공개 범위 row — iOS PublicScope.title 과 동일 (다국어).
         MetaRow(

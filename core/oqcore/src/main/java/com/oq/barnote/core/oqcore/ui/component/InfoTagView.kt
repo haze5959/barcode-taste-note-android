@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,24 +39,26 @@ fun InfoTagView(
     val shape = RoundedCornerShape(percent = 50) // iOS InfoTagView 는 Capsule (pill)
     val (bg, fg) = when (style) {
         InfoTagStyle.Normal -> palette.surfaceSecondary to palette.textSecondary
-        InfoTagStyle.Material -> Color.White.copy(alpha = 0.25f) to Color.White
+        // iOS InfoTagView .material 와 동일: .thinMaterial(밝은 frosted) + surfaceSecondary 틴트 + textSecondary 텍스트.
+        // Android 엔 backdrop blur 가 없어 surfaceSecondary 반투명으로 근사한다.
+        // (기존엔 검정 underlay + 흰 텍스트라 iOS 와 명암이 반대로 어둡게 보였음)
+        InfoTagStyle.Material -> palette.surfaceSecondary.copy(alpha = 0.85f) to palette.textSecondary
         // iOS InfoTagView .accent 와 동일: accentSecondary 배경 + accent 텍스트.
         InfoTagStyle.Accent -> palette.accentSecondary to palette.accent
     }
 
-    // Material 스타일은 frosted glass 효과 (Android 12+ backdrop blur, 이하는 alpha fallback).
     val baseModifier = modifier.clip(shape)
-    val frostedModifier = if (style == InfoTagStyle.Material) {
+    val tagModifier = if (style == InfoTagStyle.Material) {
+        // iOS .thinMaterial 처럼 이미지 위에서 살짝 떠 보이도록 옅은 경계만 추가.
         baseModifier
-            .androidBackdropBlurOrAlpha(radiusDp = 12f, fallbackAlpha = 0.55f)
             .background(bg, shape)
-            .border(0.5.dp, Color.White.copy(alpha = 0.35f), shape)
+            .border(0.5.dp, palette.textSecondary.copy(alpha = 0.12f), shape)
     } else {
         baseModifier.background(bg, shape)
     }
 
     Row(
-        modifier = frostedModifier
+        modifier = tagModifier
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -76,24 +77,6 @@ fun InfoTagView(
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
         )
     }
-}
-
-/**
- * Android 12 (API 31)+ 에서 [androidx.compose.ui.draw.blur] 와는 다른, "뒷배경" 을 흐리게 하는 hardware backdrop blur 를 적용.
- * 12 이하는 단순 검정 [fallbackAlpha] 배경으로 대체.
- *
- * 진짜 backdrop blur 는 RenderNode API 필요 — 여기선 Compose blur(`tinted view 위에 blur`) 로 근사.
- * iOS `.thinMaterial` 의 정확한 frosted glass 는 아니지만 시각적 인지를 제공.
- */
-@Composable
-private fun Modifier.androidBackdropBlurOrAlpha(
-    @Suppress("UNUSED_PARAMETER") radiusDp: Float,
-    fallbackAlpha: Float,
-): Modifier {
-    // Compose 의 `Modifier.blur` 는 자기 콘텐츠를 blur 하는 거라 backdrop blur 가 아님.
-    // backdrop blur 는 Composable 외부에서 SurfaceView/RenderNode 가 필요 — 여기서는 단순 alpha 로 fallback.
-    // 시각적으로 frosted 느낌을 주기 위해 살짝 어두운 fallback 색을 위에 background 로 깐다.
-    return this.background(Color.Black.copy(alpha = fallbackAlpha))
 }
 
 enum class InfoTagStyle { Normal, Material, Accent }

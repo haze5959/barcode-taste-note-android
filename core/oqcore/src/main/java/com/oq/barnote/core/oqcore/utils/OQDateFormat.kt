@@ -44,15 +44,16 @@ object OQDateFormat {
         }.getOrDefault(time.format(DateTimeFormatter.ofPattern("HH:mm")))
 
     /**
-     * ISO8601 문자열 → 로케일 medium 날짜 + short 시간 (예: "2026. 5. 29. 오후 3:07" / "May 29, 2026, 3:07 PM").
-     * iOS `Date.formattedWithTime` (dateStyle=.medium, timeStyle=.short) 대응.
-     * 데이터 내보내기 / 고객센터 신고 등 날짜+시간 표기에 사용.
+     * ISO8601 문자열 → 로케일 long 날짜 + short 시간 (예: "2026년 5월 29일 오후 3:07" / "May 29, 2026 at 3:07 PM").
+     * iOS `Date.formattedWithTime` (= `.formatted(date: .abbreviated, time: .shortened)`) 대응.
+     * 한국어 등에서 "2026년 5월 29일" 처럼 표기되도록 LONG 날짜 사용 (MEDIUM 은 "2026. 5. 29." 라 iOS 와 달랐음).
+     * 노트 상세 작성일 / 데이터 내보내기 / 고객센터 신고 등 날짜+시간 표기에 사용.
      */
     fun formattedWithTime(iso8601: String, locale: Locale = Locale.getDefault()): String =
         runCatching {
             val zoned = Instant.parse(iso8601).atZone(ZoneId.systemDefault())
             DateTimeFormatter
-                .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
                 .withLocale(locale)
                 .format(zoned)
         }.getOrDefault(iso8601)

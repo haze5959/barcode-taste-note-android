@@ -20,10 +20,10 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
+import com.oq.barnote.core.designsystem.component.AutoResizeText
 
 /**
  * 최상위 탭 항목. iOS `AppNavigationFeature.Tab` (home/search/barcode/myPage/settings) 에 대응.
@@ -93,6 +95,11 @@ internal fun MainBottomBar(
     val accent = colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
     val textSecondary =
         colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+
+    // 좁은(작은) 디바이스에서 5개 탭 + 중앙 FAB 가 폭을 넘어 좌우 끝 항목(홈/설정)이 잘리는 것을 막기 위해
+    // 화면 폭에 비례해 아이콘/FAB 를 축소한다. 360dp 이상은 1.0, 그 미만은 최소 0.8 까지(아이콘 minimumScaleFactor).
+    // 라벨(title)은 아래 AutoResizeText 가 각 항목 폭에 맞춰 별도로 축소한다.
+    val compactScale = (LocalConfiguration.current.screenWidthDp / 360f).coerceIn(0.8f, 1f)
 
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -158,7 +165,7 @@ internal fun MainBottomBar(
                             // 다른 탭보다 크고 라벨 없이 아이콘만 노출해 바코드 스캔 진입을 강조.
                             Box(
                                 modifier = Modifier
-                                    .size(Dimens.FabHSize)
+                                    .size(Dimens.FabHSize * compactScale)
                                     .shadow(
                                         elevation = 8.dp,
                                         shape = CircleShape,
@@ -179,7 +186,7 @@ internal fun MainBottomBar(
                                     imageVector = tab.icon,
                                     contentDescription = stringResource(tab.labelRes),
                                     tint = Color.White,
-                                    modifier = Modifier.size(26.dp),
+                                    modifier = Modifier.size(26.dp * compactScale),
                                 )
                             }
                         } else {
@@ -192,7 +199,11 @@ internal fun MainBottomBar(
                             Icon(
                                 imageVector = tab.icon,
                                 contentDescription = null,
-                                modifier = Modifier.scale(iconScale),
+                                // 기본 24dp 를 좁은 화면에서 compactScale 로 축소(아이콘 minimumScaleFactor).
+                                // 선택 시 bounce(iconScale)는 그 위에 그대로 곱해 적용.
+                                modifier = Modifier
+                                    .size(24.dp * compactScale)
+                                    .scale(iconScale),
                             )
                         }
                     },
@@ -201,10 +212,16 @@ internal fun MainBottomBar(
                         null
                     } else {
                         @Composable {
-                            // 라벨이 2줄 이상이 될 때(다국어 등) 한쪽으로 치우치지 않도록 가운데 정렬.
-                            Text(
+                            // 라벨(title)이 좁은 항목 폭에서 2줄로 줄바꿈되거나 잘리지 않도록 한 줄 유지 +
+                            // 폰트 자동 축소(iOS `.lineLimit(1).minimumScaleFactor` 대응). 색/굵기는
+                            // NavigationBarItem 의 selected/unselectedTextColor 를 LocalContentColor 로 상속한다
+                            // (labelMedium 의 color 가 Unspecified 이므로 내부 Text 가 LocalContentColor 사용).
+                            AutoResizeText(
                                 text = stringResource(tab.labelRes),
+                                style = MaterialTheme.typography.labelMedium,
                                 textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                minScaleFactor = 0.7f,
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }

@@ -1,12 +1,10 @@
 package com.oq.barnote.core.oqcore.utils
 
 import android.graphics.Bitmap
+import android.graphics.BitmapShader
 import android.graphics.Canvas
-import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.RadialGradient
 import android.graphics.Shader
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
@@ -21,23 +19,30 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * 이미지의 사람 얼굴을 검출해 **가우시안 블러** 처리. iOS `OQBlurFace` 대응.
+ * 이미지의 사람 얼굴을 검출해 **모자이크(픽셀화)** 처리. iOS `OQBlurFace` 대응.
  *
  * iOS 는 CoreImage(`CIDetector` 얼굴 검출 + `CIPixellate` + `CIRadialGradient` 마스크 + `CIBlendWithMask`)
- * 로 구현했지만 Android 엔 CoreImage 가 없어 다음으로 대체한다:
+ * 로 구현했고, Android 엔 CoreImage 가 없어 다음으로 대체하되 파라미터·동작은 iOS 와 동일하게 맞춘다:
  * - **검출**: ML Kit On-device Face Detection (번들 모델 — 네트워크 불필요)
- * - **블러**: 얼굴별 영역을 분리형 박스 블러 3-pass(≈ 가우시안)로 흐리게 한 뒤, 라디얼 알파 마스크로
- *   가장자리를 부드럽게 페이드해 원본 위에 합성 (iOS 의 원형 라디얼 마스크 등가).
+ * - **모자이크**: 얼굴 영역을 평균색으로 다운스케일 후 nearest-neighbor 로 업스케일해 또렷한 블록으로 만든다.
+ *   블록 한 변 = `max(이미지 가로, 세로) / 50` (iOS `CIPixellate` 의 inputScale 과 동일).
+ * - **합성**: 얼굴 중심에 반지름 `min(얼굴 가로, 세로) / 1.5` 의 원(iOS CIRadialGradient 와 동일)으로
+ *   모자이크를 그려 원본 위에 올린다.
  *
- * 픽셀 연산은 무거우므로 다운스케일(1/[DOWNSCALE]) 상태에서 블러 후 업스케일(bilinear)해 비용을 줄인다.
+ * 마스킹은 `drawCircle` + [BitmapShader] 로 처리한다. (RadialGradient + `PorterDuff.DST_IN` 알파 마스크는
+ * 불투명 원본에서 스케일된 비트맵의 `hasAlpha()==false` 때문에 투명해야 할 가장자리가 '불투명 검정'으로
+ * 렌더돼 **얼굴 위에 검은 네모박스**가 그려지는 버그가 있었음 → 원형 클립 셰이더로 원천 차단.)
  */
 object OQBlurFace {
 
-    private const val DOWNSCALE = 6        // 블러 전 축소 배율 (성능 + 추가적 부드러움)
-    private const val BLUR_PASSES = 3      // 박스 블러 반복 (3회 ≈ 가우시안)
+    /** iOS `CIPixellate` inputScale 과 동일: 모자이크 블록 한 변 = max(이미지 가로, 세로) / [PIXELLATE_DIVISOR]. */
+    private const val PIXELLATE_DIVISOR = 50f
+
+    /** iOS 와 동일: 얼굴을 가리는 원의 반지름 = min(얼굴 가로, 세로) / [FACE_RADIUS_DIVISOR]. */
+    private const val FACE_RADIUS_DIVISOR = 1.5f
 
     /**
-     * 얼굴이 있으면 블러 처리한 **새 비트맵**을, 없으면 `null` 을 반환한다.
+     * 얼굴이 있으면 모자이크 처리한 **새 비트맵**을, 없으면 `null` 을 반환한다.
      * (iOS `hasFaces()` + `blurFaces()` 를 한 번에 — 호출부는 null 이면 "얼굴 없음" 처리)
      */
     suspend fun blurFaces(bitmap: Bitmap): Bitmap? {
@@ -45,7 +50,7 @@ object OQBlurFace {
             .onFailure { OQLog.e("OQBlurFace 검출 실패: ${it.message}") }
             .getOrDefault(emptyList())
         if (faces.isEmpty()) return null
-        return withContext(Dispatchers.Default) { renderBlurred(bitmap, faces) }
+        return withContext(Dispatchers.Default) { renderMosaic(bitmap, faces) }
     }
 
     private suspend fun detectFaces(bitmap: Bitmap): List<Face> {
@@ -66,109 +71,63 @@ object OQBlurFace {
         }
     }
 
-    /** 검출된 얼굴 영역들을 가우시안 블러 + 라디얼 마스크로 원본 복사본에 합성. */
-    private fun renderBlurred(src: Bitmap, faces: List<Face>): Bitmap {
+    /** 검출된 얼굴들을 모자이크(픽셀화) + 원형 클립으로 원본 복사본에 합성. iOS `blurFaces()` 대응. */
+    private fun renderMosaic(src: Bitmap, faces: List<Face>): Bitmap {
         val result = src.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(result)
         val w = result.width
         val h = result.height
+        // iOS: CIPixellate inputScale = max(extent.width, extent.height) / 50.
+        val blockSize = max(1, (max(w, h) / PIXELLATE_DIVISOR).roundToInt())
 
         for (face in faces) {
             val box = face.boundingBox
-            // 머리카락/턱까지 덮도록 가로 18%·세로 28% 확장 후 비트맵 경계로 클램프.
-            val padX = (box.width() * 0.18f).roundToInt()
-            val padY = (box.height() * 0.28f).roundToInt()
-            val left = max(0, box.left - padX)
-            val top = max(0, box.top - padY)
-            val right = min(w, box.right + padX)
-            val bottom = min(h, box.bottom + padY)
+            val centerX = box.exactCenterX()
+            val centerY = box.exactCenterY()
+            // iOS: radius = min(faceW, faceH) / 1.5.
+            val radius = min(box.width(), box.height()) / FACE_RADIUS_DIVISOR
+            if (radius < 1f) continue
+
+            // 원이 포함되는 사각 영역만 모자이크 처리(성능). 이미지 경계로 클램프.
+            val left = max(0, (centerX - radius).toInt())
+            val top = max(0, (centerY - radius).toInt())
+            val right = min(w, (centerX + radius).roundToInt())
+            val bottom = min(h, (centerY + radius).roundToInt())
             val rw = right - left
             val rh = bottom - top
             if (rw <= 1 || rh <= 1) continue
 
             val region = Bitmap.createBitmap(result, left, top, rw, rh)
-            val blurred = gaussianBlur(region)
+            val mosaic = pixelate(region, blockSize)
 
-            // 라디얼 알파 마스크 — 중심부 불투명 → 가장자리 투명(부드러운 경계). iOS CIRadialGradient 대응.
-            val cx = rw / 2f
-            val cy = rh / 2f
-            val maskPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                shader = RadialGradient(
-                    cx, cy, max(cx, cy),
-                    intArrayOf(Color.BLACK, Color.TRANSPARENT),
-                    floatArrayOf(0.72f, 1f),
-                    Shader.TileMode.CLAMP,
-                )
-                xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+            // 모자이크 비트맵을 얼굴 위치에 정렬(translate)한 BitmapShader 로 원을 채워 그린다.
+            // ANTI_ALIAS 로 원 가장자리만 매끄럽게(블록 내부는 1:1 매핑이라 또렷하게 유지).
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                shader = BitmapShader(mosaic, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP).apply {
+                    setLocalMatrix(Matrix().apply { setTranslate(left.toFloat(), top.toFloat()) })
+                }
             }
-            Canvas(blurred).drawRect(0f, 0f, rw.toFloat(), rh.toFloat(), maskPaint)
+            canvas.drawCircle(centerX, centerY, radius, paint)
 
-            canvas.drawBitmap(blurred, left.toFloat(), top.toFloat(), null)
             region.recycle()
-            blurred.recycle()
+            mosaic.recycle()
         }
         return result
     }
 
-    /** 다운스케일 → 박스 블러 3-pass → 업스케일(bilinear). 결과는 부드러운 가우시안 근사. */
-    private fun gaussianBlur(region: Bitmap): Bitmap {
+    /**
+     * 얼굴 영역을 [blockSizePx] 한 변 크기의 또렷한 모자이크 블록으로 만든다. iOS `CIPixellate` 대응.
+     * 평균색으로 다운스케일(filter=true) → nearest-neighbor 업스케일(filter=false)해 블록 경계를 또렷하게 유지.
+     */
+    private fun pixelate(region: Bitmap, blockSizePx: Int): Bitmap {
         val rw = region.width
         val rh = region.height
-        val sw = max(1, rw / DOWNSCALE)
-        val sh = max(1, rh / DOWNSCALE)
+        val block = max(1, blockSizePx)
+        val sw = max(1, rw / block)
+        val sh = max(1, rh / block)
         val small = Bitmap.createScaledBitmap(region, sw, sh, true)
-
-        val pixels = IntArray(sw * sh)
-        small.getPixels(pixels, 0, sw, 0, 0, sw, sh)
-        val radius = max(1, min(sw, sh) / 4)
-        val tmp = IntArray(pixels.size)
-        repeat(BLUR_PASSES) {
-            horizontalAverage(pixels, tmp, sw, sh, radius)
-            verticalAverage(tmp, pixels, sw, sh, radius)
-        }
-        small.setPixels(pixels, 0, sw, 0, 0, sw, sh)
-
-        val up = Bitmap.createScaledBitmap(small, rw, rh, true)
-        if (up !== small) small.recycle()
-        return up
-    }
-
-    private fun horizontalAverage(src: IntArray, dst: IntArray, w: Int, h: Int, radius: Int) {
-        for (y in 0 until h) {
-            val base = y * w
-            for (x in 0 until w) {
-                var a = 0; var r = 0; var g = 0; var b = 0; var n = 0
-                val from = max(0, x - radius)
-                val to = min(w - 1, x + radius)
-                for (xx in from..to) {
-                    val p = src[base + xx]
-                    a += (p ushr 24) and 0xFF
-                    r += (p ushr 16) and 0xFF
-                    g += (p ushr 8) and 0xFF
-                    b += p and 0xFF
-                    n++
-                }
-                dst[base + x] = ((a / n) shl 24) or ((r / n) shl 16) or ((g / n) shl 8) or (b / n)
-            }
-        }
-    }
-
-    private fun verticalAverage(src: IntArray, dst: IntArray, w: Int, h: Int, radius: Int) {
-        for (x in 0 until w) {
-            for (y in 0 until h) {
-                var a = 0; var r = 0; var g = 0; var b = 0; var n = 0
-                val from = max(0, y - radius)
-                val to = min(h - 1, y + radius)
-                for (yy in from..to) {
-                    val p = src[yy * w + x]
-                    a += (p ushr 24) and 0xFF
-                    r += (p ushr 16) and 0xFF
-                    g += (p ushr 8) and 0xFF
-                    b += p and 0xFF
-                    n++
-                }
-                dst[y * w + x] = ((a / n) shl 24) or ((r / n) shl 16) or ((g / n) shl 8) or (b / n)
-            }
-        }
+        val mosaic = Bitmap.createScaledBitmap(small, rw, rh, false)
+        if (small !== mosaic) small.recycle()
+        return mosaic
     }
 }

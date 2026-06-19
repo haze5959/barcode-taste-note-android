@@ -14,18 +14,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -420,144 +420,160 @@ private fun OnboardingPageContent(
     accent: Color,
 ) {
     // TopBar/BottomBar 와 같은 Column 축에 있어 별도 top 패딩·하단 고정 예약이 불필요 —
-    // 1:2 weight 스페이서로 카드가 중앙보다 살짝 위, 문구가 그 아래 오는 비율만 유지한다.
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 48.dp)
-                .heightIn(max = 450.dp) // iOS frame(maxHeight: 450) — 작은 화면에서도 문구가 밀리지 않도록
-                .wrapContentHeight(),
+    // 위/아래 weight 스페이서로 (카드 + 문구) 블록을 세로 가운데에 배치한다.
+    // iOS `.frame(maxHeight: 450)` + 이미지 `.aspectRatio(.fit)` 처럼, 저해상도(세로가 짧은) 화면에서는
+    // 미디어 카드가 줄어들어 아래 문구(특히 description)가 잘리지 않도록 공간을 양보한다.
+    // 텍스트 영역(제목/부제/설명 + 위 여백)에 항상 210dp 를 남기고, 카드는 나머지를 차지하되 최대 420dp.
+    // (기존엔 카드 내부 미디어가 420dp 고정이라 작은 화면에서도 안 줄어 description 이 잘렸다.)
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val cardHeight = (maxHeight - 210.dp).coerceIn(150.dp, 420.dp)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // iOS imageShowcase 의 "soft gradient glow" — 카드 뒤에서 번지는 컬러 halo.
-            // RoundedRectangle(40).fill(gradient 0.55).blur(36) 등가. blur 미지원(API<31) 시에도
-            // 카드 가장자리 컬러 배경으로 보여 큰 위화감 없음.
+            Spacer(modifier = Modifier.weight(1f))
+
             Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
                     .fillMaxWidth()
-                    .height(420.dp)
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
-                    .blur(36.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                    .background(
-                        Brush.linearGradient(colors = accentGradient.map { it.copy(alpha = 0.55f) }),
-                        shape = RoundedCornerShape(40.dp),
-                    ),
-            )
-
-            // iOS mediaContent — 이미지/영상 공통 카드 스타일(그림자·라운드·테두리)에 미디어만 교체.
-            val cardDecoration = Modifier
-                .shadow(
-                    elevation = 25.dp,
-                    shape = RoundedCornerShape(32.dp),
-                    spotColor = accentGradient.first().copy(alpha = 0.35f),
-                )
-                .clip(RoundedCornerShape(32.dp))
-                // iOS overlay(RoundedRectangle(32).stroke(흰색 그라데이션, 1.5)) 대응.
-                .border(
-                    width = 1.5.dp,
-                    brush = Brush.linearGradient(
-                        listOf(
-                            Color.White.copy(alpha = 0.85f),
-                            Color.White.copy(alpha = 0.15f),
-                            Color.White.copy(alpha = 0.05f),
-                            Color.White.copy(alpha = 0.45f),
-                        ),
-                    ),
-                    shape = RoundedCornerShape(32.dp),
-                )
-
-            if (page.video != null) {
-                // 영상은 원본 비율(aspectRatio)로 fit — iOS .aspectRatio(_, .fit) 대응(세로 영상이 카드 안에 들어옴).
-                OQLoopingVideoView(
-                    rawResId = page.video,
+                    .padding(horizontal = 48.dp)
+                    .height(cardHeight),
+            ) {
+                // iOS imageShowcase 의 "soft gradient glow" — 카드 뒤에서 번지는 컬러 halo.
+                // RoundedRectangle(40).fill(gradient 0.55).blur(36) 등가. blur 미지원(API<31) 시에도
+                // 카드 가장자리 컬러 배경으로 보여 큰 위화감 없음.
+                Box(
                     modifier = Modifier
-                        .align(Alignment.Center)
-                        .height(420.dp)
-                        .aspectRatio(page.videoAspectRatio)
-                        .then(cardDecoration),
-                )
-            } else if (page.image != null) {
-                Image(
-                    painter = painterResource(page.image),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    // 카드(가로 꽉 · 높이 420)를 빈틈없이 채움. Fit 은 portrait 이미지가 가로 패딩 한계에 걸리는
-                    // 화면에서 위/아래 레터박스(여백)가 생겨, Crop 으로 채우고 넘치는 위/아래만 잘라낸다.
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .fillMaxWidth()
-                        .height(420.dp)
-                        .then(cardDecoration),
-                )
-            }
-
-            if (page.id == 0) {
-                val display = if (productCount > 0) productCount.formatThousands() else "00,000"
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .offset(y = (-18).dp)
-                        .clip(CircleShape)
+                        .matchParentSize()
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                        .blur(36.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
                         .background(
-                            Brush.horizontalGradient(colors = accentGradient),
-                        )
-                        .padding(horizontal = 16.dp, vertical = 9.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.jigeumggaji_gae_jepumi_deungrogdoeeo_isseoyo, display),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
+                            Brush.linearGradient(colors = accentGradient.map { it.copy(alpha = 0.55f) }),
+                            shape = RoundedCornerShape(40.dp),
                         ),
+                )
+
+                // iOS mediaContent — 이미지/영상 공통 카드 스타일(그림자·라운드·테두리)에 미디어만 교체.
+                val cardDecoration = Modifier
+                    .shadow(
+                        elevation = 25.dp,
+                        shape = RoundedCornerShape(32.dp),
+                        spotColor = accentGradient.first().copy(alpha = 0.35f),
+                    )
+                    .clip(RoundedCornerShape(32.dp))
+                    // iOS overlay(RoundedRectangle(32).stroke(흰색 그라데이션, 1.5)) 대응.
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.linearGradient(
+                            listOf(
+                                Color.White.copy(alpha = 0.85f),
+                                Color.White.copy(alpha = 0.15f),
+                                Color.White.copy(alpha = 0.05f),
+                                Color.White.copy(alpha = 0.45f),
+                            ),
+                        ),
+                        shape = RoundedCornerShape(32.dp),
+                    )
+
+                if (page.video != null) {
+                    // 영상은 원본 비율(aspectRatio)로 fit — iOS .aspectRatio(_, .fit) 대응(세로 영상이 카드 안에 들어옴).
+                    OQLoopingVideoView(
+                        rawResId = page.video,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxHeight()
+                            .aspectRatio(page.videoAspectRatio)
+                            .then(cardDecoration),
+                    )
+                } else if (page.image != null) {
+                    Image(
+                        painter = painterResource(page.image),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        // 카드(가로 꽉 · 카드 높이)를 빈틈없이 채움. Fit 은 portrait 이미지가 가로 패딩 한계에 걸리는
+                        // 화면에서 위/아래 레터박스(여백)가 생겨, Crop 으로 채우고 넘치는 위/아래만 잘라낸다.
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxSize()
+                            .then(cardDecoration),
                     )
                 }
+
+                if (page.id == 0) {
+                    val display = if (productCount > 0) productCount.formatThousands() else "00,000"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .offset(y = (-18).dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.horizontalGradient(colors = accentGradient),
+                            )
+                            .padding(horizontal = 16.dp, vertical = 9.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.jigeumggaji_gae_jepumi_deungrogdoeeo_isseoyo, display),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold,
+                            ),
+                        )
+                    }
+                }
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(horizontal = Dimens.BtnPadding + 4.dp),
+            ) {
+                // iOS `.lineLimit(1).minimumScaleFactor(0.5)` — 작은 화면에서 잘리는 대신 폰트를 축소.
+                AutoResizeText(
+                    text = "${page.accentEmoji} ${stringResource(page.titleRes)}",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        color = textPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 26.sp, // iOS font(size: 26, weight: .bold)
+                    ),
+                    textAlign = TextAlign.Center,
+                    minScaleFactor = 0.5f,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                // 부제/설명도 저해상도에서 잘리는 대신 폰트를 축소. maxLines 로 높이 상한을 두어
+                // (카드가 양보한) 텍스트 영역 안에 항상 들어오도록 한다. iOS 는 카드 축소만으로 충분하나
+                // Android 는 추가 안전장치로 minScaleFactor 적용.
+                AutoResizeText(
+                    text = stringResource(page.subtitleRes),
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = accent,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp, // iOS font(size: 15, weight: .semibold)
+                    ),
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    minScaleFactor = 0.8f,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                AutoResizeText(
+                    text = stringResource(page.descriptionRes),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = textSecondary,
+                        fontSize = 14.sp, // iOS font(size: 14, weight: .regular)
+                    ),
+                    textAlign = TextAlign.Center,
+                    maxLines = 4,
+                    minScaleFactor = 0.65f,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            // 설명과 하단 버튼 사이의 여백
+            Spacer(modifier = Modifier.weight(1f))
         }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(horizontal = Dimens.BtnPadding + 4.dp),
-        ) {
-            // iOS `.lineLimit(1).minimumScaleFactor(0.5)` — 작은 화면에서 잘리는 대신 폰트를 축소.
-            AutoResizeText(
-                text = "${page.accentEmoji} ${stringResource(page.titleRes)}",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    color = textPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 26.sp, // iOS font(size: 26, weight: .bold)
-                ),
-                textAlign = TextAlign.Center,
-                minScaleFactor = 0.5f,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Text(
-                text = stringResource(page.subtitleRes),
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = accent,
-                    fontWeight = FontWeight.SemiBold,
-                ),
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = stringResource(page.descriptionRes),
-                style = MaterialTheme.typography.bodyMedium.copy(color = textSecondary),
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        // 설명(descriptionRes)과 하단 버튼 사이의 여백을 줄임
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -573,11 +589,13 @@ private fun BottomBar(
             .padding(
                 start = Dimens.BtnPadding,
                 end = Dimens.BtnPadding,
-                // 위 설명 문구와의 최소 간격(weight 스페이서가 0 으로 줄어드는 작은 화면 대비) +
-                // 시스템 내비 inset 위 약간의 여백.
+                // 위 설명 문구와의 최소 간격(weight 스페이서가 0 으로 줄어드는 작은 화면 대비).
                 top = Dimens.Padding,
-                // 시스템 네비게이션 버튼과 겹치지 않도록 충분한 하단 여백 추가
-                bottom = Dimens.Padding + 24.dp,
+                // iOS `.padding(.bottom, btnPadding)` 와 동일 — 네비 바 '위' 의 가시 간격만 둔다.
+                // 시스템 네비게이션 영역(safe area)은 부모 Column 의 bottomInset 패딩이 이미 확보한다.
+                // (기존 Padding+24dp 는 bottomInset 위에 추가로 더해져, 3버튼 내비처럼 inset 이 큰
+                //  기기에서 버튼이 과하게 떠 보이고, 작은 화면에선 24dp 만큼 콘텐츠를 밀어 문구가 잘렸다.)
+                bottom = Dimens.BtnPadding,
             ),
     ) {
         Row(

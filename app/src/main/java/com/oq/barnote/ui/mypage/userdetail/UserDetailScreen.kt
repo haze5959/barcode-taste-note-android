@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -604,6 +605,12 @@ private fun EditProfileSheet(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            // 작은 화면에서 키보드를 띄우면 마지막 자기소개 필드가 키보드에 가려 잘리던 문제 방지:
+            // imePadding 으로 스크롤 뷰포트를 '키보드 위' 로 줄이고, verticalScroll 로 넘치는 만큼 스크롤되게 한다.
+            // (포커스 시 OQTF 내부 TextField 의 bringIntoView 가 해당 필드를 자동으로 보이게 스크롤)
+            // imePadding 을 verticalScroll 앞(바깥)에 둬야 스크롤 뷰포트 자체가 키보드 위로 제한된다.
+            .imePadding()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.BtnPadding),
         verticalArrangement = Arrangement.spacedBy(Dimens.SectionSpacing),
     ) {
