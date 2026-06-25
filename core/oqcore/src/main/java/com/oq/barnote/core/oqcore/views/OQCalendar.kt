@@ -1,7 +1,6 @@
-package com.oq.barnote.ui.component
+package com.oq.barnote.core.oqcore.views
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,12 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.oq.barnote.core.designsystem.Dimens
-import com.oq.barnote.core.designsystem.R
+import com.oq.barnote.core.oqcore.models.Palette
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,29 +39,29 @@ import java.util.Locale
  * - [dayContentCount] — 해당 날짜의 노트 개수 (0 이면 dot 없음, 1~3 이면 1~3개 dot, 4+ 면 3개 dot 표시).
  * - [selectedDate] 와 일치하는 셀은 accent 원형 배경으로 강조.
  * - [onHeaderClick] 가 non-null 이면 헤더 (연.월 텍스트) 를 탭 가능하게 만들어 임의의 월/년 jump 트리거로 사용.
+ * - 색상은 [palette] 로 주입한다 (oqcore 는 designsystem 의존 불가 — 호출부에서 `barNotePalette()` 전달).
  */
 @Composable
-fun MonthCalendar(
+fun OQCalendar(
     yearMonth: YearMonth,
     selectedDate: LocalDate?,
     dayContentCount: (Int) -> Int,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
+    onMonthChange: (YearMonth) -> Unit,
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
+    palette: Palette = Palette(),
     onHeaderClick: (() -> Unit)? = null,
 ) {
-    val accent = colorResource(R.color.accent_color)
-    val textPrimary = colorResource(R.color.text_primary)
-    val textSecondary = colorResource(R.color.text_secondary)
-    val surfaceSecondary = colorResource(R.color.surface_secondary)
+    val accent = palette.accent
+    val textPrimary = palette.textPrimary
+    val textSecondary = palette.textSecondary
 
     Column(modifier = modifier.fillMaxWidth()) {
         // 헤더: < 2026.05 >
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Dimens.BtnPadding, vertical = Dimens.Padding),
+                .padding(horizontal = 18.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -72,8 +69,8 @@ fun MonthCalendar(
                 contentDescription = null,
                 tint = textPrimary,
                 modifier = Modifier
-                    .size(Dimens.IconSize)
-                    .clickable(onClick = onPrev),
+                    .size(28.dp)
+                    .clickable { onMonthChange(yearMonth.minusMonths(1)) },
             )
             Text(
                 text = yearMonth.format(DateTimeFormatter.ofPattern("yyyy.MM")),
@@ -96,8 +93,8 @@ fun MonthCalendar(
                 contentDescription = null,
                 tint = textPrimary,
                 modifier = Modifier
-                    .size(Dimens.IconSize)
-                    .clickable(onClick = onNext),
+                    .size(28.dp)
+                    .clickable { onMonthChange(yearMonth.plusMonths(1)) },
             )
         }
 
@@ -116,7 +113,7 @@ fun MonthCalendar(
                         fontWeight = FontWeight.SemiBold,
                     ),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f).padding(vertical = Dimens.Padding),
+                    modifier = Modifier.weight(1f).padding(vertical = 8.dp),
                 )
             }
         }
@@ -144,7 +141,6 @@ fun MonthCalendar(
                             dotCount = count.coerceAtMost(3),
                             accent = accent,
                             textPrimary = textPrimary,
-                            surfaceSecondary = surfaceSecondary,
                             onClick = { onDateClick(date) },
                             modifier = Modifier.weight(1f),
                         )
@@ -164,7 +160,6 @@ private fun DayCell(
     dotCount: Int,
     accent: Color,
     textPrimary: Color,
-    surfaceSecondary: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -173,7 +168,7 @@ private fun DayCell(
             .padding(2.dp)
             .clip(CircleShape)
             .clickable(onClick = onClick)
-            .padding(vertical = Dimens.Padding),
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -197,7 +192,8 @@ private fun DayCell(
 
         // iOS OQCalendarView 와 동일하게 최대 3개의 dot.
         Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            // 점 그룹을 18dp 폭 안에서 가운데 정렬(1~2개일 때 왼쪽으로 치우치지 않도록). 간격은 그대로 2dp.
+            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
             modifier = Modifier.size(width = 18.dp, height = 4.dp),
         ) {
             repeat(dotCount) {

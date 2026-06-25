@@ -56,7 +56,7 @@ import com.oq.barnote.core.oqcore.views.OQFAB
 import com.oq.barnote.ui.tip.BarNoteTip
 import com.oq.barnote.ui.tip.BarnoteTip
 import com.oq.barnote.ui.component.EmptyStateView
-import com.oq.barnote.ui.component.MonthCalendar
+import com.oq.barnote.core.oqcore.views.OQCalendar
 import com.oq.barnote.ui.component.MonthYearPickerBottomSheet
 import com.oq.barnote.ui.component.NoteDetailRow
 import com.oq.barnote.ui.component.NoteListRow
@@ -301,13 +301,20 @@ private fun Content(state: NoteListUiState, onEvent: (NoteListUiEvent) -> Unit) 
             }
         }
 
-        // iOS: ContentUnavailableView("작성한 노트가 없습니다", systemImage: "text.book.closed", description: nil)
+        // iOS: ContentUnavailableView(type == .neededReview ? "노트 작성이 필요한 제품이 없습니다"
+        //   : "작성한 노트가 없습니다", systemImage: "text.book.closed", description: nil)
         state.list.isEmpty() -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             EmptyStateView(
-                title = stringResource(R.string.jagseonghan_noteuga_eobsseubnida),
+                title = stringResource(
+                    if (state.type == NoteListListType.NeededReview) {
+                        R.string.noteu_jagseongi_pilyohan_jepumi_eobsseubnida
+                    } else {
+                        R.string.jagseonghan_noteuga_eobsseubnida
+                    },
+                ),
                 icon = Icons.AutoMirrored.Filled.MenuBook,
             )
         }
@@ -385,13 +392,13 @@ private fun CalendarContent(
             }
         }
         item {
-            MonthCalendar(
+            OQCalendar(
                 yearMonth = state.currentMonth,
                 selectedDate = state.selectedDate,
                 dayContentCount = { day -> state.calendarData[day].orEmpty().size },
-                onPrev = { onEvent(NoteListUiEvent.ShowPrevMonth) },
-                onNext = { onEvent(NoteListUiEvent.ShowNextMonth) },
+                onMonthChange = { ym -> onEvent(NoteListUiEvent.JumpToMonth(ym)) },
                 onDateClick = { date -> onEvent(NoteListUiEvent.SelectDate(date)) },
+                palette = barNotePalette(),
                 onHeaderClick = onHeaderClick,
             )
         }

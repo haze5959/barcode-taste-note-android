@@ -1,15 +1,21 @@
 package com.oq.barnote.ui.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,13 +27,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -70,18 +74,28 @@ internal enum class MainTab(
     }
 }
 
+/** 탭 바의 콘텐츠 높이(시스템 nav inset 제외) — 커스텀 탭 Row 높이. */
+private val TabBarContentHeight = 76.dp
+
 /**
  * MainBottomBar(floating pill)가 콘텐츠 위를 덮는 높이 (시스템 nav inset 제외).
- * = Material3 NavigationBar 기본 높이(80dp) + Box 의 vertical padding(Dimens.Spacing * 2).
+ * = 탭 Row 높이([TabBarContentHeight]) + Box 의 vertical padding(Dimens.Spacing * 2).
  *
  * 바는 Scaffold bottomBar 슬롯이 아니라 오버레이라, 탭 화면 콘텐츠가 바 뒤로 스크롤된다. 마지막 항목이
  * 바에 가리지 않도록 탭 화면(Home/Search/MyPage/Settings)의 스크롤 하단 여백으로 이 값을 더해준다.
  * 콘텐츠와 바 모두 navigationBarsPadding 로 시스템 nav inset 을 각자 처리하므로 이 값은 디바이스 무관.
  */
-val MainBottomBarHeight = 80.dp + Dimens.Spacing * 2
+val MainBottomBarHeight = TabBarContentHeight + Dimens.Spacing * 2
 
 /**
- * 최상위 BottomNavBar.
+ * 최상위 BottomNavBar. iOS `AppNavigationView.tabBar` 를 커스텀 [Row] 로 구현 (Material3 `NavigationBar` 미사용).
+ *
+ * - **floating glass pill**: `.ultraThinMaterial` 근사 배경 + 흰 그라데이션 stroke + 그림자 + 둥근 모서리.
+ * - **선택 인디케이터**: 아이콘+라벨 묶음 뒤의 둥근 사각(accent 0.15) — 폭을 항목의 일부로 제한해 좌우 끝
+ *   항목에서도 잘리지 않고, 색을 [animateColorAsState] 로 크로스페이드해 탭 전환이 부드럽다.
+ * - **라벨**: iOS `lineLimit(1).minimumScaleFactor(0.5)` 와 동일 — 항상 1줄, 길면 축소. 모든 탭 높이가
+ *   같아 아이콘 세로 정렬이 자동으로 일정해진다.
+ * - **중앙 스캔 버튼**: accent 그라데이션 원 + 흰 stroke + accent 글로우 그림자(라벨 없이 강조).
  *
  * @param onTabClick Barcode 처럼 일반 navigate 가 아닌 권한 체크 등 special 처리 필요한 탭의 콜백.
  *                  null 또는 false 반환 시 기본 navigate 동작 수행.
@@ -96,17 +110,28 @@ internal fun MainBottomBar(
     val textSecondary =
         colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
 
-    // 좁은(작은) 디바이스에서 5개 탭 + 중앙 FAB 가 폭을 넘어 좌우 끝 항목(홈/설정)이 잘리는 것을 막기 위해
-    // 화면 폭에 비례해 아이콘/FAB 를 축소한다. 360dp 이상은 1.0, 그 미만은 최소 0.8 까지(아이콘 minimumScaleFactor).
-    // 라벨(title)은 아래 AutoResizeText 가 각 항목 폭에 맞춰 별도로 축소한다.
+    // 좁은(작은) 디바이스에서 5개 탭 + 중앙 버튼이 폭을 넘지 않도록 화면 폭에 비례해 아이콘/버튼을 축소.
     val compactScale = (LocalConfiguration.current.screenWidthDp / 360f).coerceIn(0.8f, 1f)
 
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 
-    // iOS `tabBar`: floating glass pill — 화면 가장자리에서 떨어져 둥근 모서리 + white 그라데이션
-    // stroke + shadow. 배경은 iOS `.ultraThinMaterial` 근사 — 반투명 surface 틴트(tabbar_background)로
-    // 채워 콘텐츠가 비치는 프로스티드 글래스 느낌(Android엔 블러 머티리얼이 없어 알파 fill로 근사).
+    fun onTab(tab: MainTab) {
+        // 외부 special 처리가 true 를 반환하면 기본 navigate 생략.
+        if (onTabClick(tab)) return
+        if (currentRoute != tab.route) {
+            // 다른 탭으로 전환 — startDestination 까지 popUpTo + saveState/restoreState 로 탭별 백스택 보존/복원.
+            navController.navigate(tab.route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        } else {
+            // iOS `tabSelected` 의 `state.path.removeAll()` 대응 — 이미 선택된 탭을 다시 탭하면 루트까지 pop.
+            navController.popBackStack(route = tab.route, inclusive = false)
+        }
+    }
+
     val glassStroke = Brush.linearGradient(
         colors = listOf(
             Color.White.copy(alpha = 0.6f),
@@ -118,125 +143,158 @@ internal fun MainBottomBar(
     Box(
         modifier = modifier
             .navigationBarsPadding()
-            // floating pill — 좌우를 화면 가장자리에서 확실히 띄운다. 아래 shadow(elevation 12dp, clip=false)가
-            // 바깥으로 번져 BtnPadding(18dp) 만으론 그림자가 가장자리에 거의 닿아 "붙어 보였음" → 24dp 로 키움.
+            // floating pill — 좌우를 화면 가장자리에서 확실히 띄운다(그림자가 가장자리에 닿아 "붙어 보임" 방지).
             .padding(horizontal = 24.dp, vertical = Dimens.Spacing)
             .shadow(Dimens.Radius, RoundedCornerShape(Dimens.Radius), clip = false)
             .clip(RoundedCornerShape(Dimens.Radius))
             .background(colorResource(com.oq.barnote.core.designsystem.R.color.tabbar_background))
             .border(1.dp, glassStroke, RoundedCornerShape(Dimens.Radius)),
     ) {
-        NavigationBar(
-            // 좌우 끝 항목(홈/설정)이 선택될 때 인디케이터 pill 이 둥근 모서리에 닿지 않도록 내부 수평 패딩.
-            modifier = Modifier.padding(horizontal = Dimens.Padding),
-            containerColor = Color.Transparent,
-            // 인셋은 바깥 Box 의 navigationBarsPadding 이 처리 — 내부는 0.
-            windowInsets = WindowInsets(0, 0, 0, 0),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(TabBarContentHeight)
+                .padding(horizontal = Dimens.Padding),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             MainTab.values().forEach { tab ->
                 // Search 의 등록 route 는 "search?keyword={keyword}" 이므로 쿼리부를 떼고 비교.
                 val selected = backStack?.destination?.hierarchy?.any {
                     it.route?.substringBefore('?') == tab.route
                 } == true
-                NavigationBarItem(
-                    selected = selected,
-                    onClick = {
-                        // 외부 special 처리가 true 를 반환하면 기본 navigate 생략.
-                        if (onTabClick(tab)) return@NavigationBarItem
-                        if (currentRoute != tab.route) {
-                            // 다른 탭으로 전환 — startDestination 까지 popUpTo + saveState/restoreState 로
-                            // 탭별 백스택을 보존/복원.
-                            navController.navigate(tab.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        } else {
-                            // iOS `tabSelected` 의 `state.path.removeAll()` 대응 — 이미 선택된 탭을 다시 탭하면
-                            // 그 탭의 백스택을 루트(탭 route)까지 pop (inclusive=false 라 루트 자체는 유지).
-                            navController.popBackStack(route = tab.route, inclusive = false)
-                        }
-                    },
-                    icon = {
-                        if (tab == MainTab.Barcode) {
-                            // iOS centralScanButton — accent 그라데이션 원형 + white stroke(1.5) + accent glow.
-                            // 다른 탭보다 크고 라벨 없이 아이콘만 노출해 바코드 스캔 진입을 강조.
-                            Box(
-                                modifier = Modifier
-                                    .size(Dimens.FabHSize * compactScale)
-                                    .shadow(
-                                        elevation = 8.dp,
-                                        shape = CircleShape,
-                                        clip = false,
-                                        spotColor = accent,
-                                        ambientColor = accent,
-                                    )
-                                    .clip(CircleShape)
-                                    .background(
-                                        Brush.verticalGradient(
-                                            listOf(accent, accent.copy(alpha = 0.82f)),
-                                        ),
-                                    )
-                                    .border(1.5.dp, Color.White, CircleShape),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = tab.icon,
-                                    contentDescription = stringResource(tab.labelRes),
-                                    tint = Color.White,
-                                    modifier = Modifier.size(26.dp * compactScale),
-                                )
-                            }
-                        } else {
-                            // iOS `.symbolEffect(.bounce)` 근사 — 선택 시 스프링 스케일 강조.
-                            val iconScale by animateFloatAsState(
-                                targetValue = if (selected) 1.2f else 1f,
-                                animationSpec = spring(dampingRatio = 0.4f),
-                                label = "tabIconBounce",
-                            )
-                            Icon(
-                                imageVector = tab.icon,
-                                contentDescription = null,
-                                // 기본 24dp 를 좁은 화면에서 compactScale 로 축소(아이콘 minimumScaleFactor).
-                                // 선택 시 bounce(iconScale)는 그 위에 그대로 곱해 적용.
-                                modifier = Modifier
-                                    .size(24.dp * compactScale)
-                                    .scale(iconScale),
-                            )
-                        }
-                    },
-                    // 바코드 탭은 강조 원형 버튼이라 라벨 없음(iOS centralScanButton 과 동일).
-                    label = if (tab == MainTab.Barcode) {
-                        null
-                    } else {
-                        @Composable {
-                            // 라벨(title)이 좁은 항목 폭에서 2줄로 줄바꿈되거나 잘리지 않도록 한 줄 유지 +
-                            // 폰트 자동 축소(iOS `.lineLimit(1).minimumScaleFactor` 대응). 색/굵기는
-                            // NavigationBarItem 의 selected/unselectedTextColor 를 LocalContentColor 로 상속한다
-                            // (labelMedium 의 color 가 Unspecified 이므로 내부 Text 가 LocalContentColor 사용).
-                            AutoResizeText(
-                                text = stringResource(tab.labelRes),
-                                style = MaterialTheme.typography.labelMedium,
-                                textAlign = TextAlign.Center,
-                                maxLines = 1,
-                                minScaleFactor = 0.7f,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = accent,
-                        selectedTextColor = accent,
-                        // 바코드는 자체 강조 스타일이라 NavigationBar 인디케이터 pill 숨김.
-                        indicatorColor = if (tab == MainTab.Barcode) Color.Transparent
-                        else accent.copy(alpha = 0.15f),
-                        unselectedIconColor = textSecondary,
-                        unselectedTextColor = textSecondary,
-                    ),
-                )
+                if (tab == MainTab.Barcode) {
+                    CentralScanButton(
+                        tab = tab,
+                        accent = accent,
+                        compactScale = compactScale,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onTab(tab) },
+                    )
+                } else {
+                    TabButton(
+                        tab = tab,
+                        selected = selected,
+                        accent = accent,
+                        textSecondary = textSecondary,
+                        compactScale = compactScale,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onTab(tab) },
+                    )
+                }
             }
+        }
+    }
+}
+
+/**
+ * 라벨이 있는 일반 탭. 아이콘 + 라벨(항상 1줄, 길면 축소) 묶음 뒤에 선택 인디케이터(둥근 사각)를 그린다.
+ * iOS `tabButton` 대응 — 선택 시 accent 색 + 인디케이터, 미선택 시 textSecondary.
+ */
+@Composable
+private fun TabButton(
+    tab: MainTab,
+    selected: Boolean,
+    accent: Color,
+    textSecondary: Color,
+    compactScale: Float,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    // 탭 전환 시 색/인디케이터를 부드럽게 크로스페이드 (iOS matchedGeometry 슬라이드의 단순 대응).
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) accent else textSecondary,
+        label = "tabContentColor",
+    )
+    val indicatorColor by animateColorAsState(
+        targetValue = if (selected) accent.copy(alpha = 0.15f) else Color.Transparent,
+        label = "tabIndicatorColor",
+    )
+    // iOS `.symbolEffect(.bounce)` 근사 — 선택 시 살짝 커지는 스프링.
+    val iconScale by animateFloatAsState(
+        targetValue = if (selected) 1.1f else 1f,
+        animationSpec = spring(dampingRatio = 0.45f),
+        label = "tabIconBounce",
+    )
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier
+                // 인디케이터/콘텐츠 폭을 항목의 84% 로 제한 → 좌우 끝 항목에서도 둥근 모서리에 닿아 잘리지 않음.
+                .fillMaxWidth(0.84f)
+                .clip(RoundedCornerShape(Dimens.Radius))
+                .background(indicatorColor)
+                .padding(vertical = Dimens.Padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = tab.icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier
+                    .size(22.dp * compactScale)
+                    .scale(iconScale),
+            )
+            // iOS `lineLimit(1).minimumScaleFactor(0.5)` — 항상 1줄, 좁으면 폰트 축소(2줄 줄바꿈 안 함).
+            AutoResizeText(
+                text = stringResource(tab.labelRes),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = contentColor,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                ),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                minScaleFactor = 0.5f,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
+ * 중앙 바코드 스캔 버튼(라벨 없음). iOS `centralScanButton` 대응 —
+ * accent 그라데이션 원 + 흰 stroke + accent 글로우 그림자로 강조.
+ */
+@Composable
+private fun CentralScanButton(
+    tab: MainTab,
+    accent: Color,
+    compactScale: Float,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier.fillMaxHeight(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(54.dp * compactScale)
+                .shadow(
+                    elevation = 12.dp,
+                    shape = CircleShape,
+                    clip = false,
+                    spotColor = accent,
+                    ambientColor = accent,
+                )
+                .clip(CircleShape)
+                .clickable(onClick = onClick)
+                .background(
+                    Brush.verticalGradient(listOf(accent, accent.copy(alpha = 0.82f))),
+                )
+                .border(1.5.dp, Color.White, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = tab.icon,
+                contentDescription = stringResource(tab.labelRes),
+                tint = Color.White,
+                modifier = Modifier.size(28.dp * compactScale),
+            )
         }
     }
 }

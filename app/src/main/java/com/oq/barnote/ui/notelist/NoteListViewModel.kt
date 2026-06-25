@@ -71,8 +71,7 @@ sealed interface NoteListUiEvent {
 
     // Calendar
     data class SetViewMode(val mode: NoteListViewMode) : NoteListUiEvent
-    data object ShowNextMonth : NoteListUiEvent
-    data object ShowPrevMonth : NoteListUiEvent
+    // 월 이동(이전/다음/직접 점프)은 OQCalendar 의 onMonthChange → 모두 JumpToMonth 로 통합. (iOS onMonthChange 대응)
     data class JumpToMonth(val yearMonth: java.time.YearMonth) : NoteListUiEvent
     data class SelectDate(val date: java.time.LocalDate) : NoteListUiEvent
 
@@ -165,8 +164,6 @@ class NoteListViewModel @Inject constructor(
                     fetch(reset = true)
                 }
             }
-            NoteListUiEvent.ShowNextMonth -> jumpToMonth(_uiState.value.currentMonth.plusMonths(1))
-            NoteListUiEvent.ShowPrevMonth -> jumpToMonth(_uiState.value.currentMonth.minusMonths(1))
             is NoteListUiEvent.JumpToMonth -> jumpToMonth(event.yearMonth)
             is NoteListUiEvent.SelectDate -> selectDate(event.date)
 

@@ -25,7 +25,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
@@ -78,29 +80,11 @@ fun DashboardRow(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = textSecondary),
-                )
-                if (hasNewBadge) {
-                    Text(
-                        text = "NEW",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = androidx.compose.ui.unit.TextUnit.Unspecified,
-                        ),
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.Red.copy(alpha = 0.8f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
-                    )
-                }
-            }
+            TitleWithNewBadge(
+                title = title,
+                titleStyle = MaterialTheme.typography.bodyMedium.copy(color = textSecondary),
+                hasBadge = hasNewBadge,
+            )
             if (value != null) {
                 Text(
                     text = value,
@@ -118,6 +102,48 @@ fun DashboardRow(
             tint = textSecondary,
             modifier = Modifier.size(Dimens.MiniIconSize - 2.dp),
         )
+    }
+}
+
+/**
+ * 제목 + (옵션) NEW 배지. 제목이 길면 2줄로 줄바꿈하고, NEW 배지는 고정 크기로 항상 1줄 표시한다.
+ */
+@Composable
+private fun TitleWithNewBadge(
+    title: String,
+    titleStyle: TextStyle,
+    hasBadge: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimens.Padding),
+    ) {
+        Text(
+            text = title,
+            style = titleStyle,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            // weight(fill=false): 짧은 제목은 배지를 바로 옆에, 긴 제목은 남은 폭까지 차지하며 2줄로 줄바꿈.
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        if (hasBadge) {
+            Text(
+                text = "NEW",
+                // 고정 크기 — 스케일 축소 없이 항상 1줄.
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                ),
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.Red.copy(alpha = 0.8f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
     }
 }
 

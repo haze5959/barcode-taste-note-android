@@ -54,7 +54,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oq.barnote.R
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.barNotePalette
-import com.oq.barnote.core.oqcore.views.OQTopBar
 import com.oq.barnote.ui.navigation.MainBottomBarHeight
 import com.oq.barnote.core.oqcore.models.AppTheme
 import com.oq.barnote.ui.component.SettingsDivider
@@ -133,17 +132,12 @@ internal fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                // MainBottomBar(오버레이) 뒤로 콘텐츠가 스크롤되므로, 마지막 항목이 바에 가리지 않도록
-                // 바 높이만큼 하단 스크롤 여백을 준다.
-                .padding(bottom = MainBottomBarHeight),
+                // 설정은 하단 탭 화면이라 상단 타이틀바(OQTopBar)를 두지 않는다(홈/마이페이지 등 다른 탭과 동일).
+                // 상태바 인셋은 NavHost 의 contentPadding 이 이미 적용하므로, 여기선 첫 섹션 위 여백만 준다.
+                // 하단은 (오버레이형) MainBottomBar 뒤로 스크롤되는 마지막 항목이 가리지 않도록 바 높이만큼.
+                .padding(top = Dimens.SectionSpacing, bottom = MainBottomBarHeight),
             verticalArrangement = Arrangement.spacedBy(Dimens.Spacing),
         ) {
-            OQTopBar(
-                title = stringResource(R.string.seoljeong),
-                onNavClick = onBack,
-                palette = barNotePalette(),
-            )
-
             GeneralSection(state = state, onEvent = onEvent)
             MembershipSection(onEvent = onEvent)
             SupportSection(onEvent = onEvent)

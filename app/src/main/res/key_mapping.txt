@@ -551,3 +551,4 @@ yujeoreul_cajeul_su_eobsseubnida ← '%@' 유저를 찾을 수 없습니다.
 beonyeog_risoseu_daunrodeu_annae ← 번역 리소스를 다운로드하는 중입니다. 첫 실행 시 시간이 다소 걸릴 수 있습니다.
 
 seutoeo ← 스토어
+noteu_jagseongi_pilyohan_jepumi_eobsseubnida ← 노트 작성이 필요한 제품이 없습니다

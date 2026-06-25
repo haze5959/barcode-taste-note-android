@@ -5,14 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -45,6 +48,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -246,6 +250,8 @@ private fun FilterAndSortRow(
 ) {
     val surfaceSecondary =
         colorResource(com.oq.barnote.core.designsystem.R.color.surface_secondary)
+    val surfacePrimary =
+        colorResource(com.oq.barnote.core.designsystem.R.color.surface_primary)
     val textPrimary =
         colorResource(com.oq.barnote.core.designsystem.R.color.text_primary)
 
@@ -257,46 +263,76 @@ private fun FilterAndSortRow(
         ProductTypeFilter(
             selectedType = state.selectedType,
             onSelect = { onEvent(SearchUiEvent.SetFilter(it)) },
-            trailingPadding = Dimens.IconSize + Dimens.BtnPadding,
+            // 정렬 버튼 + 페이드 그라데이션 영역만큼 우측 여백을 둬 마지막 칩이 버튼 뒤에 가리지 않게.
+            trailingPadding = Dimens.ViewSpacing + Dimens.BtnPadding,
         )
 
-        Box(
+        // 정렬 버튼 + 좌측 페이드 그라데이션.
+        // 가로 스크롤되는 필터 칩이 정렬 버튼 뒤로 사라지기 전에 surfacePrimary 로 자연스럽게 페이드아웃된다.
+        // iOS .overlay(alignment: .leading) { LinearGradient([surfacePrimary.opacity(0), surfacePrimary],
+        //   .leading→.trailing).frame(width: viewSpacing).offset(x: -viewSpacing) } 대응.
+        Row(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = Dimens.Padding),
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.Filled.Sort,
-                contentDescription = null,
-                tint = textPrimary,
+            Box(
                 modifier = Modifier
-                    .size(Dimens.IconSize)
-                    .clip(CircleShape)
-                    .background(surfaceSecondary)
-                    .clickable { sortMenuOpen = true }
-                    .padding(Dimens.Padding),
+                    .fillMaxHeight()
+                    .width(Dimens.ViewSpacing)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(surfacePrimary.copy(alpha = 0f), surfacePrimary),
+                        ),
+                    ),
             )
 
-            DropdownMenu(
-                expanded = sortMenuOpen,
-                onDismissRequest = { sortMenuOpen = false },
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(surfacePrimary)
+                    .padding(end = Dimens.Padding),
+                contentAlignment = Alignment.Center,
             ) {
-                SortMenuItem(
-                    label = stringResource(R.string.coesinsun),
-                    isSelected = state.selectedOrderBy == ProductOrderByKey.Registered,
-                    onClick = {
-                        sortMenuOpen = false
-                        onEvent(SearchUiEvent.SetOrderBy(ProductOrderByKey.Registered))
-                    },
-                )
-                SortMenuItem(
-                    label = stringResource(R.string.pyeongjeomsun),
-                    isSelected = state.selectedOrderBy == ProductOrderByKey.Rating,
-                    onClick = {
-                        sortMenuOpen = false
-                        onEvent(SearchUiEvent.SetOrderBy(ProductOrderByKey.Rating))
-                    },
-                )
+                // 정렬 버튼 — 글리프를 키워 버튼 확대(기존 글리프 12dp/원 28dp → 글리프 24dp/원 40dp).
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(surfaceSecondary)
+                        .clickable { sortMenuOpen = true }
+                        .padding(Dimens.Padding),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Sort,
+                        contentDescription = null,
+                        tint = textPrimary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = sortMenuOpen,
+                    onDismissRequest = { sortMenuOpen = false },
+                ) {
+                    SortMenuItem(
+                        label = stringResource(R.string.coesinsun),
+                        isSelected = state.selectedOrderBy == ProductOrderByKey.Registered,
+                        onClick = {
+                            sortMenuOpen = false
+                            onEvent(SearchUiEvent.SetOrderBy(ProductOrderByKey.Registered))
+                        },
+                    )
+                    SortMenuItem(
+                        label = stringResource(R.string.pyeongjeomsun),
+                        isSelected = state.selectedOrderBy == ProductOrderByKey.Rating,
+                        onClick = {
+                            sortMenuOpen = false
+                            onEvent(SearchUiEvent.SetOrderBy(ProductOrderByKey.Rating))
+                        },
+                    )
+                }
             }
         }
     }

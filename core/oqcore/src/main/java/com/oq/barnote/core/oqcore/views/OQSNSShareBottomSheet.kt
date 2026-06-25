@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oq.barnote.core.oqcore.R
@@ -71,11 +72,13 @@ fun OQSNSShareBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                // 각 아이템에 동일 weight 를 줘 균등 폭으로 정렬(제목 길이와 무관하게 칼럼 폭 동일).
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.Top
             ) {
                 OQSNSShareType.values().forEach { type ->
                     if (type != OQSNSShareType.Url || data.shareUrl != null) {
-                        ShareItem(type = type, palette = palette) {
+                        ShareItem(type = type, palette = palette, modifier = Modifier.weight(1f)) {
                             coroutineScope.launch {
                                 sheetState.hide()
                                 // share() 는 매니저 자체 스코프에서 fire-and-forget 으로 즉시 반환 —
@@ -95,13 +98,15 @@ fun OQSNSShareBottomSheet(
 private fun ShareItem(
     type: OQSNSShareType,
     palette: Palette,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val title = stringResource(type.titleRes)
     Column(
-        modifier = Modifier
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(8.dp),
+            .padding(vertical = 8.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -144,7 +149,11 @@ private fun ShareItem(
             text = title,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = palette.textPrimary
+            color = palette.textPrimary,
+            // 긴 제목(예: "인스타그램 스토리")은 칼럼 폭 안에서 가운데 정렬로 2줄까지 표시.
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
