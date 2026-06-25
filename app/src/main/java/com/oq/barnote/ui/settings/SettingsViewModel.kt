@@ -1,6 +1,7 @@
 package com.oq.barnote.ui.settings
 
 import android.content.Context
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
@@ -21,6 +22,7 @@ import com.oq.barnote.extension.shareUrl
 import com.oq.barnote.extension.title
 import com.oq.barnote.ui.util.showNeededNotiSetting
 import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.appcompat.app.AppCompatDelegate
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -243,21 +245,30 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun buildExportText(notes: List<com.oq.barnote.core.domain.NoteInfo>): String {
-        if (notes.isEmpty()) return context.getString(R.string.sieum_noteuga_eobsseubnida)
+        // 텍스트 파일은 디바이스 언어가 아니라 '인앱 언어 설정' 으로 생성해야 한다.
+        // @ApplicationContext 의 기본 resources 는 시스템(디바이스) 언어다(특히 API<33 에선 AppCompat 의
+        // per-app locale 이 Activity context 에만 적용되고 Application context 엔 반영 안 됨).
+        // → AppCompatDelegate 에 설정된 앱 로케일로 Context 를 만들어 문자열/날짜를 리졸브한다.
+        // (AppLanguage.System 이면 getApplicationLocales() 가 비어 Locale.getDefault() = 시스템 언어로 폴백)
+        val appLocale = AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault()
+        val config = Configuration(context.resources.configuration).apply { setLocale(appLocale) }
+        val lc = context.createConfigurationContext(config)
+
+        if (notes.isEmpty()) return lc.getString(R.string.sieum_noteuga_eobsseubnida)
         val sb = StringBuilder()
         for (info in notes) {
             sb.append("=========================================\n")
             sb.append("[${info.product.type.title()}] ${info.product.name}\n")
             sb.append(
-                "- ${context.getString(R.string.deungrogil)}: " +
-                    "${OQDateFormat.formattedWithTime(info.note.registered)}\n",
+                "- ${lc.getString(R.string.deungrogil)}: " +
+                    "${OQDateFormat.formattedWithTime(info.note.registered, appLocale)}\n",
             )
             if (info.note.rating > 0) {
                 val r = String.format(Locale.US, "%.1f", info.note.rating / 2.0)
-                sb.append("- ${context.getString(R.string.byeoljeom)}: $r / 5.0\n")
+                sb.append("- ${lc.getString(R.string.byeoljeom)}: $r / 5.0\n")
             }
-            sb.append("- ${context.getString(R.string.naeyong)}:\n${info.note.body}\n\n")
-            sb.append("- ${context.getString(R.string.ringkeu)}: ${info.shareUrl}\n")
+            sb.append("- ${lc.getString(R.string.naeyong)}:\n${info.note.body}\n\n")
+            sb.append("- ${lc.getString(R.string.ringkeu)}: ${info.shareUrl}\n")
             sb.append("=========================================\n\n")
         }
         return sb.toString()
