@@ -93,13 +93,15 @@ class MainActivity : AppCompatActivity() {
         appThemeApplicator.applyOnStartup()
         appLanguageApplicator.applyOnStartup()
 
-        // 알림 탭으로 launch 된 경우 NotificationEvent 를 emit (iOS `didReceive response` 등가).
-        // setIntent 대신 onCreate 의 intent 를 직접 dispatch — savedInstance 가 있어도 같은 intent 가 들어옴.
-        dispatchNotificationTap(intent)
-
         // iOS 처럼 마지막으로 보던 탭으로 바로 시작 — HOME 을 거치지 않아 HomeScreen 의 네트워크
         // (OnAppear)가 불필요하게 실행되지 않는다. (deep link 가 있으면 HOME 시작 후 그 위로 navigate)
-        val startDestination = resolveStartDestination(intent?.dataString)
+        val deepLinkStr = intent?.dataString ?: intent?.getStringExtra(NotificationTapDispatch.EXTRA_DEEP_LINK) ?: intent?.getStringExtra(NotificationTapDispatch.EXTRA_DEEP_URL)
+        val startDestination = resolveStartDestination(deepLinkStr)
+
+        // 알림 탭 및 Deep Link 로 launch 된 경우 NotificationEvent 를 emit (iOS `didReceive response` 등가).
+        // setIntent 대신 onCreate 의 intent 를 직접 dispatch — savedInstance 가 있어도 같은 intent 가 들어옴.
+        // 여기서 intent.data 와 extras 를 consume 하므로 반드시 resolveStartDestination 이후에 호출.
+        dispatchNotificationTap(intent)
 
         setContent {
             // Material 컴포넌트(AlertDialog/DropdownMenu/CircularProgressIndicator 등)는 색 미지정 시
@@ -116,7 +118,6 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     AppRoot(
                         appController = appController,
-                        initialDeepLink = intent?.dataString,
                         startDestination = startDestination,
                     )
                 }
@@ -174,7 +175,6 @@ class MainActivity : AppCompatActivity() {
 @Composable
 private fun AppRoot(
     appController: AppController,
-    initialDeepLink: String? = null,
     startDestination: String = Destinations.HOME,
     appNavViewModel: AppNavigationViewModel = hiltViewModel(),
 ) {
@@ -232,13 +232,6 @@ private fun AppRoot(
     // iOS `App.onTask` 가 getUser/currentCredentials 로 토큰을 조기 검증하던 흐름의 등가물.
     LaunchedEffect(Unit) {
         appNavViewModel.validateSessionOnColdStart()
-    }
-
-    // 초기 / 새 deep link
-    LaunchedEffect(initialDeepLink) {
-        if (!initialDeepLink.isNullOrBlank()) {
-            appNavViewModel.onEvent(AppNavigationUiEvent.HandleDeepLink(initialDeepLink))
-        }
     }
 
     // Google Play In-App Review 요청 — Activity context 가 필요해 여기서 collect.

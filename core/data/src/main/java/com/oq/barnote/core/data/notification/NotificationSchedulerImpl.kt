@@ -160,8 +160,13 @@ class NotificationSchedulerImpl @Inject constructor(
             context.getString(R.string.notification_new_note_channel_name),
             NotificationManager.IMPORTANCE_DEFAULT,
         )
+        val announcement = NotificationChannel(
+            CHANNEL_ANNOUNCEMENT,
+            context.getString(R.string.notification_announcement_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        )
         notificationManager.createNotificationChannels(
-            listOf(reservation, newFollower, newNote),
+            listOf(reservation, newFollower, newNote, announcement),
         )
     }
 
@@ -169,6 +174,7 @@ class NotificationSchedulerImpl @Inject constructor(
         const val CHANNEL_NOTE_RESERVATION = "note_reservation"
         const val CHANNEL_NEW_FOLLOWER = "new_follower"
         const val CHANNEL_NEW_NOTE = "new_note"
+        const val CHANNEL_ANNOUNCEMENT = "announcement"
 
         /**
          * 알림 탭 이벤트 전용 채널.

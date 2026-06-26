@@ -52,8 +52,10 @@ class BarNoteMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(message)
         val data = message.data
         val type = data["type"]
-        if (type.isNullOrEmpty()) {
-            OQLog.d("FCM: type 미지정 payload 무시. data=$data")
+        val deepLink = data["link"] ?: data["url"] ?: message.notification?.link?.toString()
+        
+        if (type.isNullOrEmpty() && deepLink.isNullOrEmpty()) {
+            OQLog.d("FCM: type 및 link 미지정 payload 무시. data=$data")
             return
         }
 
@@ -109,7 +111,21 @@ class BarNoteMessagingService : FirebaseMessagingService() {
                     payloadValue = userId,
                 )
             }
-            else -> OQLog.d("Unhandled FCM data payload: type=$type, data=$data")
+            else -> {
+                if (!deepLink.isNullOrEmpty()) {
+                    displayNotification(
+                        channelId = NotificationSchedulerImpl.CHANNEL_ANNOUNCEMENT,
+                        notificationId = stableNotificationId("deepLink", deepLink),
+                        title = title,
+                        body = body,
+                        typeExtra = "deepLink", // type이 없는 범용 딥링크
+                        payloadKey = NotificationTapDispatch.EXTRA_DEEP_LINK,
+                        payloadValue = deepLink,
+                    )
+                } else {
+                    OQLog.d("Unhandled FCM data payload: type=$type, data=$data")
+                }
+            }
         }
     }
 

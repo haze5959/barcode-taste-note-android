@@ -174,6 +174,9 @@ class AppNavigationViewModel @Inject constructor(
                 is RemotePushType.NewNote ->
                     _navEffect.send(AppNavigationNavEffect.GoUserNoteList(userId = type.userId))
             }
+            is NotificationEvent.TappedDeepLink -> {
+                handleDeepLink(event.url)
+            }
         }
     }
 

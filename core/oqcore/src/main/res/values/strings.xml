@@ -84,7 +84,8 @@ For iCloud or panorama photos, open them once in the Photos app and try again.</
     <string name="sns_share_other">Other options</string>
     <string name="notification_reservation_channel_name">Tasting Note Reservation</string>
     <string name="notification_reservation_title">It\'s time to write your tasting note!</string>
-    <string name="notification_reservation_body">Please complete the registration of %s 📝</string>
+    <string name="notification_reservation_body">Please complete registration for %s 📝</string>
     <string name="notification_new_follower_channel_name">New Follower</string>
     <string name="notification_new_note_channel_name">New Note</string>
+    <string name="notification_announcement_channel_name">Announcements</string>
 </resources>

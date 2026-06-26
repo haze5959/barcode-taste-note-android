@@ -52,6 +52,9 @@ sealed interface NotificationEvent {
 
     /** 원격 푸시 알림을 탭했을 때. iOS `tappedRemotePush` 에 대응. */
     data class TappedRemotePush(val type: RemotePushType) : NotificationEvent
+
+    /** 알림에서 딥링크(URL)를 탭했을 때. iOS `handleDeepLink` 에 대응. */
+    data class TappedDeepLink(val url: String) : NotificationEvent
 }
 
 /** 서버에서 전송하는 원격 푸시 알림의 타입. iOS `RemotePushType` 에 대응. */

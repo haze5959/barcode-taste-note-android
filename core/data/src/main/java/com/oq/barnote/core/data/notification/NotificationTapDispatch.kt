@@ -35,6 +35,10 @@ object NotificationTapDispatch {
     const val TYPE_NEW_FOLLOWER = "new_follower"
     const val TYPE_NEW_NOTE = "new_note"
 
+    /** FCM data payload 의 범용 딥링크 키. */
+    const val EXTRA_DEEP_LINK = "link"
+    const val EXTRA_DEEP_URL = "url"
+
     /**
      * 앱 launcher Activity 를 target 으로 하는 [Intent] 빌더. core/data 모듈에서 MainActivity 클래스를
      * 직접 참조할 수 없으므로 [PackageManager.getLaunchIntentForPackage] 로 우회.
@@ -57,6 +61,14 @@ object NotificationTapDispatch {
      */
     fun parseEvent(intent: Intent?, json: Json): NotificationEvent? {
         intent ?: return null
+        
+        // 1. 범용 딥링크 우선 확인 (FCM payload 의 link/url 또는 intent.data)
+        val deepLink = intent.dataString ?: intent.getStringExtra(EXTRA_DEEP_LINK) ?: intent.getStringExtra(EXTRA_DEEP_URL)
+        if (!deepLink.isNullOrBlank()) {
+            return NotificationEvent.TappedDeepLink(deepLink)
+        }
+
+        // 2. 기존 커스텀 type 확인
         val type = intent.getStringExtra(EXTRA_TYPE) ?: return null
         return when (type) {
             TYPE_NOTE_RESERVATION -> {
@@ -82,8 +94,11 @@ object NotificationTapDispatch {
      * 한 번 처리한 Intent 의 알림 extras 를 제거. Activity 가 재구성될 때 중복 emit 방지용.
      */
     fun consume(intent: Intent?) {
+        intent?.data = null
         intent?.removeExtra(EXTRA_TYPE)
         intent?.removeExtra(EXTRA_PRODUCT_JSON)
         intent?.removeExtra(EXTRA_USER_ID)
+        intent?.removeExtra(EXTRA_DEEP_LINK)
+        intent?.removeExtra(EXTRA_DEEP_URL)
     }
 }

@@ -124,12 +124,14 @@ class OQSNSShareManager @Inject constructor(
         }
 
         val intent = Intent("com.instagram.share.ADD_TO_STORY").apply {
+            setPackage(INSTAGRAM_PACKAGE)
             // iOS 는 source_application=bundleID. Android 는 패키지명 (FB App ID 등록 시 그 값 권장).
             putExtra("source_application", context.packageName)
             if (backgroundUri != null) {
                 setDataAndType(backgroundUri, "image/jpeg")
             } else {
                 // 배경 이미지가 없으면 iOS 와 동일한 그라디언트
+                setType("image/*") // Type이 지정되지 않으면 Instagram의 intent filter를 통과하지 못해 ActivityNotFoundException 발생
                 putExtra("top_background_color", "#231557")
                 putExtra("bottom_background_color", "#FF1361")
             }
@@ -408,9 +410,24 @@ class OQSNSShareManager @Inject constructor(
         // 닉네임 + 앱 이름
         val textX = (left + avatar + gapAvatarText).toFloat()
         canvas.drawText(data.nick, textX, y + nickPaint.textSize, nickPaint)
-        runCatching { context.applicationInfo.loadLabel(context.packageManager).toString() }
-            .getOrNull()?.takeIf { it.isNotBlank() }
-            ?.let { canvas.drawText(it, textX, y + nickPaint.textSize + subPaint.textSize + 10f, subPaint) }
+        
+        val appName = runCatching { context.applicationInfo.loadLabel(context.packageManager).toString() }
+            .getOrNull()?.takeIf { it.isNotBlank() } ?: "BarNote"
+        val subtitle = "$appName on Google Play"
+        canvas.drawText(subtitle, textX, y + nickPaint.textSize + subPaint.textSize + 10f, subPaint)
+
+        // 앱 아이콘 그리기 (iOS와 동일하게 우측에 표시)
+        val appIconDrawable = runCatching { context.packageManager.getApplicationIcon(context.packageName) }.getOrNull()
+        if (appIconDrawable != null) {
+            val iconSize = avatar
+            val iconRect = RectF(width - left - iconSize.toFloat(), y, width - left.toFloat(), y + iconSize)
+            val path = Path().apply { addRoundRect(iconRect, 16f, 16f, Path.Direction.CW) }
+            canvas.save()
+            canvas.clipPath(path)
+            appIconDrawable.setBounds(iconRect.left.toInt(), iconRect.top.toInt(), iconRect.right.toInt(), iconRect.bottom.toInt())
+            appIconDrawable.draw(canvas)
+            canvas.restore()
+        }
 
         y += avatar + gapHeaderTitle
         // 제목
