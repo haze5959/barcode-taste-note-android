@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
+import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.designsystem.component.RatingView
 import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.NoteInfo
@@ -62,6 +63,7 @@ fun NoteDetailRow(
     val secondary = colorResource(R.color.text_secondary)
     val surfacePrimary = colorResource(R.color.surface_primary)
     val textPrimary = colorResource(R.color.text_primary)
+    val palette = barNotePalette()
     val isBlocked = rememberIsUserBlocked(info?.user?.id)
 
     Box(
@@ -119,12 +121,14 @@ fun NoteDetailRow(
                                 text = info.note.publicScope.title(),
                                 style = InfoTagStyle.Material,
                                 leadingIcon = info.note.publicScope.icon(),
+                                palette = palette,
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
                         InfoTagView(
                             text = info.product.type.emoji,
                             style = InfoTagStyle.Material,
+                            palette = palette,
                         )
                     }
                 }
