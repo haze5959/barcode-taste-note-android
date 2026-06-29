@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
+import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.designsystem.component.InfoPopOver
 import com.oq.barnote.core.domain.NoteDetail
 import com.oq.barnote.core.domain.ProductType
@@ -104,7 +105,11 @@ fun NoteDetailExpandable(
                     )
                     if (isOption) {
                         Spacer(modifier = Modifier.padding(start = 6.dp))
-                        InfoTagView(text = stringResource(com.oq.barnote.R.string.obsyeon), style = InfoTagStyle.Material)
+                        InfoTagView(
+                            text = stringResource(com.oq.barnote.R.string.obsyeon),
+                            style = InfoTagStyle.Material,
+                            palette = barNotePalette(),
+                        )
                     }
                     Spacer(modifier = Modifier.padding(start = 6.dp))
                     InfoPopOver(title = stringResource(com.oq.barnote.R.string.sangse_pyeongga_hangmog_seolmyeong), items = popoverItems)

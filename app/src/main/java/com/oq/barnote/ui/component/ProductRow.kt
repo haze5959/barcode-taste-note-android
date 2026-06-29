@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.oq.barnote.core.designsystem.Dimens
 import com.oq.barnote.core.designsystem.R
+import com.oq.barnote.core.designsystem.barNotePalette
 import com.oq.barnote.core.designsystem.icon
 import com.oq.barnote.core.domain.ProductInfo
 import com.oq.barnote.extension.ratingStarText
@@ -44,6 +45,7 @@ fun ProductRow(
 ) {
     val divider = colorResource(R.color.divider)
     val surfacePrimary = colorResource(R.color.surface_primary)
+    val palette = barNotePalette()
 
     Box(
         modifier = modifier
@@ -90,12 +92,14 @@ fun ProductRow(
                         InfoTagView(
                             text = rating.ratingStarText(),
                             style = InfoTagStyle.Material,
+                            palette = palette,
                         )
                     }
                     if (info.getNoteCount() > 0) {
                         InfoTagView(
                             text = "📝 ${info.getNoteCount()}",
                             style = InfoTagStyle.Material,
+                            palette = palette,
                         )
                     }
                 }
@@ -104,9 +108,9 @@ fun ProductRow(
                     verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
                 ) {
                     info.favoriteCount?.takeIf { it > 0 }?.let { fav ->
-                        InfoTagView(text = "❤️ $fav", style = InfoTagStyle.Material)
+                        InfoTagView(text = "❤️ $fav", style = InfoTagStyle.Material, palette = palette)
                     }
-                    InfoTagView(text = info.product.type.emoji, style = InfoTagStyle.Material)
+                    InfoTagView(text = info.product.type.emoji, style = InfoTagStyle.Material, palette = palette)
                 }
             }
 

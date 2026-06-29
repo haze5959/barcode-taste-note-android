@@ -29,6 +29,9 @@ import java.net.URL
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -115,11 +118,13 @@ class OQSNSShareManager @Inject constructor(
                 ?.let { downloadBytes(it) }
                 ?.let { writeShareFile("ig_background.jpg", it) }
             // 스티커 = 프로필(있으면) + 브랜드 카드. 생성 실패해도 공유는 진행(graceful).
+            // 프로필은 스티커에서 작은 원으로만 쓰이므로 풀 해상도 디코드 대신 다운샘플 → OOM·메모리 점유 감소.
             val profile = data.profileImgUrl?.takeIf { it.isNotBlank() }
                 ?.let { downloadBytes(it) }
-                ?.let { runCatching { BitmapFactory.decodeByteArray(it, 0, it.size) }.getOrNull() }
+                ?.let { decodeSampledBitmap(it, reqSize = 144) }  // 스티커 아바타(72px)의 2배 여유
             val sticker = runCatching { buildStickerBitmap(data, profile) }.getOrNull()
-                ?.let { writeShareBitmap("ig_sticker.png", it) }
+                ?.let { bmp -> writeShareBitmap("ig_sticker.png", bmp).also { bmp.recycle() } }
+            profile?.recycle()
             bg to sticker
         }
 
@@ -185,14 +190,17 @@ class OQSNSShareManager @Inject constructor(
             "NICK" to data.nick,
         )
 
-        // 프로필 이미지 카카오 서버 캐싱
-        data.profileImgUrl?.takeIf { it.isNotBlank() }
-            ?.let { scrapKakaoImageUrl(it) }
-            ?.let { templateArgs["PROFILE"] = it }
-
-        // 첨부 이미지들 (최대 3) — IMG1, IMG2, IMG3
-        val scrapped = data.imageURLs.take(3).mapNotNull { url ->
-            url.takeIf { it.isNotBlank() }?.let { scrapKakaoImageUrl(it) }
+        // 프로필 + 첨부 이미지(최대 3) 를 카카오 서버에 병렬 캐싱 — 직렬 RTT 누적으로 공유 시트가 늦게 뜨는 것 방지.
+        // PROFILE 과 IMG1~3 은 키가 달라 핸들을 분리한다. awaitAll 이 순서를 보존하고 filterNotNull 로 실패분만
+        // 제거하므로, 당겨짐·개수 기반 templateId 분기 의미는 직렬 구현(iOS) 과 동일하게 유지된다.
+        val scrapped: List<String> = coroutineScope {
+            val profileDeferred = data.profileImgUrl?.takeIf { it.isNotBlank() }
+                ?.let { async { scrapKakaoImageUrl(it) } }
+            val imageDeferreds = data.imageURLs.take(3)
+                .filter { it.isNotBlank() }
+                .map { async { scrapKakaoImageUrl(it) } }
+            profileDeferred?.await()?.let { templateArgs["PROFILE"] = it }
+            imageDeferreds.awaitAll().filterNotNull()
         }
         scrapped.forEachIndexed { index, url -> templateArgs["IMG${index + 1}"] = url }
 
@@ -216,7 +224,9 @@ class OQSNSShareManager @Inject constructor(
             }
         }
 
-        // Kakao SDK 의 shareCustom 콜백은 worker thread 에서 호출. UI 작업은 Main 에서.
+        // Kakao SDK 내부 Retrofit(kapi)은 커스텀 callbackExecutor 를 지정하지 않아, Retrofit 의 Android 기본
+        // 콜백 디스패처(AndroidMainExecutor = Handler(mainLooper))로 shareCustom 콜백이 메인스레드에서 호출된다.
+        // 따라서 콜백 본문에서 startActivity 를 그대로 호출해도 안전하다. (AAR 디컴파일로 확인)
         shareCustomViaApp(templateId, templateArgs)
     }
 
@@ -320,6 +330,21 @@ class OQSNSShareManager @Inject constructor(
         conn.inputStream.use { it.readBytes() }
     }.onFailure { OQLog.w("Instagram share: download failed for $urlStr: ${it.message}") }.getOrNull()
 
+    /**
+     * 바이트를 [reqSize] 근처로 다운샘플 디코드. 거대한 원본(서버 해상도)을 풀 ARGB 로 디코드해
+     * OOM·과도한 일시 메모리 점유가 발생하는 것을 막는다 (스티커 프로필은 작은 원으로만 사용).
+     * inJustDecodeBounds 로 치수만 먼저 읽어 inSampleSize 를 산정한다. 실패 시 null.
+     */
+    private fun decodeSampledBitmap(bytes: ByteArray, reqSize: Int): Bitmap? = runCatching {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        var inSample = 1
+        val maxDim = maxOf(bounds.outWidth, bounds.outHeight)
+        while (maxDim / inSample > reqSize) inSample *= 2
+        val opts = BitmapFactory.Options().apply { inSampleSize = inSample }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+    }.onFailure { OQLog.w("Instagram share: decodeSampledBitmap failed: ${it.message}") }.getOrNull()
+
     /** 바이트를 `cacheDir/share/<name>` 에 저장 후 FileProvider content URI 반환. */
     private fun writeShareFile(name: String, bytes: ByteArray): Uri? = runCatching {
         val dir = File(context.cacheDir, "share").apply { mkdirs() }
@@ -400,17 +425,45 @@ class OQSNSShareManager @Inject constructor(
             canvas.clipPath(Path().apply { addCircle(cx, cy, avatar / 2f, Path.Direction.CW) })
             canvas.drawBitmap(scaled, left.toFloat(), y, null)
             canvas.restore()
+            if (scaled !== profile) scaled.recycle()
         } else {
             canvas.drawCircle(cx, cy, avatar / 2f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.argb(60, 255, 255, 255)
             })
         }
-        // 닉네임 + 앱 이름
+
+        // 앱 아이콘 (헤더 우측, 라운드 사각형) — iOS OQInstagramStickerView 의
+        // appIcon.frame(48).clipShape(RoundedRectangle(cornerRadius:10)) 대응. 미지정(null)/디코드 실패면 iOS 처럼 생략.
+        val appIcon = data.appIconResId
+            ?.let { runCatching { BitmapFactory.decodeResource(context.resources, it) }.getOrNull() }
+        val iconLeft: Float? = appIcon?.let { icon ->
+            val iconRight = (width - outer - pad).toFloat()
+            val iconL = iconRight - avatar
+            val scaledIcon = Bitmap.createScaledBitmap(icon, avatar, avatar, true)
+            canvas.save()
+            canvas.clipPath(Path().apply {
+                addRoundRect(RectF(iconL, y, iconRight, y + avatar), 16f, 16f, Path.Direction.CW)
+            })
+            canvas.drawBitmap(scaledIcon, iconL, y, null)
+            canvas.restore()
+            if (scaledIcon !== icon) scaledIcon.recycle()
+            icon.recycle()
+            iconL
+        }
+
+        // 닉네임 + 앱 이름 — 헤더 우측 아이콘과 겹치지 않게 폭을 제한하고 ellipsize (iOS Spacer 자동정렬 등가).
+        // drawText 는 줄바꿈/잘림이 없어 긴 닉이면 아이콘 위로 겹치므로 명시적 절단이 필요하다.
         val textX = (left + avatar + gapAvatarText).toFloat()
-        canvas.drawText(data.nick, textX, y + nickPaint.textSize, nickPaint)
+        val textRight = iconLeft?.minus(gapAvatarText) ?: (width - outer - pad).toFloat()
+        val maxTextWidth = (textRight - textX).coerceAtLeast(0f)
+        val nick = TextUtils.ellipsize(data.nick, nickPaint, maxTextWidth, TextUtils.TruncateAt.END)
+        canvas.drawText(nick, 0, nick.length, textX, y + nickPaint.textSize, nickPaint)
         runCatching { context.applicationInfo.loadLabel(context.packageManager).toString() }
             .getOrNull()?.takeIf { it.isNotBlank() }
-            ?.let { canvas.drawText(it, textX, y + nickPaint.textSize + subPaint.textSize + 10f, subPaint) }
+            ?.let {
+                val label = TextUtils.ellipsize(it, subPaint, maxTextWidth, TextUtils.TruncateAt.END)
+                canvas.drawText(label, 0, label.length, textX, y + nickPaint.textSize + subPaint.textSize + 10f, subPaint)
+            }
 
         y += avatar + gapHeaderTitle
         // 제목

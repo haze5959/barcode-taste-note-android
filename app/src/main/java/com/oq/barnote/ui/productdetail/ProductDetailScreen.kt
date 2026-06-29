@@ -63,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
@@ -1190,8 +1191,6 @@ private fun BottomCtaBar(
                 },
                 icon = if (state.isTastedProduct) Icons.Filled.Edit else Icons.Filled.Bolt,
                 isAccent = true,
-                background = accent,
-                foreground = Color.White,
                 onClick = {
                     if (state.isTastedProduct) onEvent(ProductDetailUiEvent.TappedAddNote)
                     else onEvent(ProductDetailUiEvent.TappedAddTasted)
@@ -1204,8 +1203,6 @@ private fun BottomCtaBar(
                 text = stringResource(R.string.najunge_jagseonghagi),
                 icon = Icons.Filled.Alarm,
                 isAccent = false,
-                background = surfaceSecondary,
-                foreground = textPrimary,
                 // PD15: iOS .symbolEffect(.wiggle, .repeat(.periodic)) 등가 — 알람 아이콘만 주기 흔들림.
                 wiggleIcon = true,
                 onClick = { onEvent(ProductDetailUiEvent.TappedAlarmButton) },
@@ -1219,8 +1216,6 @@ private fun CapsuleButton(
     text: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     isAccent: Boolean,
-    background: Color,
-    foreground: Color,
     modifier: Modifier = Modifier,
     wiggleIcon: Boolean = false,
     onClick: () -> Unit,
@@ -1249,11 +1244,28 @@ private fun CapsuleButton(
     } else {
         0f
     }
+    // iOS OQCapsuleButtonStyle 와 동일하게 isAccent 로 fill/텍스트색/외곽선/그림자를 도출한다.
+    val capsuleShape = RoundedCornerShape(Dimens.FabHSize / 2)
+    val fill = if (isAccent) {
+        colorResource(com.oq.barnote.core.designsystem.R.color.accent_color)
+    } else {
+        colorResource(com.oq.barnote.core.designsystem.R.color.surface_primary)
+    }
+    val content = if (isAccent) {
+        Color.White
+    } else {
+        colorResource(com.oq.barnote.core.designsystem.R.color.text_secondary)
+    }
+    val divider = colorResource(com.oq.barnote.core.designsystem.R.color.divider)
     Row(
         modifier = modifier
             .height(Dimens.FabHSize)
-            .clip(RoundedCornerShape(Dimens.FabHSize / 2))
-            .background(background)
+            // iOS .shadow(.black.opacity(isAccent ? 0.2 : 0.15), radius 6, y 4) 근사.
+            .shadow(if (isAccent) 6.dp else 3.dp, capsuleShape, clip = false)
+            .clip(capsuleShape)
+            .background(fill)
+            // isAccent=false(보조 버튼)만 divider 외곽선(1px). accent 는 fill 이라 외곽선 없음.
+            .then(if (!isAccent) Modifier.border(1.dp, divider, capsuleShape) else Modifier)
             .clickable(onClick = onClick)
             .padding(horizontal = Dimens.BtnPadding),
         verticalAlignment = Alignment.CenterVertically,
@@ -1262,7 +1274,7 @@ private fun CapsuleButton(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = foreground,
+            tint = content,
             modifier = if (wiggleIcon) {
                 Modifier.graphicsLayer { rotationZ = iconRotation }
             } else {
@@ -1273,7 +1285,7 @@ private fun CapsuleButton(
         AutoResizeText(
             text = text,
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = foreground,
+                color = content,
                 fontWeight = FontWeight.SemiBold,
             ),
             maxLines = 1,
