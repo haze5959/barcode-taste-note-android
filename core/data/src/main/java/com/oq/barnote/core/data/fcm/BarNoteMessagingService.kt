@@ -127,13 +127,9 @@ class BarNoteMessagingService : FirebaseMessagingService() {
         payloadKey: String,
         payloadValue: String,
     ) {
-        val launchIntent = NotificationTapDispatch.launchIntent(this)?.apply {
+        val launchIntent = NotificationTapDispatch.launchIntent(this).apply {
             putExtra(NotificationTapDispatch.EXTRA_TYPE, typeExtra)
             putExtra(payloadKey, payloadValue)
-        }
-        if (launchIntent == null) {
-            OQLog.w("FCM: launcher intent 를 가져올 수 없음 — 알림 표시 skip")
-            return
         }
 
         val pendingIntent = PendingIntent.getActivity(

@@ -103,7 +103,8 @@ sealed interface AddNoteUiEvent {
 }
 
 sealed interface AddNoteNavEffect {
-    data object Finished : AddNoteNavEffect
+    /** 작성 완료 → 생성된 노트 상세로 이동 (iOS `AppNavigationFeature.didFinish(note, product)` 대응). */
+    data class Finished(val noteId: String, val productName: String) : AddNoteNavEffect
     data object Cancelled : AddNoteNavEffect
     data object NeededLogin : AddNoteNavEffect
     data object RequestPicker : AddNoteNavEffect
@@ -307,12 +308,18 @@ class AddNoteViewModel @Inject constructor(
             appController.setGlobalLoading(false)
             _uiState.update { it.copy(isSubmitting = false) }
             result.fold(
-                onSuccess = {
+                onSuccess = { note ->
                     appController.neededToRefresh = true
                     userStore.addMyNoteCount()
                     // iOS AppNavigationFeature.didFinish 와 동등한 후처리 — 햅틱/예약취소/토스트/파티클/리뷰.
                     runPostSubmitSideEffects(productId = state.productId)
-                    _navEffect.send(AddNoteNavEffect.Finished)
+                    // iOS didFinish 와 동일 — 기존 제품 상세로 복귀하지 않고 방금 작성된 노트 상세로 이동.
+                    _navEffect.send(
+                        AddNoteNavEffect.Finished(
+                            noteId = note.id,
+                            productName = state.productName,
+                        ),
+                    )
                 },
                 onFailure = { appController.showError(it) },
             )
