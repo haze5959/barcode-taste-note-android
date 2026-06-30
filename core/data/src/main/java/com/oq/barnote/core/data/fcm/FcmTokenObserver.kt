@@ -57,7 +57,6 @@ class FcmTokenObserver @Inject constructor(
         //    이 시점엔 getUser() 가 정상 동작한다.
         appScope.launch {
             authStore.isLoggedIn
-                .distinctUntilChanged()
                 .filter { it }
                 .collect {
                     val token = fcmTokenProvider.currentToken() ?: return@collect
