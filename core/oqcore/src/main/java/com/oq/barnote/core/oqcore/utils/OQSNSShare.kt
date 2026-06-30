@@ -462,8 +462,11 @@ class OQSNSShareManager @Inject constructor(
         canvas.drawText(nick, 0, nick.length, textX, y + nickPaint.textSize, nickPaint)
         runCatching { context.applicationInfo.loadLabel(context.packageManager).toString() }
             .getOrNull()?.takeIf { it.isNotBlank() }
-            ?.let {
-                val label = TextUtils.ellipsize(it, subPaint, maxTextWidth, TextUtils.TruncateAt.END)
+            ?.let { appName ->
+                // iOS: Text("\(OQUtil.displayName) on the App Store") — 앱 이름 뒤에 스토어 문구를 붙인다.
+                // Android 는 Play Store 로 (iOS 와 동일하게 영문 하드코딩, 앱 이름만 로컬라이즈된 라벨).
+                val subtitle = "$appName on the Play Store"
+                val label = TextUtils.ellipsize(subtitle, subPaint, maxTextWidth, TextUtils.TruncateAt.END)
                 canvas.drawText(label, 0, label.length, textX, y + nickPaint.textSize + subPaint.textSize + 10f, subPaint)
             }
 

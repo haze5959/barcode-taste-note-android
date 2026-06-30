@@ -67,6 +67,7 @@ fun AddNoteRoute(
     productId: String,
     onBack: () -> Unit,
     onShowLogin: () -> Unit,
+    onFinishedToNote: (noteId: String, productName: String) -> Unit,
     viewModel: AddNoteViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,7 +79,8 @@ fun AddNoteRoute(
     LaunchedEffect(Unit) {
         viewModel.navEffect.collect { effect ->
             when (effect) {
-                AddNoteNavEffect.Finished -> onBack()
+                is AddNoteNavEffect.Finished ->
+                    onFinishedToNote(effect.noteId, effect.productName)
                 AddNoteNavEffect.Cancelled -> onBack()
                 AddNoteNavEffect.NeededLogin -> onShowLogin()
                 AddNoteNavEffect.RequestPicker -> scope.launch {
@@ -391,14 +393,18 @@ private fun Step3Review(state: AddNoteUiState, onEvent: (AddNoteUiEvent) -> Unit
             title = stringResource(R.string.coejong_hwagin),
             subtitle = stringResource(R.string.deungrog_jeon_naeyongeul_hwaginhaseyo),
         )
-        // iOS sharingStep: NotePublicToggleView 가 summaryCard 보다 먼저.
-        NotePublicToggleSection(
-            isPublic = state.publicScope == com.oq.barnote.core.domain.PublicScope.Public,
-            onCheckedChange = { isPublic ->
-                onEvent(AddNoteUiEvent.PublicScopeChanged(isPublic))
-            },
-        )
-        SummaryCard(state = state)
+        // iOS sharingStep 의 VStack(spacing: C.V.spacing) 대응 — 토글과 요약 카드 사이는 SectionSpacing(28)
+        // 이 아니라 Spacing(15). (StepHeader 와의 간격만 SectionSpacing 유지 — iOS sharingStep 엔 헤더가 없음.)
+        Column(verticalArrangement = Arrangement.spacedBy(Dimens.Spacing)) {
+            // iOS sharingStep: NotePublicToggleView 가 summaryCard 보다 먼저.
+            NotePublicToggleSection(
+                isPublic = state.publicScope == com.oq.barnote.core.domain.PublicScope.Public,
+                onCheckedChange = { isPublic ->
+                    onEvent(AddNoteUiEvent.PublicScopeChanged(isPublic))
+                },
+            )
+            SummaryCard(state = state)
+        }
     }
 }
 
@@ -430,8 +436,11 @@ private fun SummaryCard(state: AddNoteUiState) {
                 fontWeight = FontWeight.Bold,
             ),
         )
-        // 제품명 (semibold) + 우측 별점.
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // 제품명 (semibold) + 우측 별점. iOS HStack 처럼 둘 사이 최소 간격을 둬 긴 제품명이 별점에 붙지 않게 한다.
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing),
+        ) {
             Text(
                 text = state.productName,
                 style = MaterialTheme.typography.titleMedium.copy(

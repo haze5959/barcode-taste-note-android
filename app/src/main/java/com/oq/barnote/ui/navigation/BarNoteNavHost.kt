@@ -189,6 +189,15 @@ fun BarNoteNavHost(
                 // 이 콜백이 호출되는 구조이므로 여기서 글로벌 alert 를 또 띄우면 이중 안내가 됨 → 직접 LOGIN 으로 push.
                 // iOS: 모든 로그인 진입은 전역 "로그인 필요" alert → webAuth 직행 (전용 화면 없음).
                 onShowLogin = onNeededLogin,
+                // 작성 완료 → 방금 만든 노트 상세로 이동. iOS `AppNavigationFeature.didFinish` 의
+                // `state.path.removeAll()` + `append(.noteDetail)` 등가 — 작성 마법사/제품 상세를 모두
+                // 비우고 노트 상세만 남긴다 (뒤로가기 시 기존 제품 상세가 아닌 탭 루트로).
+                onFinishedToNote = { noteId, productName ->
+                    navController.navigate(Destinations.noteDetail(noteId, productName)) {
+                        popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
             )
         }
 

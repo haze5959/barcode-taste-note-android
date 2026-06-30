@@ -2,7 +2,6 @@ package com.oq.barnote.core.data.notification
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import com.oq.barnote.core.domain.NotificationEvent
 import com.oq.barnote.core.domain.Product
 import com.oq.barnote.core.domain.RemotePushType
@@ -40,16 +39,36 @@ object NotificationTapDispatch {
     const val EXTRA_DEEP_URL = "url"
 
     /**
-     * 앱 launcher Activity 를 target 으로 하는 [Intent] 빌더. core/data 모듈에서 MainActivity 클래스를
-     * 직접 참조할 수 없으므로 [PackageManager.getLaunchIntentForPackage] 로 우회.
+     * 서버 FCM **data payload 의 raw 키**. 서버가 `notification` 페이로드를 보낼 때 백그라운드/킬드에서는
+     * 시스템이 알림을 자동 표시하고, 탭하면 런처 인텐트에 우리 커스텀 extras 가 아니라 data 필드를 이 raw 키로
+     * 실어 보낸다. [parseEvent] 가 커스텀 키 다음 폴백으로 이 키들을 읽어야 자동표시 탭도 라우팅된다.
+     */
+    const val RAW_TYPE = "type"
+    const val RAW_USER_ID = "user_id"
+    const val RAW_PRODUCT = "product"
+
+    /** core/data 는 [com.oq.barnote.MainActivity] 클래스를 직접 참조할 수 없어 FQCN 문자열로 명시. */
+    private const val MAIN_ACTIVITY_CLASS = "com.oq.barnote.MainActivity"
+
+    /**
+     * 알림 탭으로 [com.oq.barnote.MainActivity] 를 target 으로 하는 [Intent] 빌더.
+     *
+     * **`getLaunchIntentForPackage` 를 쓰지 않는다.** 런처 인텐트(ACTION_MAIN/CATEGORY_LAUNCHER)는 앱 task 가
+     * 이미 존재하는 웜/포그라운드 상태에서 "런처 아이콘 재실행"으로 취급되어, 기존 task 만 앞으로 올리고 새 Intent/extras
+     * 를 전달하지 않는다(onNewIntent 미호출 → 딥링크 무동작). 따라서 (1) 명시 컴포넌트(FQCN)로 MainActivity 를 직접
+     * 타겟하고 (2) [Intent.FLAG_ACTIVITY_SINGLE_TOP] 을 추가해 기존 인스턴스가 top 이면 onNewIntent 로 extras 가
+     * 확실히 전달되게 한다. CLEAR_TOP+SINGLE_TOP 조합이라 더 깊은 backstack 에서도 root 까지 비우고 동일 인스턴스를
+     * 재사용하며 onNewIntent 로 새 intent 를 받는다.
      *
      * 호출자는 반환 Intent 에 putExtra 로 [EXTRA_TYPE] 및 type 별 payload extras 를 추가합니다.
-     * flags 는 NEW_TASK | CLEAR_TOP 으로 기존 task 가 있으면 onNewIntent 로 진입.
      */
-    fun launchIntent(context: Context): Intent? {
-        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: return null
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        return intent
+    fun launchIntent(context: Context): Intent = Intent().apply {
+        setClassName(context.packageName, MAIN_ACTIVITY_CLASS)
+        addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP,
+        )
     }
 
     /**
@@ -61,29 +80,33 @@ object NotificationTapDispatch {
      */
     fun parseEvent(intent: Intent?, json: Json): NotificationEvent? {
         intent ?: return null
-        
+
         // 1. 범용 딥링크 우선 확인 (FCM payload 의 link/url 또는 intent.data)
         val deepLink = intent.dataString ?: intent.getStringExtra(EXTRA_DEEP_LINK) ?: intent.getStringExtra(EXTRA_DEEP_URL)
         if (!deepLink.isNullOrBlank()) {
             return NotificationEvent.TappedDeepLink(deepLink)
         }
 
-        // 2. 기존 커스텀 type 확인
-        val type = intent.getStringExtra(EXTRA_TYPE) ?: return null
+        // 2. 커스텀 type 확인 — 커스텀 extras(앱이 onMessageReceived 에서 빌드한 PendingIntent 경로) 우선,
+        //    없으면 raw FCM data 키(서버 notification 페이로드를 시스템이 자동표시 → 탭한 경로) 폴백.
+        val type = intent.getStringExtra(EXTRA_TYPE) ?: intent.getStringExtra(RAW_TYPE) ?: return null
         return when (type) {
             TYPE_NOTE_RESERVATION -> {
-                val productJson = intent.getStringExtra(EXTRA_PRODUCT_JSON) ?: return null
+                val productJson = intent.getStringExtra(EXTRA_PRODUCT_JSON)
+                    ?: intent.getStringExtra(RAW_PRODUCT) ?: return null
                 val product = runCatching {
                     json.decodeFromString(Product.serializer(), productJson)
                 }.getOrNull() ?: return null
                 NotificationEvent.TappedReservation(product)
             }
             TYPE_NEW_FOLLOWER -> {
-                val userId = intent.getStringExtra(EXTRA_USER_ID) ?: return null
+                val userId = intent.getStringExtra(EXTRA_USER_ID)
+                    ?: intent.getStringExtra(RAW_USER_ID) ?: return null
                 NotificationEvent.TappedRemotePush(RemotePushType.NewFollower(userId = userId))
             }
             TYPE_NEW_NOTE -> {
-                val userId = intent.getStringExtra(EXTRA_USER_ID) ?: return null
+                val userId = intent.getStringExtra(EXTRA_USER_ID)
+                    ?: intent.getStringExtra(RAW_USER_ID) ?: return null
                 NotificationEvent.TappedRemotePush(RemotePushType.NewNote(userId = userId))
             }
             else -> null
@@ -100,5 +123,9 @@ object NotificationTapDispatch {
         intent?.removeExtra(EXTRA_USER_ID)
         intent?.removeExtra(EXTRA_DEEP_LINK)
         intent?.removeExtra(EXTRA_DEEP_URL)
+        // 시스템 자동표시 탭 경로의 raw 키도 제거 — Activity 재구성/재진입 시 중복 emit 방지.
+        intent?.removeExtra(RAW_TYPE)
+        intent?.removeExtra(RAW_USER_ID)
+        intent?.removeExtra(RAW_PRODUCT)
     }
 }

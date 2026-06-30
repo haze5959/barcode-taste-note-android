@@ -42,10 +42,10 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
             .getOrNull()
             ?: return OQLog.w("[Reservation] product 디코딩 실패 — 알림 표시 생략")
 
-        val tapIntent = NotificationTapDispatch.launchIntent(context)?.apply {
+        val tapIntent = NotificationTapDispatch.launchIntent(context).apply {
             putExtra(NotificationTapDispatch.EXTRA_TYPE, NotificationTapDispatch.TYPE_NOTE_RESERVATION)
             putExtra(NotificationTapDispatch.EXTRA_PRODUCT_JSON, productJson)
-        } ?: return OQLog.w("[Reservation] launchIntent null — 알림 표시 생략")
+        }
 
         val tapPendingIntent = PendingIntent.getActivity(
             context,
