@@ -8,13 +8,11 @@ package com.oq.barnote.core.oqcore
  * Compose 기반 공용 UI 컴포넌트를 포함합니다.
  *
  * 패키지 구조:
- * - cache: 캐시 관리 (CacheManager, CacheItem)
  * - extension: Kotlin 확장 함수 모음 (Array, String, Date 등)
  * - log: 로깅 유틸리티 (OQLog)
- * - file: 파일 관리 유틸리티 (OQFileManager)
  * - haptic: 햅틱 피드백 서비스
  * - keychain: 보안 저장소 (KeyStore wrapper)
- * - model: 공용 모델 (Palette, Report, CacheItem 등)
+ * - model: 공용 모델 (Palette, Report 등)
  * - network: 네트워크 클라이언트 유틸리티
  * - share: SNS 공유 유틸리티
  * - type: 공용 타입 정의

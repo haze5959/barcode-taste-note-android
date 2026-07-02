@@ -65,7 +65,6 @@ data class OQSNSShareData(
 @Singleton
 class OQSNSShareManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val fileManager: OQFileManager
 ) {
     /**
      * 공유 작업 전용 스코프. 공유 시트가 닫히면서(onDismiss) 호출측 rememberCoroutineScope 가 취소돼도
