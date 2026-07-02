@@ -51,16 +51,29 @@ class BarNoteMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         val data = message.data
+        val notif = message.notification
+        // 진단 로그: title/body 가 어디서 오는지(data 키 / notification 리터럴 / localization key) 확인용.
+        OQLog.d(
+            "FCM onMessageReceived: data=$data | notif.title=${notif?.title} notif.body=${notif?.body} " +
+                "titleLocKey=${notif?.titleLocalizationKey} bodyLocKey=${notif?.bodyLocalizationKey}",
+        )
         val type = data["type"]
-        val deepLink = data["link"] ?: data["url"] ?: message.notification?.link?.toString()
-        
-        if (type.isNullOrEmpty() && deepLink.isNullOrEmpty()) {
-            OQLog.d("FCM: type 및 link 미지정 payload 무시. data=$data")
+        val deepLink = data["link"] ?: data["url"] ?: notif?.link?.toString()
+        // 서버가 notification 페이로드에 리터럴 title 대신 localization key(title_loc_key)만 실으면,
+        // 백그라운드는 시스템이 자동 해석해 표시되지만 포그라운드 onMessageReceived 에선 notif.title 이 null 이라
+        // 타이틀/바디가 비어 보인다 → loc key 를 strings.xml 리소스로 직접 해석해 채운다.
+        val title = data["title"] ?: notif?.title
+            ?: resolveLocalized(notif?.titleLocalizationKey, notif?.titleLocalizationArgs) ?: ""
+        val body = data["body"] ?: notif?.body
+            ?: resolveLocalized(notif?.bodyLocalizationKey, notif?.bodyLocalizationArgs) ?: ""
+
+        // 표시할 내용이 아무것도 없을 때만 무시한다. title/body 만 있는 일반 알림(공지 등)도 포그라운드에서
+        // 표시해야 백그라운드(시스템 자동표시)와 동작이 일치한다 — 기존엔 type·link 없으면 조기 return 되어
+        // 포그라운드 수신 시 알림이 아예 안 떴다.
+        if (type.isNullOrEmpty() && deepLink.isNullOrEmpty() && title.isEmpty() && body.isEmpty()) {
+            OQLog.d("FCM: 표시할 내용 없음(type/link/title/body 모두 없음) → 무시. data=$data")
             return
         }
-
-        val title = data["title"] ?: message.notification?.title ?: ""
-        val body = data["body"] ?: message.notification?.body ?: ""
 
         when (type) {
             NotificationTapDispatch.TYPE_NOTE_RESERVATION -> {
@@ -122,6 +135,16 @@ class BarNoteMessagingService : FirebaseMessagingService() {
                         payloadKey = NotificationTapDispatch.EXTRA_DEEP_LINK,
                         payloadValue = deepLink,
                     )
+                } else if (title.isNotEmpty() || body.isNotEmpty()) {
+                    // type·link 없는 일반 알림(공지 등) — 포그라운드에서도 title/body 를 표시한다.
+                    // 탭하면 앱만 연다(딥링크/type payload 없음 → parseEvent 가 null 반환 → 네비게이션 없이 앱 오픈).
+                    displayNotification(
+                        channelId = NotificationSchedulerImpl.CHANNEL_ANNOUNCEMENT,
+                        notificationId = stableNotificationId("announcement", title + body),
+                        title = title,
+                        body = body,
+                        typeExtra = "announcement",
+                    )
                 } else {
                     OQLog.d("Unhandled FCM data payload: type=$type, data=$data")
                 }
@@ -140,12 +163,12 @@ class BarNoteMessagingService : FirebaseMessagingService() {
         title: String,
         body: String,
         typeExtra: String,
-        payloadKey: String,
-        payloadValue: String,
+        payloadKey: String? = null,
+        payloadValue: String? = null,
     ) {
         val launchIntent = NotificationTapDispatch.launchIntent(this).apply {
             putExtra(NotificationTapDispatch.EXTRA_TYPE, typeExtra)
-            putExtra(payloadKey, payloadValue)
+            if (payloadKey != null && payloadValue != null) putExtra(payloadKey, payloadValue)
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -172,4 +195,19 @@ class BarNoteMessagingService : FirebaseMessagingService() {
      * 짧은 시간 내 재전송되면 새 알림이 쌓이지 않고 갱신됩니다 (서버 retry 시 사용자 경험 개선).
      */
     private fun stableNotificationId(type: String, key: String): Int = (type + ":" + key).hashCode()
+
+    /**
+     * FCM notification 페이로드의 localization key(예: `title_loc_key`)를 앱 strings.xml 리소스로 해석한다.
+     * 백그라운드에선 시스템이 자동 해석하지만, 포그라운드 [onMessageReceived] 에선
+     * [RemoteMessage.Notification.getTitle] 등이 null 이라 직접 해석해야 한다.
+     * 리소스가 없거나 key 가 비면 null 반환.
+     */
+    private fun resolveLocalized(locKey: String?, args: Array<String>?): String? {
+        if (locKey.isNullOrEmpty()) return null
+        val resId = resources.getIdentifier(locKey, "string", packageName)
+        if (resId == 0) return null
+        return runCatching {
+            if (args.isNullOrEmpty()) getString(resId) else getString(resId, *args)
+        }.getOrNull()
+    }
 }
