@@ -234,6 +234,9 @@ class NoteListViewModel @Inject constructor(
                 onSuccess = {
                     appController.setGlobalLoading(false)
                     appController.neededToRefresh = true
+                    // 삭제된 노트의 제품을 홈 "최근 마셔본 제품" 로컬 캐시에서도 제거
+                    // — iOS NoteListFeature.deleteTastedProductResponse 대응.
+                    userStore.removeRecentTastedProduct(alert.product.id)
                     // iOS 와 동일하게 view mode 에 따라 리스트 / 캘린더 새로고침.
                     val state = _uiState.value
                     if (state.viewMode == NoteListViewMode.Calendar) {

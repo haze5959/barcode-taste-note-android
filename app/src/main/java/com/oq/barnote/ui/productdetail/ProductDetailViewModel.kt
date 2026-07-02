@@ -501,6 +501,17 @@ class ProductDetailViewModel @Inject constructor(
                     )
                 }
                 userStore.setNeededReviewProduct(true)
+                // 홈 "최근 마셔본 제품" 로컬 캐시 갱신 — 마셔본 목록(infoWithMyRating)과 동일하게
+                // 내 평점 기준으로 구성. 방금 등록한 노트는 rating 0(미평가)이라 별점 미표시가 정상.
+                // iOS ProductDetailFeature 의 prependRecentTastedProduct 대응.
+                userStore.prependRecentTastedProduct(
+                    ProductInfo(
+                        product = product.copy(rating = 0, details = null),
+                        imageIds = s.info?.imageIds.orEmpty(),
+                        favoriteCount = null,
+                        myNoteIds = listOf(note.id),
+                    ),
+                )
                 // iOS ProductDetailFeature(~339-341): 성공 햅틱 + 하단 파티클 버스트.
                 haptic.success()
                 appController.triggerParticleBurst()
@@ -627,6 +638,15 @@ class ProductDetailViewModel @Inject constructor(
                     appController.setGlobalLoading(false)
                     appController.neededToRefresh = true
                     userStore.removeMyNoteCount()
+                    // 삭제 후 이 제품에 남은 내 노트가 없으면(마셔본 상태 해제) 홈 "최근 마셔본 제품"
+                    // 로컬 캐시에서도 제거 — myNoteIds 는 위 update 에서 이미 삭제분이 반영된 상태.
+                    // iOS ProductDetailFeature.deleteNoteResponse 대응.
+                    val st = _uiState.value
+                    if (!st.isTastedProduct) {
+                        userStore.removeRecentTastedProduct(
+                            st.info?.product?.id ?: st.productId,
+                        )
+                    }
                     fetchMyNotes()
                 },
                 onFailure = {

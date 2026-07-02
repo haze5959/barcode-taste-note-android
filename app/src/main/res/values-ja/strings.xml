@@ -65,6 +65,8 @@
     <string name="cingugonggae">友達のみ</string>
     <string name="coegeun_deungrog_jepum">最近登録された製品</string>
     <string name="coegeun_deungrog_noteu">最近登録されたノート</string>
+    <string name="coegeun_masyeobon_jepum">最近飲んだ製品</string>
+    <string name="coegeun_masyeobon_jepumdeuleul_dasi_hwaginhaseyo">最近飲んだ製品をもう一度チェックしましょう</string>
     <string name="coejong_hwagin">最終確認</string>
     <string name="coesin_jepum">最新の製品</string>
     <string name="coesinsun">最新順</string>

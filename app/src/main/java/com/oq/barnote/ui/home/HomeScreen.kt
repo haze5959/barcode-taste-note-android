@@ -57,6 +57,8 @@ import com.oq.barnote.core.oqcore.utils.formatThousands
 import com.oq.barnote.core.domain.NoteInfo
 import com.oq.barnote.core.domain.ProductInfo
 import com.oq.barnote.ui.component.NoteRow
+import com.oq.barnote.core.domain.UserStore
+import com.oq.barnote.ui.component.ProductListRow
 import com.oq.barnote.ui.component.ProductRow
 
 /**
@@ -71,6 +73,7 @@ fun HomeRoute(
     onShowNoteDetail: (id: String, productName: String) -> Unit,
     onShowRecentProductList: () -> Unit,
     onShowProductDetail: (id: String, productName: String) -> Unit,
+    onShowTastedProductList: () -> Unit,
     onShowMyPage: () -> Unit,
     onShowSearch: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -89,6 +92,7 @@ fun HomeRoute(
                 is HomeNavEffect.NoteDetail -> onShowNoteDetail(effect.id, effect.productName)
                 HomeNavEffect.RecentProductList -> onShowRecentProductList()
                 is HomeNavEffect.ProductDetail -> onShowProductDetail(effect.id, effect.productName)
+                HomeNavEffect.TastedProductList -> onShowTastedProductList()
             }
         }
     }
@@ -134,6 +138,17 @@ internal fun HomeScreen(
                         .padding(horizontal = Dimens.Padding)
                         .padding(top = Dimens.Padding),
                 )
+
+                // iOS HomeView "최근 마셔본 제품" 섹션 대응 — 로컬 데이터, 비어있으면 섹션 숨김.
+                if (state.recentTastedProducts.isNotEmpty()) {
+                    RecentTastedProductsSection(
+                        products = state.recentTastedProducts,
+                        onSeeAll = { onEvent(HomeUiEvent.ShowTastedProductList) },
+                        onClickProduct = { product ->
+                            onEvent(HomeUiEvent.ShowProductDetail(product.id, product.product.name))
+                        },
+                    )
+                }
 
                 RecentNotesSection(
                     notes = state.info?.recentNotes,
@@ -245,6 +260,35 @@ private fun BarcodeScanCta(
                 ),
                 maxLines = 2,
             )
+        }
+    }
+}
+
+@Composable
+private fun RecentTastedProductsSection(
+    products: List<ProductInfo>,
+    onSeeAll: () -> Unit,
+    onClickProduct: (ProductInfo) -> Unit,
+) {
+    // iOS HomeView 의 "최근 마셔본 제품" 섹션 — 헤더(제목+부제+모두 보기)는 다른 섹션과 동일하고,
+    // 콘텐츠는 가로 카드가 아닌 세로 ProductListRow 리스트 (iOS LazyVStack + ProductListRowView).
+    HorizontalSection(
+        title = stringResource(R.string.coegeun_masyeobon_jepum),
+        subtitle = stringResource(R.string.coegeun_masyeobon_jepumdeuleul_dasi_hwaginhaseyo),
+        onSeeAll = onSeeAll,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimens.Padding),
+            verticalArrangement = Arrangement.spacedBy(Dimens.Padding),
+        ) {
+            products.take(UserStore.RECENT_TASTED_PRODUCT_COUNT).forEach { info ->
+                ProductListRow(
+                    info = info,
+                    modifier = Modifier.clickable { onClickProduct(info) },
+                )
+            }
         }
     }
 }

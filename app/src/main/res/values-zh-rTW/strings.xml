@@ -65,6 +65,8 @@
     <string name="cingugonggae">僅朋友可見</string>
     <string name="coegeun_deungrog_jepum">最近註冊的產品</string>
     <string name="coegeun_deungrog_noteu">最近註冊的筆記</string>
+    <string name="coegeun_masyeobon_jepum">最近品嚐的產品</string>
+    <string name="coegeun_masyeobon_jepumdeuleul_dasi_hwaginhaseyo">再次查看您最近品嚐的產品</string>
     <string name="coejong_hwagin">最終確認</string>
     <string name="coesin_jepum">最新產品</string>
     <string name="coesinsun">最新</string>

@@ -65,6 +65,8 @@ para escribir notas de cata de forma rápida y precisa.</string>
     <string name="cingugonggae">Solo amigos</string>
     <string name="coegeun_deungrog_jepum">Productos registrados recientemente</string>
     <string name="coegeun_deungrog_noteu">Notas registradas recientemente</string>
+    <string name="coegeun_masyeobon_jepum">Productos catados recientemente</string>
+    <string name="coegeun_masyeobon_jepumdeuleul_dasi_hwaginhaseyo">Vuelve a ver los productos que has catado recientemente</string>
     <string name="coejong_hwagin">Revisión final</string>
     <string name="coesin_jepum">Últimos productos</string>
     <string name="coesinsun">Más recientes</string>

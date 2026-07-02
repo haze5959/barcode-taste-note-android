@@ -7,6 +7,7 @@ import com.oq.barnote.core.domain.BarNoteRepository
 import com.oq.barnote.core.domain.ProductInfo
 import com.oq.barnote.core.domain.ProductOrderByKey
 import com.oq.barnote.core.domain.ProductType
+import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.utils.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -53,6 +54,7 @@ class ProductListViewModel @Inject constructor(
     private val repository: BarNoteRepository,
     private val appController: AppController,
     private val preferences: ProductListPreferences,
+    private val userStore: UserStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProductListUiState())
@@ -138,6 +140,14 @@ class ProductListViewModel @Inject constructor(
                         )
                     }
                     if (items.isNotEmpty()) pageIndex += 1
+                    // 마셔본 제품 목록의 첫 페이지(필터 없음)일 때만 최신 항목을 홈 "최근 마셔본 제품"
+                    // 로컬 캐시에 저장 — iOS ProductListFeature.fetchResponse 대응. 페이징 2페이지
+                    // 이후(reset=false)나 타입 필터가 걸린 조회는 캐시를 덮지 않는다.
+                    if (state.fetchType == ProductListFetchType.Tasted &&
+                        reset && state.selectedType == null
+                    ) {
+                        userStore.setRecentTastedProducts(items)
+                    }
                 },
                 onFailure = {
                     _uiState.update { it.copy(isLoading = false) }

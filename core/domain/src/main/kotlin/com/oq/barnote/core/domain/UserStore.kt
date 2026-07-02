@@ -64,6 +64,22 @@ interface UserStore {
 
     // endregion
 
+    // region 최근 마셔본 제품 (홈 "최근 마셔본 제품" 섹션용 로컬 캐시) --------
+
+    /** 로컬에 저장된 최근 마셔본 제품 목록. 데이터가 없거나 디코딩 실패 시 빈 리스트. */
+    suspend fun getRecentTastedProducts(): List<ProductInfo>
+
+    /** 최근 마셔본 목록을 통째로 교체. (마셔본 제품 목록 fetch 시 최신 N개 저장) */
+    suspend fun setRecentTastedProducts(products: List<ProductInfo>)
+
+    /** 방금 마셔본으로 등록한 제품을 맨 앞에 삽입. 동일 제품(id)은 중복 제거 후 최신순 유지. */
+    suspend fun prependRecentTastedProduct(product: ProductInfo)
+
+    /** 노트 삭제 등으로 더 이상 마셔본 상태가 아닌 제품을 목록에서 제거. */
+    suspend fun removeRecentTastedProduct(productId: String)
+
+    // endregion
+
     // region 구독 (Google Play Billing TODO) ----------------------------------
 
     /** 앱 시작 시 1회 호출. iOS Transaction.updates 구독에 대응. */
@@ -77,4 +93,13 @@ interface UserStore {
     suspend fun refreshSubscriptionStatus(): Boolean
 
     // endregion
+
+    companion object {
+        /**
+         * 홈 "최근 마셔본 제품" 섹션에 보관·노출하는 최대 개수.
+         * iOS `C.N.recentTastedProductCount` 대응 — app 의 `Constants` 는 core 모듈에서 참조할 수
+         * 없어 저장(코어)과 노출(앱)이 함께 쓰는 이곳에 둔다.
+         */
+        const val RECENT_TASTED_PRODUCT_COUNT: Int = 3
+    }
 }

@@ -1,6 +1,7 @@
 package com.oq.barnote.ui.home
 
 import com.oq.barnote.core.domain.HomeInfo
+import com.oq.barnote.core.domain.ProductInfo
 
 /**
  * 홈 화면 UI 상태. iOS `HomeFeature.State` 에 대응.
@@ -10,6 +11,8 @@ data class HomeUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val showOnboarding: Boolean = false,
+    /** 홈 "최근 마셔본 제품" 섹션용 로컬 데이터 (서버 HomeInfo 와 무관, UserStore 에서 로드). */
+    val recentTastedProducts: List<ProductInfo> = emptyList(),
 )
 
 /**
@@ -26,6 +29,9 @@ sealed interface HomeUiEvent {
     data class ShowNoteDetail(val id: String, val productName: String) : HomeUiEvent
     data object ShowRecentProductList : HomeUiEvent
     data class ShowProductDetail(val id: String, val productName: String) : HomeUiEvent
+
+    /** "최근 마셔본 제품" 모두 보기 → 마셔본 제품 목록. iOS `Delegate.showProductList(type: .tasted)` 대응. */
+    data object ShowTastedProductList : HomeUiEvent
 }
 
 /**
@@ -37,4 +43,5 @@ sealed interface HomeNavEffect {
     data class NoteDetail(val id: String, val productName: String) : HomeNavEffect
     data object RecentProductList : HomeNavEffect
     data class ProductDetail(val id: String, val productName: String) : HomeNavEffect
+    data object TastedProductList : HomeNavEffect
 }

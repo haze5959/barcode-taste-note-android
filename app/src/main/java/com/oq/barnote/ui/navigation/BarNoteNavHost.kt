@@ -82,6 +82,13 @@ fun BarNoteNavHost(
                 onShowProductDetail = { id, productName ->
                     navController.navigate(Destinations.productDetail(id, productName))
                 },
+                // 홈 "최근 마셔본 제품" 모두 보기 → 마셔본 제품 목록.
+                // iOS AppNavigationFeature 의 `.showProductList(type:)` → productList(fetchType:) 대응.
+                onShowTastedProductList = {
+                    navController.navigate(
+                        Destinations.productList(ProductListType.Tasted.name.lowercase()),
+                    )
+                },
                 onShowMyPage = { navController.navigate(Destinations.MY_PAGE) },
                 onShowSearch = { navController.navigate(Destinations.SEARCH) },
             )

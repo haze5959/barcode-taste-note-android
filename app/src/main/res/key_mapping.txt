@@ -62,6 +62,8 @@ ceori_jung ← 처리 중...
 cingugonggae ← 친구공개
 coegeun_deungrog_jepum ← 최근 등록 제품
 coegeun_deungrog_noteu ← 최근 등록 노트
+coegeun_masyeobon_jepum ← 최근 마셔본 제품
+coegeun_masyeobon_jepumdeuleul_dasi_hwaginhaseyo ← 최근 마셔본 제품들을 다시 확인하세요
 coejong_hwagin ← 최종 확인
 coesin_jepum ← 최신 제품
 coesinsun ← 최신순

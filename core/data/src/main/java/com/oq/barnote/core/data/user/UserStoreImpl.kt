@@ -1,15 +1,19 @@
 package com.oq.barnote.core.data.user
 
+import android.content.Context
 import com.oq.barnote.core.data.billing.BillingManager
 import com.oq.barnote.core.data.di.ApplicationScope
 import com.oq.barnote.core.domain.AuthStore
 import com.oq.barnote.core.domain.BarNoteRepository
+import com.oq.barnote.core.domain.ProductInfo
 import com.oq.barnote.core.domain.User
 import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.utils.OQLog
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +21,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,9 +44,11 @@ import javax.inject.Singleton
  */
 @Singleton
 class UserStoreImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val repository: BarNoteRepository,
     private val authStore: AuthStore,
     private val billingManager: BillingManager,
+    private val json: Json,
     @ApplicationScope private val appScope: CoroutineScope,
 ) : UserStore {
 
@@ -159,6 +168,10 @@ class UserStoreImpl @Inject constructor(
         _neededReviewProduct.value = null
         _followerCount.value = null
         _favoriteProductIds.value = emptySet()
+        // 최근 마셔본 제품은 계정 종속 로컬 데이터이므로 로그아웃 시 함께 제거 (iOS UserStore.clear 대응)
+        withContext(Dispatchers.IO) {
+            recentTastedPrefs.edit().remove(RECENT_TASTED_PRODUCTS_KEY).apply()
+        }
     }
 
     // endregion
@@ -262,6 +275,51 @@ class UserStoreImpl @Inject constructor(
 
     // endregion
 
+    // region 최근 마셔본 제품 (홈 "최근 마셔본 제품" 섹션용 로컬 캐시) --------
+    // iOS UserStore 의 getRecentTastedProducts/setRecentTastedProducts/prependRecentTastedProduct/
+    // removeRecentTastedProduct (UserDefaults + JSON) 대응 — SharedPreferences + kotlinx JSON 으로 영속화.
+
+    private val recentTastedPrefs
+        get() = context.getSharedPreferences(RECENT_TASTED_PREFS_NAME, Context.MODE_PRIVATE)
+
+    override suspend fun getRecentTastedProducts(): List<ProductInfo> =
+        withContext(Dispatchers.IO) {
+            val raw = recentTastedPrefs.getString(RECENT_TASTED_PRODUCTS_KEY, null)
+                ?: return@withContext emptyList()
+            runCatching {
+                json.decodeFromString(ListSerializer(ProductInfo.serializer()), raw)
+            }.getOrDefault(emptyList())
+        }
+
+    override suspend fun setRecentTastedProducts(products: List<ProductInfo>) {
+        persistRecentTastedProducts(products)
+    }
+
+    override suspend fun prependRecentTastedProduct(product: ProductInfo) {
+        val list = getRecentTastedProducts().toMutableList()
+        list.removeAll { it.id == product.id }
+        list.add(0, product)
+        persistRecentTastedProducts(list)
+    }
+
+    override suspend fun removeRecentTastedProduct(productId: String) {
+        val list = getRecentTastedProducts().filter { it.id != productId }
+        persistRecentTastedProducts(list)
+    }
+
+    /** 항상 최대 [UserStore.RECENT_TASTED_PRODUCT_COUNT] 개로 잘라 JSON 으로 영속화. */
+    private suspend fun persistRecentTastedProducts(products: List<ProductInfo>) {
+        val trimmed = products.take(UserStore.RECENT_TASTED_PRODUCT_COUNT)
+        val raw = runCatching {
+            json.encodeToString(ListSerializer(ProductInfo.serializer()), trimmed)
+        }.getOrNull() ?: return
+        withContext(Dispatchers.IO) {
+            recentTastedPrefs.edit().putString(RECENT_TASTED_PRODUCTS_KEY, raw).apply()
+        }
+    }
+
+    // endregion
+
     // region 구독 (Google Play Billing) ----------------------------------
 
     override fun startSubscriptionObservation() {
@@ -287,4 +345,11 @@ class UserStoreImpl @Inject constructor(
         billingManager.refreshSubscriptionStatus()
 
     // endregion
+
+    private companion object {
+        const val RECENT_TASTED_PREFS_NAME = "user_store_prefs"
+
+        /** iOS `C.S.recentTastedProductsKey` 대응. */
+        const val RECENT_TASTED_PRODUCTS_KEY = "recent_tasted_products"
+    }
 }

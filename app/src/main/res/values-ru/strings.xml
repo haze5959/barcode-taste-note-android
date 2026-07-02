@@ -65,6 +65,8 @@
     <string name="cingugonggae">Только друзья</string>
     <string name="coegeun_deungrog_jepum">Недавно зарегистрированные продукты</string>
     <string name="coegeun_deungrog_noteu">Недавно зарегистрированные заметки</string>
+    <string name="coegeun_masyeobon_jepum">Недавно продегустированные продукты</string>
+    <string name="coegeun_masyeobon_jepumdeuleul_dasi_hwaginhaseyo">Просмотрите недавно продегустированные продукты ещё раз</string>
     <string name="coejong_hwagin">Финальная проверка</string>
     <string name="coesin_jepum">Новые продукты</string>
     <string name="coesinsun">Сначала новые</string>

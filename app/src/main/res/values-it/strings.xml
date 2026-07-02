@@ -65,6 +65,8 @@ per scrivere note di degustazione in modo rapido e preciso.</string>
     <string name="cingugonggae">Solo amici</string>
     <string name="coegeun_deungrog_jepum">Prodotti registrati di recente</string>
     <string name="coegeun_deungrog_noteu">Note registrate di recente</string>
+    <string name="coegeun_masyeobon_jepum">Prodotti degustati di recente</string>
+    <string name="coegeun_masyeobon_jepumdeuleul_dasi_hwaginhaseyo">Rivedi i prodotti che hai degustato di recente</string>
     <string name="coejong_hwagin">Revisione finale</string>
     <string name="coesin_jepum">Ultimi prodotti</string>
     <string name="coesinsun">Più recenti</string>

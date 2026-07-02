@@ -3,6 +3,7 @@ package com.oq.barnote.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oq.barnote.core.domain.BarNoteRepository
+import com.oq.barnote.core.domain.UserStore
 import com.oq.barnote.core.oqcore.utils.AppController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -26,6 +27,7 @@ class HomeViewModel @Inject constructor(
     private val repository: BarNoteRepository,
     private val onboardingPreferences: OnboardingPreferences,
     private val appController: AppController,
+    private val userStore: UserStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -46,6 +48,7 @@ class HomeViewModel @Inject constructor(
             HomeUiEvent.ShowRecentProductList -> emitNav(HomeNavEffect.RecentProductList)
             is HomeUiEvent.ShowProductDetail ->
                 emitNav(HomeNavEffect.ProductDetail(event.id, event.productName))
+            HomeUiEvent.ShowTastedProductList -> emitNav(HomeNavEffect.TastedProductList)
         }
     }
 
@@ -55,6 +58,11 @@ class HomeViewModel @Inject constructor(
             if (!hasSeen) {
                 _uiState.update { it.copy(showOnboarding = true) }
             }
+
+            // 홈 재진입 시마다 최근 마셔본 제품(로컬)을 다시 읽어 최신 상태를 반영한다.
+            // (제품 상세에서 마셔본 등록 후 복귀하거나, 마셔본 목록을 다녀온 경우 반영) — iOS onAppear 대응.
+            val tasted = userStore.getRecentTastedProducts()
+            _uiState.update { it.copy(recentTastedProducts = tasted) }
 
             val needsFetch = _uiState.value.info == null || appController.neededToRefresh
             if (needsFetch) {
